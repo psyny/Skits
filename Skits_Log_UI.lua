@@ -202,7 +202,6 @@ function Skits_Log_UI:PopulateLogFrame()
                 
                 -- Check limit for this page
                 if spaceFilled + topBotPadding > frameHeight then
-                    print("past limit: " .. spaceFilled)
                     if msgEleDir > 0 then
                         msgEleBottom = msgEleBottom.next
                     else
