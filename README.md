@@ -30,6 +30,17 @@ Having the CreatureDisplayDB addon installed vastly improves the user experience
 Same limitations as NPC Portraits, plus we can't have a database for player portraits.
 So on Skits the player portrait can be shown as the current player model. But on the skits log (`/skitslog`) it will be an aproximation of that player (race/bodytype).
 
+## Known Issues
+
+- Limitations listed above.
+- Portraits of NPCs in some areas sometimes displays a different model. This needs to be solved in a case by case basis.
+
+## Roadmap
+
+No fixed roadmap yet, but I plan to keep improving this addon as much as I can.
+I have plans to improve the skits art, adding more style options.
+If you wanna help me develop this addon let me know.
+
 ## Options
 
 Can be changed in the WoW options menu: Options -> Addons -> Skits
