@@ -1,0 +1,87 @@
+﻿-- Skits
+-- ptBR
+
+local L = LibStub("AceLocale-3.0"):NewLocale("Skits", "ptBR", true)
+if not L then return end
+
+L["Skits.options.Skits.title"] = "Skits"
+L["Skits.options.Skits.desc"] = "Skits"
+L["Skits.options.enabled.title"] = "Ativar Skits"
+L["Skits.options.enabled.desc"] = "Ativa ou desativa o Skits."
+L["Skits.options.block_talking_head.title"] = "Bloquear Talking Heads"
+L["Skits.options.block_talking_head.desc"] = "Evita que o Talking Head padrão do WoW apareça."
+L["Skits.options.overall_settings.title"] = "Configurações Gerais"
+L["Skits.options.overall_settings.desc"] = "Configurações gerais que afetam o addon."
+L["Skits.options.overall_settings.desc.title"] = "Essas configurações controlam a aparência e o comportamento do Skits."
+L["Skits.options.speech_screen_max.title"] = "Máximo de Falas na Tela"
+L["Skits.options.speech_screen_max.desc"] = "Número máximo de falas que aparecem na tela."
+L["Skits.options.speech_screen_combat_max.title"] = "Máximo de Falas: Combate"
+L["Skits.options.speech_screen_combat_max.desc"] = "Número máximo de falas na tela durante o combate. Limitado pelo valor geral de falas na tela."
+L["Skits.options.speech_screen_group_instance_max.title"] = "Máximo de Falas: Instâncias em Grupo"
+L["Skits.options.speech_screen_group_instance_max.desc"] = "Número máximo de falas na tela em uma instância com outros jogadores. Limitado pelo valor geral de falas na tela."
+L["Skits.options.speech_screen_solo_instance_max.title"] = "Máximo de Falas: Instâncias Solo"
+L["Skits.options.speech_screen_solo_instance_max.desc"] = "Número máximo de falas na tela em uma instância sem outros jogadores. Limitado pelo valor geral de falas na tela."
+L["Skits.options.speaker_face_enabled.title"] = "Ativar Retrato do Falante"
+L["Skits.options.speaker_face_enabled.desc"] = "Ativa ou desativa o retrato do falante durante as conversas."
+L["Skits.options.speaker_face_size.title"] = "Tamanho do Retrato do Falante"
+L["Skits.options.speaker_face_size.desc"] = "Define o tamanho do retrato do falante durante as conversas."
+L["Skits.options.speaker_name_enabled.title"] = "Ativar Nome do Falante"
+L["Skits.options.speaker_name_enabled.desc"] = "Ativa ou desativa o nome do falante durante as conversas."
+L["Skits.options.speech_duration_min.title"] = "Duração da Fala: Mínimo"
+L["Skits.options.speech_duration_min.desc"] = "Define a duração mínima de uma fala na tela antes de desaparecer."
+L["Skits.options.speech_duration_max.title"] = "Duração da Fala: Máximo"
+L["Skits.options.speech_duration_max.desc"] = "Define a duração máxima de uma fala na tela antes de desaparecer."
+L["Skits.options.speech_speed.title"] = "Duração da Fala: Velocidade de Desaparecimento"
+L["Skits.options.speech_speed.desc"] = "Ajusta a velocidade com que o texto da fala desaparece da tela, com base no fator e no número de letras na fala."
+L["Skits.options.speech_position_bottom_distance.title"] = "Distância do Rodapé"
+L["Skits.options.speech_position_bottom_distance.desc"] = "Distância da fala até a parte inferior da tela."
+L["Skits.options.speech_frame_size.title"] = "Largura do Quadro da Fala"
+L["Skits.options.speech_frame_size.desc"] = "Define a largura da área de texto para exibir a fala."
+L["Skits.options.speech_font_size.title"] = "Tamanho da Fonte da Fala"
+L["Skits.options.speech_font_size.desc"] = "Define o tamanho da fonte para o texto da fala."
+L["Skits.options.speech_font_name.title"] = "Fonte da Fala"
+L["Skits.options.speech_font_name.desc"] = "Seleciona a fonte usada para o texto da fala."
+L["Skits.options.speaker_marker_size.title"] = "Tamanho do Marcador de Fala"
+L["Skits.options.speaker_marker_size.desc"] = "Tamanho do marcador que aparece acima da unidade no mundo do jogo."
+
+-- Eventos de NPC
+L["Skits.options.event_msg_monster_yell.title"] = "Grito de NPC"
+L["Skits.options.event_msg_monster_yell.desc"] = "Ativa ou desativa a exibição de gritos de NPC na tela."
+L["Skits.options.event_msg_monster_whisper.title"] = "Sussurro de NPC"
+L["Skits.options.event_msg_monster_whisper.desc"] = "Ativa ou desativa a exibição de sussurros de NPC na tela."
+L["Skits.options.event_msg_monster_say.title"] = "Fala de NPC"
+L["Skits.options.event_msg_monster_say.desc"] = "Ativa ou desativa a exibição de falas de NPC na tela."
+L["Skits.options.event_msg_monster_party.title"] = "Fala de Grupo de NPC"
+L["Skits.options.event_msg_monster_party.desc"] = "Ativa ou desativa a exibição de falas de grupo de NPC na tela."
+
+-- Eventos de Jogador
+L["Skits.options.event_msg_say.title"] = "Fala do Jogador"
+L["Skits.options.event_msg_say.desc"] = "Ativa ou desativa a exibição de falas do jogador na tela."
+L["Skits.options.event_msg_yell.title"] = "Grito do Jogador"
+L["Skits.options.event_msg_yell.desc"] = "Ativa ou desativa a exibição de gritos do jogador na tela."
+L["Skits.options.event_msg_whisper.title"] = "Sussurro do Jogador"
+L["Skits.options.event_msg_whisper.desc"] = "Ativa ou desativa a exibição de sussurros do jogador na tela."
+L["Skits.options.event_msg_party.title"] = "Bate-papo do Grupo"
+L["Skits.options.event_msg_party.desc"] = "Ativa ou desativa a exibição de mensagens de bate-papo do grupo na tela."
+L["Skits.options.event_msg_party_leader.title"] = "Bate-papo do Líder do Grupo"
+L["Skits.options.event_msg_party_leader.desc"] = "Ativa ou desativa a exibição de mensagens do líder do grupo na tela."
+L["Skits.options.event_msg_raid.title"] = "Bate-papo da Raide"
+L["Skits.options.event_msg_raid.desc"] = "Ativa ou desativa a exibição de mensagens de bate-papo da raide na tela."
+L["Skits.options.event_msg_raid_leader.title"] = "Bate-papo do Líder da Raide"
+L["Skits.options.event_msg_raid_leader.desc"] = "Ativa ou desativa a exibição de mensagens do líder da raide na tela."
+L["Skits.options.event_msg_instance_chat.title"] = "Bate-papo da Instância"
+L["Skits.options.event_msg_instance_chat.desc"] = "Ativa ou desativa a exibição de mensagens de bate-papo da instância na tela."
+L["Skits.options.event_msg_instance_chat_leader.title"] = "Bate-papo do Líder da Instância"
+L["Skits.options.event_msg_instance_chat_leader.desc"] = "Ativa ou desativa a exibição de mensagens do líder da instância na tela."
+L["Skits.options.event_msg_channel.title"] = "Bate-papo do Canal"
+L["Skits.options.event_msg_channel.desc"] = "Ativa ou desativa a exibição de mensagens de bate-papo do canal geral na tela."
+L["Skits.options.event_msg_guild.title"] = "Bate-papo da Guilda"
+L["Skits.options.event_msg_guild.desc"] = "Ativa ou desativa a exibição de mensagens de bate-papo da guilda na tela."
+L["Skits.options.event_msg_officer.title"] = "Bate-papo de Oficiais"
+L["Skits.options.event_msg_officer.desc"] = "Ativa ou desativa a exibição de mensagens de bate-papo de oficiais na tela."
+
+
+
+
+
+

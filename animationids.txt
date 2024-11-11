@@ -1,0 +1,111 @@
+41 holding breath
+47 standing mad face
+60 talking
+64 yell
+65 question
+67 wave
+70 laugh
+73 mock
+77 cry
+70 applaud
+81 shout
+137 stunned
+185 smile and yes
+186 frown and No
+200 bored
+
+
+
+Suggested Rules for Animation Selection
+Yelling (64)
+
+Condition: Use if the text contains multiple exclamation marks (e.g., !! or !!!).
+Example: "Get out now!!" → Yelling
+Questioning/Confused (65)
+
+Condition: Use if the text contains ?, especially if it contains multiple question marks (e.g., ??).
+Example: "What’s happening here??" → Question
+Shouting (81)
+
+Condition: Use if the text is in all caps with exclamation points.
+Example: "STOP RIGHT THERE!" → Shout
+Talking (60)
+
+Condition: Default animation if no other specific criteria are met.
+Example: "We need to talk." → Talking
+Laughing (70)
+
+Condition: Use if text contains keywords like "haha", "lol", or "laugh".
+Example: "That was hilarious! Haha!" → Laugh
+Mocking (73)
+
+Condition: Use if text contains words like "mock", "silly", or phrases like "yeah, right".
+Example: "Oh, sure, like that would work..." → Mock
+Crying (77)
+
+Condition: Use if text contains keywords like "cry", "sob", "sad", or multiple periods (...), which can imply sadness or trailing off.
+Example: "I can’t believe this happened..." → Cry
+Applauding (68)
+
+Condition: Use if text contains words like "clap", "applaud", "bravo", or "well done".
+Example: "Well done, everyone!" → Applaud
+Stunned (137)
+
+Condition: Use if text includes words like "stunned", "shock", or "unbelievable".
+Example: "I’m... stunned!" → Stunned
+Smiling/Yes (185)
+
+Condition: Use if text includes words like "yes", "agree", "happy", or smiley emoticons (:), :D).
+Example: "Yes, I’d love to!" → Smile
+Frowning/No (186)
+
+Condition: Use if text includes words like "no", "disagree", "sad", or sad emoticons (:().
+Example: "No, that’s not what I meant." → Frown
+Bored (200)
+
+Condition: Use if text includes keywords like "bored", "tired", or "ugh".
+Example: "Ugh, this is taking forever..." → Bored
+Holding Breath (41)
+
+Condition: Use if text contains words like "waiting", "anticipating", or "hold".
+Example: "I’m holding my breath for the news." → Holding Breath
+Mad/Angry (47)
+
+Condition: Use if text contains strong language indicating anger or frustration (e.g., "angry", "mad", "furious").
+Example: "I am so mad right now!" → Mad Face
+
+
+
+
+
+function GetAnimationIDFromText(text)
+    if text:find("!!") then
+        return 64  -- Yelling
+    elseif text:find("%?") then
+        return 65  -- Questioning
+    elseif text == text:upper() and text:find("!") then
+        return 81  -- Shouting
+    elseif text:find("haha") or text:find("lol") then
+        return 70  -- Laughing
+    elseif text:find("mock") or text:find("yeah, right") then
+        return 73  -- Mocking
+    elseif text:find("cry") or text:find("...") then
+        return 77  -- Crying
+    elseif text:find("clap") or text:find("bravo") then
+        return 68  -- Applauding
+    elseif text:find("stunned") or text:find("shock") then
+        return 137  -- Stunned
+    elseif text:find("yes") or text:find(":%)") then
+        return 185  -- Smiling/Yes
+    elseif text:find("no") or text:find("disagree") or text:find(":%)") then
+        return 186  -- Frowning/No
+    elseif text:find("bored") or text:find("tired") then
+        return 200  -- Bored
+    elseif text:find("hold") or text:find("anticipating") then
+        return 41  -- Holding Breath
+    elseif text:find("angry") or text:find("mad") then
+        return 47  -- Standing Mad Face
+    else
+        return 60  -- Default Talking
+    end
+end
