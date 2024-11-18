@@ -176,7 +176,7 @@ function Skits_UI:Display3DModelWithText(creatureData, isPlayer, text, duration,
         modelDisplayData.hasModel = false
     end
 
-    local textFrame, textLabel, speakerNameFrame, modelFrame, borderFrame = Skits_UI_Utils:CreateSpeakFrame(speaker, text, textColor, modelDisplayData, UIParent, self.speakerOrder, textAreaWidth, font, fontSize, showSpeakerName)
+    local textFrame, textLabel, speakerNameFrame, modelFrame, borderFrame = Skits_UI_Speaker:CreateSpeakFrame(speaker, text, textColor, modelDisplayData, UIParent, self.speakerOrder, textAreaWidth, font, fontSize, showSpeakerName)
     if modelDisplayData.hasModel then
         modelFrame:SetPosition(0, 0, -0.05)     
         local animationIds = self:GetAnimationIDFromText(text)
@@ -270,9 +270,9 @@ function Skits_UI:IncreaseText(msgData, newText, newDur)
     local currText = msgData.textLabel:GetText()
     currText = currText .. "\n\n" .. newText    
     msgData.textLabel:SetText(currText)
-    -- Skits_UI_Utils:UpdateText(oldText, msgData.textFrame, msgData.textLabel, options.speaker_face_enabled)
+    -- Skits_UI_Speaker:UpdateText(oldText, msgData.textFrame, msgData.textLabel, options.speaker_face_enabled)
     -- Readjust frame size
-    Skits_UI_Utils:AdjustSpeakFrameHeight(msgData.textFrame, msgData.textLabel)
+    Skits_UI_Speaker:AdjustSpeakFrameHeight(msgData.textFrame, msgData.textLabel)
 
     -- Update duration
     msgData.duration = msgData.duration + newDur

@@ -2,7 +2,7 @@
 ## Title: Skits
 ## Notes: Displays 3D portraits of NPCs speaking in chat.
 ## Author: Psyny
-## Version: 1.0
+## Version: 1.1
 ## DefaultState: enabled
 
 ## SavedVariables: SkitsDB
@@ -34,6 +34,8 @@ Skits_Deque.lua
 Skits_ID_Store.lua
 Skits_Utils.lua
 Skits_UI_Utils.lua
+
+Skits_UI_Speaker.lua
 
 Skits.lua
 Skits_UI.lua

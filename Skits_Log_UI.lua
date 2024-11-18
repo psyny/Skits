@@ -135,7 +135,7 @@ function Skits_Log_UI:PopulateLogFrame()
                     newText = entry.text .. "\n\n" .. oldText
                 end
 
-                Skits_UI_Utils:UpdateText(newText, lastSpeakerTextFrame, lastSpeakerTextLabel, options.speaker_face_enabled)
+                Skits_UI_Speaker:UpdateText(newText, lastSpeakerTextFrame, lastSpeakerTextLabel, options.speaker_face_enabled)
 
                 -- Temp variables (possible definitive)
                 local newHeight = lastSpeakerTextFrame:GetHeight()        
@@ -146,7 +146,7 @@ function Skits_Log_UI:PopulateLogFrame()
                 if newSpaceFilled > frameHeight then
                     -- Revert changes and set to create new frame
                     createNewFrame = true
-                    Skits_UI_Utils:UpdateText(oldText, lastSpeakerTextFrame, lastSpeakerTextLabel, options.speaker_face_enabled)
+                    Skits_UI_Speaker:UpdateText(oldText, lastSpeakerTextFrame, lastSpeakerTextLabel, options.speaker_face_enabled)
                 else
                     -- Keep changes
                     spaceFilled = newSpaceFilled
@@ -169,7 +169,7 @@ function Skits_Log_UI:PopulateLogFrame()
                     genderId = entry.genderId,
                 }
 
-                local textFrame, textLabel, speakerNameFrame, modelFrame, borderFrame = Skits_UI_Utils:CreateSpeakFrame(entry.speaker, entry.text, entry.color, modelDisplayData, logFrame, altSpeakerSide, textAreaWidth, font, fontSize, showSpeakerName)        
+                local textFrame, textLabel, speakerNameFrame, modelFrame, borderFrame = Skits_UI_Speaker:CreateSpeakFrame(entry.speaker, entry.text, entry.color, modelDisplayData, logFrame, altSpeakerSide, textAreaWidth, font, fontSize, showSpeakerName)        
                 if modelFrame then
                     modelFrame:SetPaused(true) 
                 end        
