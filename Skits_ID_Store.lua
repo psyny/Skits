@@ -264,16 +264,16 @@ function Skits_ID_Store:ExternalDB_GetFixedCreatureDataByName(creatureName)
 
     local creatureId = CreatureDisplayDB:GetFixedNpcIdForCurrentZone(creatureName)
 
-    if not creatureId then
-        return nil, "external: CreatureDisplayDB fixed data"
+    if creatureId then
+        local creatureData = {
+            name = creatureName,
+            creatureId = creatureId,
+        } 
+        
+        return creatureData, "external: CreatureDisplayDB fixed data"
     end
 
-    local creatureData = {
-        name = creatureName,
-        creatureId = creatureId,
-    } 
-
-    return creatureData, "external: CreatureDisplayDB fixed data"
+    return nil, "external: CreatureDisplayDB fixed data"
 end
 
 
@@ -293,8 +293,8 @@ function Skits_ID_Store:GetCreatureDataByName(creatureName, isPlayer)
     -- We will try to retrieve the NPC data from many sources.
     -- Source 1: External Addons Fixed ID log
     -- Source 2 Local Cache (cache since last reload)
-    -- Source 3: Local DB
-    -- Source 4: Other Addons DB
+    -- Source 3: Other Addons DB    
+    -- Source 4: Local DB
 
     -- Source 1: Other Addons DB
     creatureData, source = self:ExternalDB_GetFixedCreatureDataByName(creatureName)
@@ -306,19 +306,19 @@ function Skits_ID_Store:GetCreatureDataByName(creatureName, isPlayer)
     creatureData = self:LocalCache_GetCreatureDataByName(creatureName)
     if creatureData then
         return creatureData, "local cache"
-    end    
+    end  
+    
+    -- Source 3: Other Addons DB
+    creatureData, source = self:ExternalDB_GetCreatureDataByName(creatureName)
+    if creatureData then
+        return creatureData, source
+    end      
 
-    -- Source 3: Local DB
+    -- Source 4: Local DB
     creatureData = self:LocalDB_GetCreatureDataByName(creatureName)
     if creatureData then
         return creatureData, "local database"
     end
-
-    -- Source 4: Other Addons DB
-    creatureData, source = self:ExternalDB_GetCreatureDataByName(creatureName)
-    if creatureData then
-        return creatureData, source
-    end  
 
     -- Nothing was found
     return nil, nil
@@ -371,7 +371,25 @@ SlashCmdList["SkitsNPCData"] = function(creatureName)
         print(creatureName .. " not found in our DBs")
     else
         print("Name: " .. creatureData.name)
-        print("ID: " .. creatureData.creatureId)
+
+        local creatureId = "nil"
+        if creatureData.creatureId then
+            creatureId = creatureData.creatureId
+        end
+        print("NPC ID: " .. creatureId)
+
+        local creatureIds = "{}"
+        if creatureData.creatureIds then
+            creatureIds = "{" .. table.concat(creatureData.creatureIds," , ") .. "}"
+        end
+        print("NPC IDs: " .. creatureIds)
+
+        local displayIds = "{}"
+        if creatureData.displayIds then
+            displayIds = "{" .. table.concat(creatureData.displayIds," , ") .. "}"
+        end
+        print("Display IDs: " .. displayIds)        
+
         print("Source: " .. source)
     end
 end

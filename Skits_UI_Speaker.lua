@@ -279,6 +279,7 @@ function Skits_UI_Speaker:LoadModel(speakerData)
     
     -- Set model (trying to load it)
     if modelDisplayData.isPlayer then
+        -- Player        
         if speakerData.attemptCurrent > loadModelAttemptsPerIdx then
             speakerData.attemptCurrent = 1
             speakerData.attemptPhase = 10
