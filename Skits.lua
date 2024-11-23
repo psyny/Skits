@@ -546,8 +546,38 @@ function Skits:HandleTalkingHead()
 end
 
 function Skits:HandleTalkingHeadAux()
-    if addonOptions.block_talking_head == true then
-        if TalkingHeadFrame and TalkingHeadFrame:IsShown() then
+    if TalkingHeadFrame and TalkingHeadFrame:IsShown() then
+        -- Save its contents
+        local nameText = TalkingHeadFrame.NameFrame.Name:GetText()
+        if nameText then
+            if not SkitsDBtalkinghead then
+                SkitsDBtalkinghead = {}
+                local currData = SkitsDBtalkinghead[nameText]
+
+                -- Create entry if theres not
+                if not currData then
+                    currData = {
+                        zoneNames = {},
+                        zoneIds = {},
+                    }
+                    SkitsDBtalkinghead[nameText] = currData
+                end
+
+                -- Save new data
+                local currZoneName = GetZoneText()
+                local currZoneId = C_Map.GetBestMapForUnit("player")
+
+                if currZoneName then
+                    table.insert(currData.zoneNames, currZoneName)
+                end
+                if currZoneId then
+                    table.insert(currData.zoneIds, currZoneId)
+                end
+            end
+        end
+
+        -- Block it
+        if addonOptions.block_talking_head == true then
             TalkingHeadFrame:Hide()
         end
     end
