@@ -164,6 +164,8 @@ function Skits_Log_UI:PopulateLogFrame()
                     modelSize = modelSize,
                     isPlayer = entry.isPlayer,
                     creatureId = entry.creatureId,
+                    displayId = entry.displayId,
+                    ids = entry.ids,
                     unitToken = nil,
                     raceId = entry.raceId,
                     genderId = entry.genderId,

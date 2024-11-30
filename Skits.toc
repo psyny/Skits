@@ -2,7 +2,7 @@
 ## Title: Skits
 ## Notes: Displays 3D portraits of NPCs speaking in chat.
 ## Author: Psyny
-## Version: 1.1
+## Version: 1.2
 ## DefaultState: enabled
 
 ## SavedVariables: SkitsDB, SkitsDBtalkinghead

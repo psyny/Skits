@@ -33,3 +33,30 @@ function Skits_Utils:IsInInstanceGroup()
 
     return inInstance and playerCount > 1
 end
+
+function Skits_Utils:AddEleToList(ele, list)
+    for _, value in ipairs(list) do
+        if value == ele then
+            return
+        end
+    end
+
+    table.insert(list, ele)
+end
+
+function Skits_Utils:AddListToList(sourceList, list, avoidDuplicated)
+    -- Set, for faster checks
+    local set = {}
+    if avoidDuplicated == true then
+        for _, ele in ipairs(list) do
+            set[ele] = true
+        end
+    end
+
+    -- Add if not already there
+    for _, ele in ipairs(sourceList) do
+        if avoidDuplicated == false or not set[ele] then
+            table.insert(list, ele)
+        end
+    end
+end

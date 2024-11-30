@@ -15,10 +15,15 @@ local allowedTalkEvents = {}
 -- Addon events
 
 function Skits:OnInitialize()
+    -- Debug
+    if not SkitsDB.debugMode then
+        SkitsDB.debugMode = false
+    end
+    
+	-- Set up our database
     local options = Skits_Options.options
     local defaults = Skits_Options.defaults
 
-	-- Set up our database
 	self.db = LibStub("AceDB-3.0"):New("SkitsDB", defaults)
 	self.db.RegisterCallback(self, "OnProfileChanged", "OnProfileChanged")
 	self.db.RegisterCallback(self, "OnProfileCopied", "OnProfileChanged")
@@ -281,8 +286,8 @@ function Skits:StoreInMemory(creatureData, isPlayer, text, duration, color)
     local msgEntry = {
         memoryIdx = memoryIdx,
         creatureId = creatureData.creatureId,
-        creatureIds = creatureData.creatureIds,
-        displayIds = creatureData.displayIds,
+        displayId = creatureData.displayId,
+        ids = creatureData.ids,
         raceId = creatureData.raceId,
         genderId = creatureData.genderId,
         isPlayer = isPlayer,
@@ -550,30 +555,56 @@ function Skits:HandleTalkingHeadAux()
         -- Save its contents
         local nameText = TalkingHeadFrame.NameFrame.Name:GetText()
         if nameText then
-            if not SkitsDBtalkinghead then
-                SkitsDBtalkinghead = {}
-                local currData = SkitsDBtalkinghead[nameText]
-
-                -- Create entry if theres not
-                if not currData then
-                    currData = {
-                        zoneNames = {},
-                        zoneIds = {},
+            -- Save Display Id
+            local thModel = TalkingHeadFrame.MainFrame.Model
+            local displayId = nil
+            if thModel then
+                displayId = thModel:GetDisplayInfo()
+                if displayId then
+                    local creatureData = {
+                        name = nameText,
+                        displayId = displayId,
                     }
-                    SkitsDBtalkinghead[nameText] = currData
-                end
+                    Skits_ID_Store:SetCreatureData(creatureData, false)
 
-                -- Save new data
-                local currZoneName = GetZoneText()
-                local currZoneId = C_Map.GetBestMapForUnit("player")
-
-                if currZoneName then
-                    table.insert(currData.zoneNames, currZoneName)
-                end
-                if currZoneId then
-                    table.insert(currData.zoneIds, currZoneId)
+                    if SkitsDB.debugMode then
+                        print("[SAVING TALKING HEAD DATA]")
+                        print("name: " .. creatureData.name)
+                        print("display id: " .. creatureData.displayId)
+                    end
                 end
             end
+                        
+            -- Save Talking Head info
+            if not SkitsDBtalkinghead then
+                SkitsDBtalkinghead = {}
+            end
+
+            local currData = SkitsDBtalkinghead[nameText]
+
+            -- Create entry if theres not
+            if not currData then
+                currData = {
+                    zoneNames = {},
+                    zoneIds = {},
+                    displayIds = {},
+                }
+                SkitsDBtalkinghead[nameText] = currData
+            end
+
+            -- Save new data
+            local currZoneName = GetZoneText()
+            local currZoneId = C_Map.GetBestMapForUnit("player")
+
+            if currZoneName then
+                Skits_Utils:AddEleToList(currZoneName, currData.zoneNames)
+            end
+            if currZoneId then
+                Skits_Utils:AddEleToList(currZoneId, currData.zoneIds)
+            end
+            if displayId then
+                Skits_Utils:AddEleToList(displayId, currData.displayIds)
+            end            
         end
 
         -- Block it
@@ -593,3 +624,19 @@ SlashCmdList["SkitsToggle"] = function()
         print("Skits are now disabled")
     end
 end
+
+-- Debug Toggle
+SLASH_SkitsDebug1 = "/SkitsDebug"
+SlashCmdList["SkitsDebug"] = function()   
+    SkitsDB.debugMode = not SkitsDB.debugMode
+    if SkitsDB.debugMode then
+        print("Skits Debug is now enabled")
+    else
+        print("Skits Debug is now disabled")
+    end
+end
+
+
+
+
+

@@ -88,37 +88,80 @@ function Skits_ID_Store:Locals_GetCreatureDataByName(database, idxQueue, creatur
 end
 
 function Skits_ID_Store:Locals_SetCreatureData(database, idxQueue, idxLimit, creatureData, updateNewer)
-    if creatureData == nil or creatureData.creatureId == nil then
+    if creatureData == nil then
         return
     end
 
-    -- Add DB
+    -- Check if we have the creature in the db
     local dataIdx = nil
     dataIdx = database.mapNpcNameToIdx[creatureData.name]
+
+    local dbCreatureData = {}
     if not dataIdx then
-        -- Add
+        dbCreatureData.name = creatureData.name
+        dbCreatureData.creatureId = creatureData.creatureId
+        dbCreatureData.displayId = creatureData.displayId
+
         dataIdx = database.nextCreatureDataIdx
         database.nextCreatureDataIdx = database.nextCreatureDataIdx + 1
 
-        database.mapNpcNameToIdx[creatureData.name] = dataIdx
-        database.mapNpcCreatureIdToIdx[creatureData.creatureId] = dataIdx            
-        database.creatureDataByIdx[dataIdx] = creatureData
+        database.mapNpcNameToIdx[dbCreatureData.name] = dataIdx      
+        database.creatureDataByIdx[dataIdx] = dbCreatureData
 
         database.dataQty = database.dataQty + 1
 
         -- Update Queue
         idxQueue:AddToHead(dataIdx)
-    else       
-        local currCreatureData = database.creatureDataByIdx[dataIdx]
+    else
+        dbCreatureData = database.creatureDataByIdx[dataIdx]
+
+        -- Newer Update Logic
         if updateNewer then
-             -- Update creature id if its newer (theres a reason to store all the old ones? how would we define its usage?)            
-            if creatureData.creatureId > currCreatureData.creatureId then
-                currCreatureData.creatureId = creatureData.creatureId
+            -- Update creature id only if its newer (theres a reason to store all the old ones? how would we define its usage?)            
+            if not dbCreatureData.creatureId or (creatureData.creatureId and creatureData.creatureId > dbCreatureData.creatureId) then
+                dbCreatureData.creatureId = creatureData.creatureId
             end   
+            if not dbCreatureData.displayId or (creatureData.displayId and creatureData.displayId > dbCreatureData.displayId) then
+                dbCreatureData.displayId = creatureData.displayId
+            end              
         else
             -- Update creature id no matter what
             -- Useful for local cache, that usually represents most recent, ephemeral, player interactions.
-            currCreatureData.creatureId = creatureData.creatureId
+            if creatureData.creatureId then
+                dbCreatureData.creatureId = creatureData.creatureId
+            end
+            if creatureData.displayId then
+                dbCreatureData.displayId = creatureData.displayId
+            end            
+        end         
+    end
+
+    if creatureData.displayId then
+        dbCreatureData.isDisplayIdNewer = creatureData.displayId and true
+    end
+
+    -- Update DB Lists
+    if false then
+        -- WIP: Currently is adding too much stuttering
+        if not dbCreatureData.creatureIds then
+            dbCreatureData.creatureIds = {}
+        end
+        if not dbCreatureData.displayIds then
+            dbCreatureData.displayIds = {}
+        end
+
+        if creatureData.creatureId then
+            Skits_Utils:AddEleToList(creatureData.creatureId, dbCreatureData.creatureIds)
+        end
+        if creatureData.displayId then
+            Skits_Utils:AddEleToList(creatureData.displayId, dbCreatureData.displayIds)
+        end
+
+        if creatureData.creatureIds then
+            Skits_Utils:AddListToList(creatureData.creatureIds, dbCreatureData.creatureIds, true)
+        end
+        if creatureData.displayIds then
+            Skits_Utils:AddListToList(creatureData.displayIds, dbCreatureData.displayIds, true)
         end
     end
 
@@ -141,8 +184,7 @@ function Skits_ID_Store:Locals_Trim(database, idxQueue, dataLimit)
             local creatureData = database.creatureDataByIdx[dataIdx]
             database.creatureDataByIdx[dataIdx] = nil
             if creatureData then
-                database.mapNpcNameToIdx[creatureData.name] = nil
-                database.mapNpcCreatureIdToIdx[creatureData.creatureId] = nil            
+                database.mapNpcNameToIdx[creatureData.name] = nil     
             end
         end
     end
@@ -155,7 +197,6 @@ function Skits_ID_Store:LocalCache_Start()
     if not Skits_ID_Store.localCache then
         Skits_ID_Store.localCache = {
             mapNpcNameToIdx = {},
-            mapNpcCreatureIdToIdx = {},
                         
             creatureDataByIdx = {},
             creatureDataIdxQueue = {},
@@ -184,7 +225,6 @@ function Skits_ID_Store:LocalDB_Start()
     if not SkitsDB.creatureIdStore then
         SkitsDB.creatureIdStore = {
             mapNpcNameToIdx = {},
-            mapNpcCreatureIdToIdx = {},
                         
             creatureDataByIdx = {},
             creatureDataIdxQueue = {},
@@ -210,7 +250,6 @@ function Skits_ID_Store:LocalPlayerCache_Start()
     if not Skits_ID_Store.localPlayerCache then
         Skits_ID_Store.localPlayerCache = {
             mapNpcNameToIdx = {},
-            mapNpcCreatureIdToIdx = {},
                         
             creatureDataByIdx = {},
             creatureDataIdxQueue = {},
@@ -243,7 +282,7 @@ function Skits_ID_Store:ExternalDB_GetCreatureDataByName(creatureName)
     local displayIds = CreatureDisplayDB:GetDisplayIdsByName(creatureName)
     local creatureIds = CreatureDisplayDB:GetNpcIdsByName(creatureName)
     if not displayIds then
-        return nil, "external: CreatureDisplayDB"
+        return nil, {"external: CreatureDisplayDB"}
     end
 
     local creatureData = {
@@ -253,7 +292,7 @@ function Skits_ID_Store:ExternalDB_GetCreatureDataByName(creatureName)
         displayIds = displayIds,
     }
 
-    return creatureData, "external: CreatureDisplayDB"
+    return creatureData, {"external: CreatureDisplayDB"}
 end
 
 function Skits_ID_Store:ExternalDB_GetFixedCreatureDataByName(creatureName)
@@ -270,15 +309,74 @@ function Skits_ID_Store:ExternalDB_GetFixedCreatureDataByName(creatureName)
             creatureId = creatureId,
         } 
         
-        return creatureData, "external: CreatureDisplayDB fixed data"
+        return creatureData, {"external: CreatureDisplayDB fixed data"}
     end
 
-    return nil, "external: CreatureDisplayDB fixed data"
+    return nil, {"external: CreatureDisplayDB fixed data"}
 end
 
 
 -- ------------------------------------
 -- Exposed Functions
+
+local function addToCreatureData(newCreatureData, currCreatureData, newSources, currSources)
+    -- Sources Update
+    if currSources then
+        Skits_Utils:AddListToList(newSources, currSources, false)
+    end
+
+    -- Basic Creature Data
+    if not currCreatureData.name and newCreatureData.name then
+        currCreatureData.name = newCreatureData.name
+    end
+
+    if not currCreatureData.creatureId and newCreatureData.creatureId then
+        currCreatureData.creatureId = newCreatureData.creatureId
+    end
+
+    if not currCreatureData.displayId and newCreatureData.displayId then
+        currCreatureData.displayId = newCreatureData.displayId
+    end
+
+    -- Advanced Creature Data: Ordered Ids
+    if not currCreatureData.ids then
+        currCreatureData.ids = {}
+    end
+
+    if newCreatureData.isDisplayIdNewer then
+        if newCreatureData.displayId then
+            local idData = {newCreatureData.displayId, true}
+            Skits_Utils:AddEleToList(idData, currCreatureData.ids)
+        end   
+        if newCreatureData.creatureId then
+            local idData = {newCreatureData.creatureId, false}
+            Skits_Utils:AddEleToList(idData, currCreatureData.ids)
+        end      
+    else 
+        if newCreatureData.creatureId then
+            local idData = {newCreatureData.creatureId, false}
+            Skits_Utils:AddEleToList(idData, currCreatureData.ids)
+        end  
+        if newCreatureData.displayId then
+            local idData = {newCreatureData.displayId, true}
+            Skits_Utils:AddEleToList(idData, currCreatureData.ids)
+        end 
+    end
+ 
+    if newCreatureData.creatureIds then    
+        for _, id in ipairs(newCreatureData.creatureIds) do
+            local idData = {id, false}
+            Skits_Utils:AddEleToList(idData, currCreatureData.ids)
+        end
+    end
+ 
+    if newCreatureData.displayIds then    
+        for _, id in ipairs(newCreatureData.displayIds) do
+            local idData = {id, true}
+            Skits_Utils:AddEleToList(idData, currCreatureData.ids)
+        end
+    end    
+end
 
 function Skits_ID_Store:GetCreatureDataByName(creatureName, isPlayer)
     local creatureData = nil
@@ -287,41 +385,54 @@ function Skits_ID_Store:GetCreatureDataByName(creatureName, isPlayer)
     -- Player data is only retrieved from the local cache
     if isPlayer then
         creatureData = self:LocalPlayerCache_GetCreatureDataByName(creatureName)
-        return creatureData, "local cache"
+        return creatureData, {"player local cache"}
     end
 
     -- We will try to retrieve the NPC data from many sources.
     -- Source 1: External Addons Fixed ID log
-    -- Source 2 Local Cache (cache since last reload)
-    -- Source 3: Other Addons DB    
-    -- Source 4: Local DB
+    -- Source 2: Local Cache (cache since last reload)
+    -- Source 3: Local DB    
+    -- Source 4: Other Addons DB    
 
-    -- Source 1: Other Addons DB
-    creatureData, source = self:ExternalDB_GetFixedCreatureDataByName(creatureName)
+
+    local allCreatureData = {}
+    local allSources = {}
+    local hadSomeData = false
+
+    -- Source 1: Other Addons DB - Fixed Creature data
+    creatureData, sources = self:ExternalDB_GetFixedCreatureDataByName(creatureName)
     if creatureData then
-        return creatureData, source
+        hadSomeData = true
+        addToCreatureData(creatureData, allCreatureData, sources, allSources)
     end      
 
     -- Source 2: Local Cache
     creatureData = self:LocalCache_GetCreatureDataByName(creatureName)
     if creatureData then
-        return creatureData, "local cache"
+        hadSomeData = true
+        addToCreatureData(creatureData, allCreatureData, {"local cache"}, allSources)
     end  
     
-    -- Source 3: Other Addons DB
-    creatureData, source = self:ExternalDB_GetCreatureDataByName(creatureName)
-    if creatureData then
-        return creatureData, source
-    end      
-
-    -- Source 4: Local DB
+    -- Source 3: Local DB
     creatureData = self:LocalDB_GetCreatureDataByName(creatureName)
     if creatureData then
-        return creatureData, "local database"
+        hadSomeData = true
+        addToCreatureData(creatureData, allCreatureData, {"local database"}, allSources)
     end
 
+    -- Source 4: Other Addons DB
+    creatureData, sources = self:ExternalDB_GetCreatureDataByName(creatureName)
+    if creatureData then
+        hadSomeData = true
+        addToCreatureData(creatureData, allCreatureData, sources, allSources)
+    end      
+
     -- Nothing was found
-    return nil, nil
+    if hadSomeData then
+        return allCreatureData, allSources
+    else
+        return nil, {}
+    end    
 end
 
 function Skits_ID_Store:SetCreatureData(creatureData, isPlayer)
@@ -354,7 +465,47 @@ SlashCmdList["SkitsLocalDBStats"] = function()
     print("Number of Data Entries: " .. SkitsDB.creatureIdStore.dataQty )
 end
 
--- Command to get NPC data
+local function PrintNpcData(creatureName)
+    local creatureData, sources = Skits_ID_Store:GetCreatureDataByName(creatureName, false)
+
+    print("[NPC Data]") 
+    if not creatureData then
+        print(creatureName .. " not found in our DBs")
+    else
+        print("NAME: " .. creatureData.name)
+
+        local creatureId = "nil"
+        if creatureData.creatureId then
+            creatureId = creatureData.creatureId
+        end
+        print("NPC ID: " .. creatureId)
+
+        local displayId = "nil"
+        if creatureData.displayId then
+            displayId = creatureData.displayId
+        end
+        print("DISPLAY ID: " .. displayId)
+
+        print("ORDERED IDS:")
+        if creatureData.ids then
+            for _, id in ipairs(creatureData.ids) do
+                if id[2] then
+                    print("DisId: " .. id[1])
+                else
+                    print("NpcId: " .. id[1])
+                end
+            end
+        end
+        
+        local sourcesStr = "{}"
+        if sources then
+            sourcesStr = "{" .. table.concat(sources," , ") .. "}"
+        end
+        print("SOURCES: " .. sourcesStr)
+    end
+end
+
+-- Command to get NPC data by name
 SLASH_SkitsNPCData1 = "/Skitsnpcdata"
 SlashCmdList["SkitsNPCData"] = function(creatureName)    
     if not SkitsDB then
@@ -364,34 +515,30 @@ SlashCmdList["SkitsNPCData"] = function(creatureName)
         return
     end
 
-    local creatureData, source = Skits_ID_Store:GetCreatureDataByName(creatureName, false)
+    PrintNpcData(creatureName)
+end
 
-    print("[NPC Data]") 
-    if not creatureData then
-        print(creatureName .. " not found in our DBs")
-    else
-        print("Name: " .. creatureData.name)
 
-        local creatureId = "nil"
-        if creatureData.creatureId then
-            creatureId = creatureData.creatureId
-        end
-        print("NPC ID: " .. creatureId)
-
-        local creatureIds = "{}"
-        if creatureData.creatureIds then
-            creatureIds = "{" .. table.concat(creatureData.creatureIds," , ") .. "}"
-        end
-        print("NPC IDs: " .. creatureIds)
-
-        local displayIds = "{}"
-        if creatureData.displayIds then
-            displayIds = "{" .. table.concat(creatureData.displayIds," , ") .. "}"
-        end
-        print("Display IDs: " .. displayIds)        
-
-        print("Source: " .. source)
+-- Command to get target NPC data
+SLASH_SkitsTargetData1 = "/Skitstargetdata"
+SlashCmdList["SkitsTargetData"] = function()    
+    if not SkitsDB then
+        return
     end
+    if not SkitsDB.creatureIdStore then
+        return
+    end
+
+    local creatureName = nil
+    local unittoken = "target"
+    if UnitExists(unittoken) then
+        creatureName, _ = UnitName(unittoken)
+    end
+
+    if creatureName then
+        PrintNpcData(creatureName)
+    end
+    return
 end
 
 -- Command to clear the local db
@@ -405,7 +552,6 @@ SlashCmdList["SkitsClearLocalDB"] = function()
 
     SkitsDB.creatureIdStore = {
         mapNpcNameToIdx = {},
-        mapNpcCreatureIdToIdx = {},
                     
         creatureDataByIdx = {},
         creatureDataIdxQueue = {},

@@ -1,7 +1,7 @@
 -- Skits_UI_Speaker.lua
 Skits_UI_Speaker = {}
 
-local loadModelAttemptsPerIdx = 5
+local loadModelAttemptsPerIdx = 2
 
 local textFrameGap = 20  -- Adjustable gap between frames
 
@@ -202,6 +202,11 @@ function Skits_UI_Speaker:CreateSpeakFrame(speaker, text, textColor, modelDispla
     borderFrame:SetBackdropBorderColor(1, 1, 1)
 
     -- Create and register the speaker frame
+    local attemptPhase = 1
+    if (not modelDisplayData.creatureIds or #modelDisplayData.creatureIds == 0) and (not modelDisplayData.displayIds or #modelDisplayData.displayIds == 0) and (not modelDisplayData.creatureId) and (not modelDisplayData.displayId) then
+        attemptPhase = 0
+    end
+
     speakerData = {
         speakerName = speaker,
         textFrame = textFrame,
@@ -213,8 +218,11 @@ function Skits_UI_Speaker:CreateSpeakFrame(speaker, text, textColor, modelDispla
         zoom = Skits_UI.portraitZoom and 1 or 0,
         loaderHandle = nil,
         attemptIdx = 1,
-        attemptPhase = 1,
-        attemptCurrent = 1,
+        attemptPhase = attemptPhase,
+        attemptCurrent = 0,
+        attemptTotal = 0,
+        attemptLastId = 0,
+        attemptLastIdIsDisplay = true,
     }    
 
     modelFrame:SetPortraitZoom(speakerData.zoom)            
@@ -268,14 +276,31 @@ function Skits_UI_Speaker:LoadModel(speakerData)
     -- Useful Variables
     local speaker = speakerData.speakerName
     local modelFrame = speakerData.modelFrame
-    speakerData.attemptCurrent = speakerData.attemptCurrent + 1
 
     -- Is model ready loaded?
     local modelFileID = modelFrame:GetModelFileID()
     if modelFileID and modelFileID > 0 then
+        if SkitsDB.debugMode then
+            if not speakerData.modelDisplayData.isPlayer then
+                print("[SPEAKER FRAME MODEL LOADED]")
+                print("Speaker Name: " .. speakerData.speakerName)
+                print("Attempts: " .. speakerData.attemptTotal)
+                print("Phase: " .. speakerData.attemptPhase)
+                if speakerData.attemptLastIdIsDisplay then
+                    print("Display Id: " .. speakerData.attemptLastId)
+                else
+                    print("Npc Id: " .. speakerData.attemptLastId)
+                end    
+            end
+        end
+    
         self:LoadModelStopTimer(speakerData)
         return
     end   
+
+    -- Attempt Control
+    speakerData.attemptCurrent = speakerData.attemptCurrent + 1
+    speakerData.attemptTotal = speakerData.attemptTotal + 1    
     
     -- Set model (trying to load it)
     if modelDisplayData.isPlayer then
@@ -304,66 +329,95 @@ function Skits_UI_Speaker:LoadModel(speakerData)
     else
         -- NPC
 
-        -- Multiple Display Ids
+        -- We still dont have a model, try fetch it (maybe we got this information after the frame was created)
+        if speakerData.attemptPhase == 0 then
+            local creatureData, _ = Skits_ID_Store:GetCreatureDataByName(speakerData.speakerName, false)
+            if creatureData then
+                modelDisplayData.creatureId = creatureData.creatureId
+                modelDisplayData.ids = creatureData.ids
+                speakerData.attemptPhase = 1
+            else
+                speakerData.attemptCurrent = 1
+                if speakerData.attemptCurrent > loadModelAttemptsPerIdx * 5 then
+                    speakerData.attemptIdx = 1
+                    speakerData.attemptCurrent = 1
+                    speakerData.attemptPhase = 10
+                end
+            end            
+        end
+
+        -- Ordered Ids
         if speakerData.attemptPhase == 1 then   
-            if not modelDisplayData.displayIds or #modelDisplayData.displayIds == 0 then
+            if not modelDisplayData.ids or #modelDisplayData.ids == 0 then
                 speakerData.attemptPhase = 2
             else
+                local shouldAttempt = true
                 if speakerData.attemptCurrent > loadModelAttemptsPerIdx then
                     speakerData.attemptCurrent = 1
                     speakerData.attemptIdx = speakerData.attemptIdx + 1
-                    if speakerData.attemptIdx > #modelDisplayData.displayIds then
+                    if speakerData.attemptIdx > #modelDisplayData.ids then
                         speakerData.attemptIdx = 1
                         speakerData.attemptPhase = 2
-                    else
-                        local currId = modelDisplayData.displayIds[speakerData.attemptIdx]
-                        if currId then
-                            modelFrame:ClearModel()
+                        shouldAttempt = false
+                    end
+                end
+
+                if shouldAttempt then
+                    local currIdData = modelDisplayData.ids[speakerData.attemptIdx]
+                    if currIdData then
+                        local currId = currIdData[1]
+                        local isDisplayId = currIdData[2]
+                        speakerData.attemptLastId = currId
+                        speakerData.attemptLastIdIsDisplay = isDisplayId                                                             
+                        --modelFrame:ClearModel()
+                        if isDisplayId then
                             modelFrame:SetDisplayInfo(currId)
+                        else
+                            modelFrame:SetCreature(currId)
                         end
+
+                        if SkitsDB.debugMode then
+                            print("Attempting to load id: " .. currId)
+                        end                            
                     end
                 end                                 
             end
-        end            
+        end  
 
-        -- Multiple NPC Ids
+        -- Single Display Id
         if speakerData.attemptPhase == 2 then
-            if not modelDisplayData.creatureIds or #modelDisplayData.creatureIds == 0 then
+            if speakerData.attemptCurrent > loadModelAttemptsPerIdx then
+                speakerData.attemptCurrent = 0
                 speakerData.attemptPhase = 3
             else
-                if speakerData.attemptCurrent > loadModelAttemptsPerIdx then
-                    speakerData.attemptCurrent = 1
-                    speakerData.attemptIdx = speakerData.attemptIdx + 1
-                    if speakerData.attemptIdx > #modelDisplayData.creatureIds then
-                        speakerData.attemptIdx = 1
-                        speakerData.attemptPhase = 3
-                    else
-                        local currId = modelDisplayData.creatureIds[speakerData.attemptIdx]
-                        if currId then
-                            modelFrame:ClearModel()
-                            modelFrame:SetCreature(currId)
-                        end
-                    end
-                end                                 
+                if not modelDisplayData.displayId then         
+                    speakerData.attemptPhase = 3
+                else
+                    speakerData.attemptLastId = modelDisplayData.displayId
+                    speakerData.attemptLastIdIsDisplay = true                       
+                    modelFrame:SetDisplayInfo(modelDisplayData.displayId)
+                end
             end
         end
 
-        -- Single NPC ID
+        -- Single NPC Id
         if speakerData.attemptPhase == 3 then
             if speakerData.attemptCurrent > loadModelAttemptsPerIdx then
-                speakerData.attemptCurrent = 1
+                speakerData.attemptCurrent = 0
                 speakerData.attemptPhase = 10
             else
                 if not modelDisplayData.creatureId then         
                     speakerData.attemptPhase = 10
                 else
+                    speakerData.attemptLastId = modelDisplayData.creatureId
+                    speakerData.attemptLastIdIsDisplay = false                        
                     modelFrame:SetCreature(modelDisplayData.creatureId)
                 end
             end
         end
     end  
     
-    -- Timer to check if the model was loaded
+    -- Timer to check if the model has been loaded
     if speakerData.attemptPhase < 10 then
         self:LoadModelStartTimer(speakerData)
     end        
