@@ -1,7 +1,5 @@
 -- Skits.lua
 
--- TODO: Hide Talking Head option
-
 ---------------------------------------------------------
 -- Addon declaration
 
@@ -150,12 +148,9 @@ end
 
 
 ---------------------------------------------------------
--- Code
-
-
+-- Main 
 
 local frame = CreateFrame("Frame")
-local localModelFrame = CreateFrame("PlayerModel", nil, UIParent, "BackdropTemplate")
 
 -- Define 5 pastel colors with perceptual differences
 Skits.colorPalette = {
@@ -573,38 +568,7 @@ function Skits:HandleTalkingHeadAux()
                         print("display id: " .. creatureData.displayId)
                     end
                 end
-            end
-                        
-            -- Save Talking Head info
-            if not SkitsDBtalkinghead then
-                SkitsDBtalkinghead = {}
-            end
-
-            local currData = SkitsDBtalkinghead[nameText]
-
-            -- Create entry if theres not
-            if not currData then
-                currData = {
-                    zoneNames = {},
-                    zoneIds = {},
-                    displayIds = {},
-                }
-                SkitsDBtalkinghead[nameText] = currData
-            end
-
-            -- Save new data
-            local currZoneName = GetZoneText()
-            local currZoneId = C_Map.GetBestMapForUnit("player")
-
-            if currZoneName then
-                Skits_Utils:AddEleToList(currZoneName, currData.zoneNames)
-            end
-            if currZoneId then
-                Skits_Utils:AddEleToList(currZoneId, currData.zoneIds)
-            end
-            if displayId then
-                Skits_Utils:AddEleToList(displayId, currData.displayIds)
-            end            
+            end           
         end
 
         -- Block it
