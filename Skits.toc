@@ -2,7 +2,7 @@
 ## Title: Skits
 ## Notes: Displays 3D portraits of NPCs speaking in chat.
 ## Author: Psyny
-## Version: 1.2
+## Version: 2.0
 ## DefaultState: enabled
 
 ## SavedVariables: SkitsDB
@@ -28,6 +28,7 @@ Libs\AceConfig-3.0\AceConfig-3.0.xml
 Locales\Locale-enUS.lua
 Locales\Locale-ptBR.lua
 
+# Main Files
 Skits_Options.lua
 Skits_Deque.lua
 
@@ -35,8 +36,16 @@ Skits_ID_Store.lua
 Skits_Utils.lua
 Skits_UI_Utils.lua
 
-Skits_UI_Speaker.lua
-
 Skits.lua
 Skits_UI.lua
 Skits_Log_UI.lua
+
+# Style Files
+Skits_Style_Utils.lua
+Skits_Style_Tales.lua
+Skits_Style_Warcraft.lua
+Skits_Style.lua
+
+# Texture files
+# Textures\SkitsStyleTalesModelBg.tga
+# Textures\SkitsStyleTalesTextBg.tga

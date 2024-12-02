@@ -40,7 +40,7 @@ function Skits:OnInitialize()
     -- Update
     self:GeneralParameterChanges()
 
-    -- Start ID Store 
+    -- Start Subs
     Skits_ID_Store:Initialize()
 end
 
@@ -68,6 +68,7 @@ function Skits:GeneralParameterChanges()
     end
 
     self:UpdateAllowedTalkEvents()
+    Skits_Style:Initialize()
 end
 
 
@@ -274,21 +275,14 @@ function Skits:GetColorForSpeaker(name)
 end
 
 -- Store a speak in memory
-function Skits:StoreInMemory(creatureData, isPlayer, text, duration, color)
+function Skits:StoreInMemory(creatureData, text, color)
     local memoryIdx = self.msgMemoryNextIdx
     self.msgMemoryNextIdx = self.msgMemoryNextIdx + 1
 
     local msgEntry = {
         memoryIdx = memoryIdx,
-        creatureId = creatureData.creatureId,
-        displayId = creatureData.displayId,
-        ids = creatureData.ids,
-        raceId = creatureData.raceId,
-        genderId = creatureData.genderId,
-        isPlayer = isPlayer,
-        speaker = creatureData.name,
+        creatureData = creatureData,
         text = text,
-        duration = duration,
         color = color,
         timestamp = GetTime()
     }
@@ -308,8 +302,6 @@ function Skits:StoreInMemory(creatureData, isPlayer, text, duration, color)
             end
         end        
     end
-
-
 end
 
 function Skits:FindUnitToken(unitName)
@@ -385,12 +377,13 @@ function Skits:HandleNpcChatEvent(event, msg, sender, languageName, channelName,
     local creatureData, _ = Skits_ID_Store:GetCreatureDataByName(sender, false)
 
     if not creatureData then
-        creatureData = {
-            name = sender,
-        }
+        creatureData = {}
     end
 
-    self:ChatEvent(sender, creatureData, false, msg)
+    creatureData.isPlayer = false
+    creatureData.name = sender
+
+    self:ChatEvent(creatureData, msg)
 end
 
 function Skits:HandlePlayerChatEvent(event, msg, sender, languageName, channelName, target, flags, unknown, channelNumber, channelName2, unknown2, counter, guid)
@@ -409,38 +402,39 @@ function Skits:HandlePlayerChatEvent(event, msg, sender, languageName, channelNa
     local creatureData, _ = Skits_ID_Store:GetCreatureDataByName(sender, true)
 
     if not creatureData then
-        creatureData = {
-            name = sender,
-        }
+        creatureData = {}
     end
 
     if unittoken then
         creatureData.unitToken = unittoken
     end
 
-    self:ChatEvent(sender, creatureData, true, msg)
+    creatureData.isPlayer = true
+    creatureData.name = sender
+
+    self:ChatEvent(creatureData, msg)
 end
 
-function Skits:ChatEvent(creatureName, creatureData, isPlayer, text)
+function Skits:ChatEvent(creatureData, text)
     local options = Skits_Options.db
-    local r, g, b = self:GetColorForSpeaker(creatureName)	
+    local r, g, b = self:GetColorForSpeaker(creatureData.name)	
 	
     -- Calculate display duration with minimum of 1 second
     local userCharactersPerSecondOption = Skits_Options.db.speech_speed
-    local displayDuration = math.max(#text / userCharactersPerSecondOption)
+    local displayDuration = Skits_Utils:MessageDuration(text)
 
 	-- Store speak information in memory
-	self:StoreInMemory(creatureData, isPlayer, text, displayDuration, {r=r, g=g, b=b})
+	self:StoreInMemory(creatureData, text, {r=r, g=g, b=b})
 
     -- Display text and 3D model
     if Skits.skitsActive then
-        Skits_UI:Display3DModelWithText(creatureData, isPlayer, text, displayDuration, r, g, b)
+        Skits_UI:DisplaySkits(creatureData, text, r, g, b)
     end
 
     -- Refresh log page
     Skits_Log_UI:RefreshPage()
 
-    Skits.lastSpeaker = creatureName
+    Skits.lastSpeaker = creatureData.name
 end
 
 

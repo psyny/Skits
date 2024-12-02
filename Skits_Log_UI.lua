@@ -91,7 +91,7 @@ function Skits_Log_UI:PopulateLogFrame()
 
         local entry = Skits.msgMemory[msgEleCurr.value]
         if entry ~= nil then    
-            if lastSpeaker ~= entry.speaker then
+            if lastSpeaker ~= entry.creatureData.name then
                 altSpeakerSide = not altSpeakerSide
             end 
 
@@ -103,19 +103,19 @@ function Skits_Log_UI:PopulateLogFrame()
             end
 
             local hasModel = false
-            if entry.isPlayer then
-                if entry.raceId then
+            if entry.creatureData.isPlayer then
+                if entry.creatureData.raceId then
                     hasModel = true
                 end
             else
-                if entry.creatureId or entry.creatureIds or entry.displayIds then
+                if entry.creatureData.creatureId or entry.creatureData.creatureIds or entry.creatureData.displayIds then
                     hasModel = true
                 end
             end
 
             -- Create speaker frame or attach to the last one?
             local createNewFrame = true
-            if entry.speaker == lastSpeaker then
+            if entry.creatureData.name == lastSpeaker then
                 if lastSpeakerTextFrame then
                     if lastFillIncrement > options.speaker_face_size + gapBetweenSpeaks + 5 then -- 5 only for rounding issues
                         createNewFrame = true
@@ -135,7 +135,7 @@ function Skits_Log_UI:PopulateLogFrame()
                     newText = entry.text .. "\n\n" .. oldText
                 end
 
-                Skits_UI_Speaker:UpdateText(newText, lastSpeakerTextFrame, lastSpeakerTextLabel, options.speaker_face_enabled)
+                Skits_Style_Warcraft:UpdateText(newText, lastSpeakerTextFrame, lastSpeakerTextLabel, options.speaker_face_enabled)
 
                 -- Temp variables (possible definitive)
                 local newHeight = lastSpeakerTextFrame:GetHeight()        
@@ -146,7 +146,7 @@ function Skits_Log_UI:PopulateLogFrame()
                 if newSpaceFilled > frameHeight then
                     -- Revert changes and set to create new frame
                     createNewFrame = true
-                    Skits_UI_Speaker:UpdateText(oldText, lastSpeakerTextFrame, lastSpeakerTextLabel, options.speaker_face_enabled)
+                    Skits_Style_Warcraft:UpdateText(oldText, lastSpeakerTextFrame, lastSpeakerTextLabel, options.speaker_face_enabled)
                 else
                     -- Keep changes
                     spaceFilled = newSpaceFilled
@@ -159,19 +159,15 @@ function Skits_Log_UI:PopulateLogFrame()
                 accumulatedLastFrameText = entry.text
 
                 -- Create new speaker frame
-                local modelDisplayData = {
-                    hasModel = hasModel,
-                    modelSize = modelSize,
-                    isPlayer = entry.isPlayer,
-                    creatureId = entry.creatureId,
-                    displayId = entry.displayId,
-                    ids = entry.ids,
-                    unitToken = nil,
-                    raceId = entry.raceId,
-                    genderId = entry.genderId,
-                }
-
-                local textFrame, textLabel, speakerNameFrame, modelFrame, borderFrame = Skits_UI_Speaker:CreateSpeakFrame(entry.speaker, entry.text, entry.color, modelDisplayData, logFrame, altSpeakerSide, textAreaWidth, font, fontSize, showSpeakerName)        
+                local textData = {
+                    text = entry.text,
+                    r = entry.color.r,
+                    g = entry.color.g,
+                    b = entry.color.b,
+                }       
+                
+                local displayOptions =  Skits_UI_Utils:BuildDisplayOptions(0.9, 0, {60}, nil, 0) 
+                local textFrame, textLabel, speakerNameFrame, modelFrame, borderFrame = Skits_Style_Warcraft:CreateSpeakFrame(entry.creatureData, textData, displayOptions, modelSize, logFrame, altSpeakerSide, textAreaWidth, font, fontSize, showSpeakerName)
                 if modelFrame then
                     modelFrame:SetPaused(true) 
                 end        
@@ -198,7 +194,7 @@ function Skits_Log_UI:PopulateLogFrame()
                 table.insert(Skits_Log_UI.frames, borderFrame)
 
                 -- Ajust speaker data
-                lastSpeaker = entry.speaker
+                lastSpeaker = entry.creatureData.name
                 lastSpeakerTextFrame = textFrame
                 lastSpeakerTextLabel = textLabel  
                 

@@ -15,6 +15,153 @@
 200 bored
 
 
+ID	Official Name	Notes/Community Name
+0	Stand	Idle
+1	Death	Death
+2	Spell	
+3	Stop	Idle (no movement)
+4	Walk	Walk
+5	Run	Run
+6	Dead	
+7	Rise	
+8	StandWound	Wound (Idle)
+9	CombatWound	Wound (Combat)
+10	CombatCritical	Wound (Critical)
+11	ShuffleLeft	Turn Left
+12	ShuffleRight	Turn Right
+13	Walkbackwards	Walk Backwards
+14	Stun	Stun
+15	HandsClosed	Idle (no movement, hands closed)
+16	AttackUnarmed	Attack (unarmed)
+17	Attack1H	Attack (1H Right)
+18	Attack2H	Attack (2H)
+19	Attack2HL	Attack (2H Large)
+20	ParryUnarmed	Block (Unarmed)
+21	Parry1H	Block (1H)
+22	Parry2H	Block (2H)
+23	Parry2HL	Block (2H Large)
+24	ShieldBlock	Block (Shield)
+25	ReadyUnarmed	Ready (Unarmed)
+26	Ready1H	Ready (1H)
+27	Ready2H	Ready (2H)
+28	Ready2HL	Ready (2H Large)
+29	ReadyBow	Ready (Bow)
+30	Dodge	Dodge
+31	SpellPrecast	
+32	SpellCast	
+33	SpellCastArea	
+34	NPCWelcome	
+35	NPCGoodbye	
+36	Block	
+37	JumpStart	Jump
+38	Jump	Fall
+39	JumpEnd	Land
+40	Fall	Fall
+41	SwimIdle	Swim (Idle)
+42	Swim	Swim (Forward)
+43	SwimLeft	Swim (Left)
+44	SwimRight	Swim (Right)
+45	SwimBackwards	Swim (Backwards)
+46	AttackBow	Shoot (Bow)
+47	FireBow	
+48	ReadyRifle	Ready (Gun/Crossbow)
+49	AttackRifle	Shoot (Gun/Crossbow)
+50	Loot	Loot
+51	ReadySpellDirected	Casting 1
+52	ReadySpellOmni	Casting 2
+53	SpellCastDirected	Cast 1
+54	SpellCastOmni	Cast 2
+55	BattleRoar	Battle Shout
+56	ReadyAbility	
+57	Special1H	Critical (1H)
+58	Special2H	Critical (2H)
+59	ShieldBash	Shield Bash
+60	EmoteTalk	Talk
+61	EmoteEat	Eat/Drink
+62	EmoteWork	Smith
+63	EmoteUseStanding	Craft
+64	EmoteTalkExclamation	Yell
+65	EmoteTalkQuestion	Question
+66	EmoteBow	Bow
+67	EmoteWave	Wave
+68	EmoteCheer	Cheer
+69	EmoteDance	Dance
+70	EmoteLaugh	Laugh
+71	EmoteSleep	
+72	EmoteSitGround	
+73	EmoteRude	Rude
+74	EmoteRoar	Roar
+75	EmoteKneel	Kneel
+76	EmoteKiss	Kiss
+77	EmoteCry	Cry
+78	EmoteChicken	Chicken
+79	EmoteBeg	Beg
+80	EmoteApplaud	Clap
+81	EmoteShout	Shout
+82	EmoteFlex	Flex
+83	EmoteShy	Shy
+84	EmotePoint	Point
+85	Attack1HPierce	Stab (Right)
+86	Attack2HLoosePierce	
+87	AttackOff	Attack (1H Left)
+88	AttackOffPierce	Stab (Left)
+89	Sheath	Sheathe (Back)
+90	HipSheath	Sheathe (Sides)
+91	Mount	Mount
+92	RunRight	
+93	RunLeft	
+94	MountSpecial	
+95	Kick	Kick
+96	SitGroundDown	Sit Ground (Begin)
+97	SitGround	Sit Ground
+98	SitGroundUp	Sit Ground (End)
+99	SleepDown	Lie Down (Begin)
+100	Sleep	Lie Down
+101	SleepUp	Lie Down (End)
+102	SitChairLow	Sit Chair (Low)
+103	SitChairMed	Sit Chair (Medium)
+104	SitChairHigh	Sit Chair (High)
+105	LoadBow	Load (Bow)
+106	LoadRifle	Load (Gun/Crossbow)
+107	AttackThrown	Shoot (Wand)
+108	ReadyThrown	Ready (Wand)
+109	HoldBow	Aim (Bow)
+110	HoldRifle	Aim (Gun/Crossbow)
+111	HoldThrown	Ready (Thrown)
+112	LoadThrown	Ready (Thrown)
+113	EmoteSalute	Salute
+114	KneelStart	Kneel (Begin)
+115	KneelLoop	Kneel
+116	KneelEnd	Kneel (End)
+117	AttackUnarmedOff	
+118	SpecialUnarmed	Critical (Unarmed)
+119	StealthWalk	Stealth (Walk)
+120	StealthStand	Stealth (Idle)
+121	Knockdown	Knock Down
+122	EatingLoop	
+123	UseStandingLoop	Craft
+124	ChannelCastDirected	Channel 1
+125	ChannelCastOmni	Channel 2
+126	Whirlwind	Bladestorm
+127	Birth	Emerge
+128	UseStandingStart	Craft (Begin)
+129	UseStandingEnd	Craft (End)
+130	CreatureSpecial	
+131	Drown	Drown
+132	Drowned	Drowned
+133	FishingCast	Fish
+134	FishingLoop	Fishing
+135	Fly	
+136	EmoteWorkNoSheathe	Smith
+137	EmoteStunNoSheathe	Stun
+138	EmoteUseStandingNoSheathe	Craft
+139	SpellSleepDown	Lie Down (Begin)
+140	SpellKneelStart	Kneel (Begin)
+141	SpellKneelLoop	Kneel
+142	SpellKneelEnd	Kneel (End)
+
+
+
 
 Suggested Rules for Animation Selection
 Yelling (64)

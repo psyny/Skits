@@ -60,3 +60,36 @@ function Skits_Utils:AddListToList(sourceList, list, avoidDuplicated)
         end
     end
 end
+
+function Skits_Utils:MessageDuration(messageText)
+    local options = Skits_Options.db
+
+    -- Calculate display duration with minimum of 1 second
+    local userCharactersPerSecondOption = Skits_Options.db.speech_speed
+    local duration = math.max(#messageText / userCharactersPerSecondOption)
+
+    -- Adjust to limits
+    duration = duration + 2 -- Add some seconds to the talk, to consider player reaction to the skit and not only the text length.
+    duration = math.max(duration, options.speech_duration_min)
+    duration = math.min(duration, options.speech_duration_max)
+
+    return duration
+end
+
+function Skits_Utils:Interpolation(targetMin, targetMax, refMin, refMax, refPoint)
+    local refRatio = 0
+    if refMax == refMin then
+        refRatio = 0
+    else
+        refRatio = (refPoint - refMin) / (refMax - refMin)
+    end
+
+    if refRatio < 0 then
+        refRatio = 0
+    elseif refRatio > 1 then
+        refRatio = 1
+    end
+
+    local targetPoint = targetMin + (refRatio * (targetMax - targetMin))
+    return targetPoint
+end
