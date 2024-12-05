@@ -93,3 +93,9 @@ function Skits_Utils:Interpolation(targetMin, targetMax, refMin, refMax, refPoin
     local targetPoint = targetMin + (refRatio * (targetMax - targetMin))
     return targetPoint
 end
+
+function Skits_Utils:PrintError(msg, debugOnly)
+    if not debugOnly or (SkitsDB.debugMode and debugOnly) then
+        print("Skits Addon Error: " .. msg) 
+    end    
+end

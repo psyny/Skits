@@ -4,10 +4,6 @@ Skits_UI.speakerData = {}
 
 -- Function to display 3D model with accompanying text
 function Skits_UI:DisplaySkits(creatureData, text, r, g, b)
-    if not self:ShouldDisplaySpeech() then
-        return
-    end
-
     local options = Skits_Options.db
     local speaker = creatureData.name
 
@@ -51,33 +47,6 @@ function Skits_UI:DisplaySkits(creatureData, text, r, g, b)
         local tSpeaker = speaker
         Skits_UI:ExpireSpeaker(tSpeaker)
     end)
-end
-
-function Skits_UI:ShouldDisplaySpeech()
-    local options = Skits_Options.db
-
-    -- Check if the overall speech screen display is enabled
-    if options.speech_screen_max == 0 then
-        return false
-    end
-
-    -- Check if we are in combat, and if combat display is enabled
-    if Skits_Utils:IsInCombat() and options.speech_screen_combat_max == 0 then
-        return false
-    end
-
-    -- Check if we are in a solo instance, and if solo instance display is enabled
-    if Skits_Utils:IsInInstanceSolo() and options.speech_screen_solo_instance_max == 0 then
-        return false
-    end
-
-    -- Check if we are in a group instance, and if group instance display is enabled
-    if Skits_Utils:IsInInstanceGroup() and options.speech_screen_group_instance_max == 0  then
-        return false
-    end
-
-    -- If none of the specific cases apply, default to enabling the speech screen
-    return true
 end
 
 function Skits_UI:ExpireSpeaker(speaker)

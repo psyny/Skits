@@ -2,18 +2,29 @@
 
 Skits_Style_Utils = {}
 
+-- Enums
+
+Skits_Style_Utils.enum_styles = {
+    HIDDEN = "hidden",
+    UNDEFINED = "undefined",
+    WARCRAFT = "warcraft",
+    TALES = "tales",
+}
+
 
 -- Light Utils ---------------------------------------------------------------------
+
+Skits_Style_Utils.fallbackId = 114599
 
 Skits_Style_Utils.lightPresets = {}
 
 Skits_Style_Utils.lightPresets.hidden = {
     omnidirectional = false,
-    point = CreateVector3D(0, 0, -1),
+    point = CreateVector3D(1, 0, -1),
     ambientIntensity = 1,
     ambientColor = CreateColor(0, 0, 0),
     diffuseIntensity = 1,
-    diffuseColor = CreateColor(0.1, 0.1, 0.2),
+    diffuseColor = CreateColor(0.0, 0.1, 0.2),
 }
 
 Skits_Style_Utils.lightPresets.inactive = {

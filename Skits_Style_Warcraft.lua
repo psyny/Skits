@@ -1,16 +1,23 @@
 -- Skits_Style_Warcraft.lua
 
 Skits_Style_Warcraft = {}
+Skits_Style_Warcraft.name = Skits_Style_Utils.enum_styles.WARCRAFT
 
 Skits_Style_Warcraft.speakerOrder = true  -- Toggle for left/right positioning
 Skits_Style_Warcraft.activeMessages = {}  -- Stores each set of frames with properties
 Skits_Style_Warcraft.lastSpeaker = ''
 Skits_Style_Warcraft.lastMsgTimestamp = nil
 Skits_Style_Warcraft.remainingDuration = 0
+Skits_Style_Warcraft.skitExpireTimestamp = GetTime()
 
 local textFrameGap = 20
 local nextMsgId = 0
 local lastMsgData = nil
+
+Skits_Style_Warcraft.mainFrame = CreateFrame("Frame", "SkitsStyleWarcraft", UIParent)
+Skits_Style_Warcraft.mainFrame:SetAllPoints(UIParent)
+Skits_Style_Warcraft.mainFrame:EnableMouse(false)
+Skits_Style_Warcraft.mainFrame:EnableMouseWheel(false)
 
 
 function Skits_Style_Warcraft:CreateSpeakFrame(creatureData, textData, displayOptions, frameSize, parentFrame, altSpeakerSide, textAreaWidth, font, fontSize, showSpeakerName)
@@ -21,7 +28,7 @@ function Skits_Style_Warcraft:CreateSpeakFrame(creatureData, textData, displayOp
     -- Create the text frame (new frame always appears at the same position)
     local textFrame = CreateFrame("Frame", nil, parentFrame)
     textFrame:SetSize(textAreaWidth, 100)
-    textFrame:SetPoint("BOTTOM", parentFrame, "BOTTOM", 0, options.speech_position_bottom_distance)
+    textFrame:SetPoint("BOTTOM", parentFrame, "BOTTOM", 0, options.style_warcraft_speech_position_bottom_distance)
 
     -- Create the main text label
     local textLabel = textFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
@@ -121,7 +128,7 @@ function Skits_Style_Warcraft:AdjustSpeakFrameHeight(textFrame, textLabel)
 
     local textHeight = textLabel:GetStringHeight()
     local frameWidth, frameHeight = textFrame:GetSize()
-    frameHeight = math.max(options.speaker_face_size, textHeight)
+    frameHeight = math.max(options.style_warcraft_speaker_face_size, textHeight)
     textFrame:SetSize(frameWidth, frameHeight)
 end
 
@@ -144,7 +151,7 @@ function Skits_Style_Warcraft:IncreaseText(msgData, newText, newDur)
 
     -- Already too big, wall of text
     local textHeight = msgData.textFrame:GetHeight()
-    if textHeight > options.speaker_face_size then
+    if textHeight > options.style_warcraft_speaker_face_size then
         return false
     end
 
@@ -166,6 +173,11 @@ function Skits_Style_Warcraft:SetMessageTimer(msgData)
     local currTime = GetTime()
     local enlapsedTime = currTime - msgData.timestamp
     local remainingDuration = msgData.duration - enlapsedTime
+    
+    local skitExpireTimestamp = currTime + remainingDuration
+    if skitExpireTimestamp > self.skitExpireTimestamp then
+        self.skitExpireTimestamp = skitExpireTimestamp
+    end
 
     local timerHandle = C_Timer.NewTimer(remainingDuration, function()
         local thisMsgId = msgData.msgId
@@ -221,18 +233,18 @@ end
 function Skits_Style_Warcraft:TrimMessages()
     -- Find max messages we can have
     local options = Skits_Options.db
-    local maxMessages = options.speech_screen_max
+    local maxMessages = options.style_warcraft_speech_screen_max
     if Skits_Utils:IsInCombat() then
-        maxMessages = math.min(maxMessages, options.speech_screen_combat_max)
+        maxMessages = math.min(maxMessages, options.style_warcraft_speech_screen_combat_max)
     end
 
     local inInstance, instanceType, playerCount = Skits_Utils:IsInInstance()
     if inInstance then
         if playerCount <= 1 then
-            maxMessages = math.min(maxMessages, options.speech_screen_solo_instance_max)
+            maxMessages = math.min(maxMessages, options.style_warcraft_speech_screen_solo_instance_max)
         end
         if playerCount > 1 then
-            maxMessages = math.min(maxMessages, options.speech_screen_group_instance_max)
+            maxMessages = math.min(maxMessages, options.style_warcraft_speech_screen_group_instance_max)
         end
     end
 
@@ -301,10 +313,10 @@ function Skits_Style_Warcraft:NewSpeak(creatureData, textData)
 
     -- Create Speak Frame
     self.lastSpeaker = speaker
-    local font = LibStub("LibSharedMedia-3.0"):Fetch("font", options.speech_font_name)
-    local fontSize = options.speech_font_size
-    local textAreaWidth = options.speech_frame_size
-    local showSpeakerName = options.speaker_name_enabled
+    local font = LibStub("LibSharedMedia-3.0"):Fetch("font", options.style_warcraft_speech_font_name)
+    local fontSize = options.style_warcraft_speech_font_size
+    local textAreaWidth = options.style_warcraft_speech_frame_size
+    local showSpeakerName = options.style_warcraft_speaker_name_enabled
 
     local hasModel = false
     if isPlayer then
@@ -317,8 +329,8 @@ function Skits_Style_Warcraft:NewSpeak(creatureData, textData)
         end
     end
 
-    local modelFrameSize = options.speaker_face_size
-    if not options.speaker_face_enabled then
+    local modelFrameSize = options.style_warcraft_speaker_face_size
+    if not options.style_warcraft_speaker_face_enabled then
         modelDisplayData.hasModel = false
     end
 
@@ -330,10 +342,13 @@ function Skits_Style_Warcraft:NewSpeak(creatureData, textData)
     end
     local rotation = Skits_UI_Utils:GetRadAngle(randomAngle)
     local portraitZoom = 0.9
+    local scale = 1.0
     local animations = Skits_UI_Utils:GetAnimationIdsFromText(textData.text, true)
-    local displayOptions =  Skits_UI_Utils:BuildDisplayOptions(portraitZoom, rotation, animations, nil, nil) 
+    local fallbackId = Skits_Style_Utils.fallbackId
+    local fallbackLight = Skits_Style_Utils.lightPresets.hidden        
+    local displayOptions =  Skits_UI_Utils:BuildDisplayOptions(portraitZoom, rotation, scale, animations, nil, nil, fallbackId, fallbackLight) 
 
-    local textFrame, textLabel, speakerNameFrame, modelFrame, borderFrame = Skits_Style_Warcraft:CreateSpeakFrame(creatureData, textData, displayOptions, modelFrameSize, UIParent, self.speakerOrder, textAreaWidth, font, fontSize, showSpeakerName)
+    local textFrame, textLabel, speakerNameFrame, modelFrame, borderFrame = Skits_Style_Warcraft:CreateSpeakFrame(creatureData, textData, displayOptions, modelFrameSize, Skits_Style_Warcraft.mainFrame, self.speakerOrder, textAreaWidth, font, fontSize, showSpeakerName)
     modelFrame:SetPosition(0, 0, -0.05)    
     self:SetLoopingAnimation(modelFrame, animations)
 
@@ -373,17 +388,57 @@ function Skits_Style_Warcraft:NewSpeak(creatureData, textData)
     self:TrimMessages()
 end
 
+function Skits_Style_Warcraft:ResetLayout()
+    return
+end
+
 function Skits_Style_Warcraft:CloseSkit()
-    -- TODO
-    -- This needs to stop all timers, reset speaker data, and close skits frame
+    self:HideSkit() 
 end
 
 function Skits_Style_Warcraft:HideSkit()
-    -- TODO
-    -- This needs to hide the entire skit
+    if self.mainFrame:IsShown() then
+        self.mainFrame:Hide()
+    end
 end
 
 function Skits_Style_Warcraft:ShowSkit()
-    -- TODO
-    -- This needs to show the entire skit
+    if not self.mainFrame:IsShown() then
+        self.mainFrame:Show()
+    end
+end
+
+function Skits_Style_Warcraft:ShouldDisplay()
+    local options = Skits_Options.db
+
+    -- Check if the overall speech screen display is enabled
+    if options.style_warcraft_speech_screen_max == 0 then
+        return false
+    end
+
+    -- Check if we are in combat, and if combat display is enabled
+    if Skits_Utils:IsInCombat() and options.style_warcraft_speech_screen_combat_max == 0 then
+        return false
+    end
+
+    -- Check if we are in a solo instance, and if solo instance display is enabled
+    if Skits_Utils:IsInInstanceSolo() and options.style_warcraft_speech_screen_solo_instance_max == 0 then
+        return false
+    end
+
+    -- Check if we are in a group instance, and if group instance display is enabled
+    if Skits_Utils:IsInInstanceGroup() and options.style_warcraft_speech_screen_group_instance_max == 0  then
+        return false
+    end
+
+    -- If none of the specific cases apply, default to enabling the speech screen
+    return true
+end
+
+function Skits_Style_Warcraft:IsActive()
+    local isActive = false
+    if self.skitExpireTimestamp > GetTime() then
+        isActive = true
+    end
+    return isActive
 end

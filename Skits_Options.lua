@@ -13,45 +13,70 @@ Skits_Options.defaults = nil
 
 Skits_Options.defaults = {
 	profile = {
-		enabled                                 = true,
-        block_talking_head                      = true,
-        speech_position_bottom_distance         = 200,
-        speech_screen_max                       = 4,        
-        speech_screen_combat_max                = 2,        
-        speech_screen_group_instance_max        = 0,
-        speech_screen_solo_instance_max         = 2,
-        speech_duration_min                     = 5,        
-		speech_duration_max                     = 30,
-        speech_speed                            = 15,
-        speaker_name_enabled                    = true,          
-        speech_font_size                        = 12,
-        speech_font_name                        = "Friz Quadrata TT", 
-        speech_frame_size                       = 350,  
-        speaker_marker_size                     = 25,     
-        speaker_face_enabled                    = true,
-        speaker_face_size                       = 100,  
+		enabled                     = true,
+        block_talking_head          = true,        
+        speech_duration_min         = 5,        
+		speech_duration_max         = 30,
+        speech_speed                = 15,
+        speaker_marker_size         = 25,     
         
        -- NPC Events
-       event_msg_monster_yell                 = true,
-       event_msg_monster_whisper              = true,
-       event_msg_monster_say                  = true,
-       event_msg_monster_party                = true,
+       event_msg_monster_yell       = true,
+       event_msg_monster_whisper    = true,
+       event_msg_monster_say        = true,
+       event_msg_monster_party      = true,
 
        -- Player Events
-       event_msg_say                          = false,
-       event_msg_yell                         = false,
-       event_msg_whisper                      = false,
-       event_msg_party                        = false,
-       event_msg_party_leader                 = false,
-       event_msg_raid                         = false,
-       event_msg_raid_leader                  = false,
-       event_msg_instance_chat                = false,
-       event_msg_instance_chat_leader         = false,
-       event_msg_channel                      = false,
-       event_msg_guild                        = false,
-       event_msg_officer                      = false,
+       event_msg_say                     = false,
+       event_msg_yell                    = false,
+       event_msg_whisper                 = false,
+       event_msg_party                   = false,
+       event_msg_party_leader            = false,
+       event_msg_raid                    = false,
+       event_msg_raid_leader             = false,
+       event_msg_instance_chat           = false,
+       event_msg_instance_chat_leader    = false,
+       event_msg_channel                 = false,
+       event_msg_guild                   = false,
+       event_msg_officer                 = false,
+
+       -- Style General
+       style_general_styleonsituation_explore           = "tales",
+       style_general_styleonsituation_combat            = "warcraft",
+       style_general_styleonsituation_instance_solo     = "warcraft",
+       style_general_styleonsituation_instance_group    = "undefined",
+
+       -- Style Warcraft
+       style_warcraft_speech_font_size                        = 12,
+       style_warcraft_speech_font_name                        = "Friz Quadrata TT",        
+       style_warcraft_speech_position_bottom_distance         = 200,
+       style_warcraft_speech_screen_max                       = 4,        
+       style_warcraft_speech_screen_combat_max                = 2,        
+       style_warcraft_speech_screen_group_instance_max        = 0,
+       style_warcraft_speech_screen_solo_instance_max         = 2,
+       style_warcraft_speech_frame_size                       = 350,  
+       style_warcraft_speaker_face_enabled                    = true,
+       style_warcraft_speaker_face_size                       = 100,    
+       style_warcraft_speaker_name_enabled                    = true,   
+       
+       -- Style Tales
+       style_tales_speech_font_size                 = 12,
+       style_tales_speech_font_name                 = "Friz Quadrata TT",        
+       style_tales_model_size                       = 500,    
+       style_tales_speaker_name_enabled             = true,          
 	},
 }
+
+---------------------------------------------------------
+-- Style Options
+local function GetStyleOptions()
+    return {
+        ["hidden"] = "Hidden",
+        ["undefined"] = "Undefined",
+        ["warcraft"] = "Warcraft",
+        ["tales"] = "Tales",
+    }
+end
 
 ---------------------------------------------------------
 -- Our options table
@@ -240,57 +265,239 @@ Skits_Options.options = {
                     width = optionWidth,
                 },
             }
-        },          
-        tab_speech_quantity = {
+        },   
+        tab_style = {
             type = "group",
-            name = "Quantity",
+            name = "Style", 
+            childGroups = "tab",           
             order = 3,
-            get = function(info) return Skits_Options.db[info.arg] end,
-            set = function(info, v)
-                local arg = info.arg
-                Skits_Options.db[arg] = v
-                Skits:GeneralParameterChanges()
-            end,
-            disabled = false,
             args = {
-                speech_screen_max = {
-                    type = "range",
-                    name = L["Skits.options.speech_screen_max.title"],
-                    desc = L["Skits.options.speech_screen_max.desc"],
-                    min = 0, max = 8, step = 1,
-                    arg = "speech_screen_max",
+                tab_style_general = {
+                    type = "group",
+                    name = "General",
                     order = 1,
-                    width = optionWidth,
+                    get = function(info) return Skits_Options.db[info.arg] end,
+                    set = function(info, v)
+                        local arg = info.arg
+                        Skits_Options.db[arg] = v
+                        Skits:GeneralParameterChanges()
+                    end,
+                    disabled = false,
+                    args = {
+                        style_general_styleonsituation_explore = {
+                            type = "select",
+                            name = L["Skits.options.style_general_styleonsituation_explore.title"],
+                            desc = L["Skits.options.style_general_styleonsituation_explore.desc"],
+                            values = function()
+                                return GetStyleOptions()
+                            end,
+                            arg = "style_general_styleonsituation_explore",
+                            order = 1,
+                            width = optionWidth,
+                        },                         
+                        style_general_styleonsituation_combat = {
+                            type = "select",
+                            name = L["Skits.options.style_general_styleonsituation_combat.title"],
+                            desc = L["Skits.options.style_general_styleonsituation_combat.desc"],
+                            values = function()
+                                return GetStyleOptions()
+                            end,
+                            arg = "style_general_styleonsituation_combat",
+                            order = 2,
+                            width = optionWidth,
+                        }, 
+                        style_general_styleonsituation_instance_solo = {
+                            type = "select",
+                            name = L["Skits.options.style_general_styleonsituation_instance_solo.title"],
+                            desc = L["Skits.options.style_general_styleonsituation_instance_solo.desc"],
+                            values = function()
+                                return GetStyleOptions()
+                            end,
+                            arg = "style_general_styleonsituation_instance_solo",
+                            order = 3,
+                            width = optionWidth,
+                        },     
+                        style_general_styleonsituation_instance_group = {
+                            type = "select",
+                            name = L["Skits.options.style_general_styleonsituation_instance_group.title"],
+                            desc = L["Skits.options.style_general_styleonsituation_instance_group.desc"],
+                            values = function()
+                                return GetStyleOptions()
+                            end,
+                            arg = "style_general_styleonsituation_instance_group",
+                            order = 4,
+                            width = optionWidth,
+                        },                         
+                    },
                 },
-                speech_screen_combat_max = {
-                    type = "range",
-                    name = L["Skits.options.speech_screen_combat_max.title"],
-                    desc = L["Skits.options.speech_screen_combat_max.desc"],
-                    min = 0, max = 8, step = 1,
-                    arg = "speech_screen_combat_max",
+                tab_style_warcraft = {
+                    type = "group",
+                    name = "Warfcraft",
                     order = 2,
-                    width = optionWidth,
-                },
-                speech_screen_group_instance_max = {
-                    type = "range",
-                    name = L["Skits.options.speech_screen_group_instance_max.title"],
-                    desc = L["Skits.options.speech_screen_group_instance_max.desc"],
-                    min = 0, max = 8, step = 1,
-                    arg = "speech_screen_group_instance_max",
+                    get = function(info) return Skits_Options.db[info.arg] end,
+                    set = function(info, v)
+                        local arg = info.arg
+                        Skits_Options.db[arg] = v
+                        Skits:GeneralParameterChanges()
+                    end,
+                    disabled = false,
+                    args = {
+                        style_warcraft_speech_font_size = {
+                            type = "range",
+                            name = L["Skits.options.style_any_speech_font_size.title"],
+                            desc = L["Skits.options.style_any_speech_font_size.desc"],
+                            min = 4, max = 30, step = 1,
+                            arg = "style_warcraft_speech_font_size",
+                            order = 1,
+                            width = optionWidth,
+                        },
+                        style_warcraft_speech_font_name = {
+                            type = "select",
+                            name = L["Skits.options.style_any_speech_font_name.title"],
+                            desc = L["Skits.options.style_any_speech_font_name.desc"],
+                            values = function()
+                                return LSM:HashTable("font")
+                            end,
+                            dialogControl = "LSM30_Font",
+                            arg = "style_warcraft_speech_font_name",
+                            order = 2,
+                            width = optionWidth,
+                        },   
+                        style_warcraft_speaker_name_enabled = {
+                            type = "toggle",
+                            name = L["Skits.options.style_warcraft_speaker_name_enabled.title"],
+                            desc = L["Skits.options.style_warcraft_speaker_name_enabled.desc"],
+                            arg = "style_warcraft_speaker_name_enabled",
+                            order = 3,
+                            width = optionWidth,
+                        },   
+                        style_warcraft_speaker_face_enabled = {
+                            type = "toggle",
+                            name = L["Skits.options.style_warcraft_speaker_face_enabled.title"],
+                            desc = L["Skits.options.style_warcraft_speaker_face_enabled.desc"],
+                            arg = "style_warcraft_speaker_face_enabled",
+                            order = 4,
+                            width = optionWidth,
+                        },
+                        style_warcraft_speaker_face_size = {
+                            type = "range",
+                            name = L["Skits.options.style_warcraft_speaker_face_size.title"],
+                            desc = L["Skits.options.style_warcraft_speaker_face_size.desc"],
+                            min = 20, max = 200, step = 10,
+                            arg = "style_warcraft_speaker_face_size",
+                            order = 5,
+                            width = optionWidth,
+                        },                                                                      
+                        style_warcraft_speech_screen_max = {
+                            type = "range",
+                            name = L["Skits.options.style_warcraft_speech_screen_max.title"],
+                            desc = L["Skits.options.style_warcraft_speech_screen_max.desc"],
+                            min = 0, max = 8, step = 1,
+                            arg = "style_warcraft_speech_screen_max",
+                            order = 6,
+                            width = optionWidth,
+                        },
+                        style_warcraft_speech_screen_combat_max = {
+                            type = "range",
+                            name = L["Skits.options.style_warcraft_speech_screen_combat_max.title"],
+                            desc = L["Skits.options.style_warcraft_speech_screen_combat_max.desc"],
+                            min = 0, max = 8, step = 1,
+                            arg = "style_warcraft_speech_screen_combat_max",
+                            order = 7,
+                            width = optionWidth,
+                        },
+                        style_warcraft_speech_screen_group_instance_max = {
+                            type = "range",
+                            name = L["Skits.options.style_warcraft_speech_screen_group_instance_max.title"],
+                            desc = L["Skits.options.style_warcraft_speech_screen_group_instance_max.desc"],
+                            min = 0, max = 8, step = 1,
+                            arg = "style_warcraft_speech_screen_group_instance_max",
+                            order = 8,
+                            width = optionWidth,
+                        },
+                        style_warcraft_speech_screen_solo_instance_max = {
+                            type = "range",
+                            name = L["Skits.options.style_warcraft_speech_screen_solo_instance_max.title"],
+                            desc = L["Skits.options.style_warcraft_speech_screen_solo_instance_max.desc"],
+                            min = 0, max = 8, step = 1,
+                            arg = "style_warcraft_speech_screen_solo_instance_max",
+                            order = 9,
+                            width = optionWidth,
+                        },                   
+                        style_warcraft_speech_position_bottom_distance = {
+                            type = "range",
+                            name = L["Skits.options.style_warcraft_speech_position_bottom_distance.title"],
+                            desc = L["Skits.options.style_warcraft_speech_position_bottom_distance.desc"],
+                            min = 0, max = 1000, step = 50,
+                            arg = "style_warcraft_speech_position_bottom_distance",
+                            order = 10,
+                            width = optionWidth,
+                        },      
+                        style_warcraft_speech_frame_size = {
+                            type = "range",
+                            name = L["Skits.options.style_warcraft_speech_frame_size.title"],
+                            desc = L["Skits.options.style_warcraft_speech_frame_size.desc"],
+                            min = 150, max = 1000, step = 50,
+                            arg = "style_warcraft_speech_frame_size",
+                            order = 11,
+                            width = optionWidth,
+                        },                                                                                           
+                    },
+                },      
+                tab_style_tales = {
+                    type = "group",
+                    name = "Tales",
                     order = 3,
-                    width = optionWidth,
-                },
-                speech_screen_solo_instance_max = {
-                    type = "range",
-                    name = L["Skits.options.speech_screen_solo_instance_max.title"],
-                    desc = L["Skits.options.speech_screen_solo_instance_max.desc"],
-                    min = 0, max = 8, step = 1,
-                    arg = "speech_screen_solo_instance_max",
-                    order = 4,
-                    width = optionWidth,
-                },    
+                    get = function(info) return Skits_Options.db[info.arg] end,
+                    set = function(info, v)
+                        local arg = info.arg
+                        Skits_Options.db[arg] = v
+                        Skits:GeneralParameterChanges()
+                    end,
+                    disabled = false,
+                    args = {
+                        style_tales_speech_font_size = {
+                            type = "range",
+                            name = L["Skits.options.style_any_speech_font_size.title"],
+                            desc = L["Skits.options.style_any_speech_font_size.desc"],
+                            min = 4, max = 30, step = 1,
+                            arg = "style_tales_speech_font_size",
+                            order = 1,
+                            width = optionWidth,
+                        },
+                        style_tales_speech_font_name = {
+                            type = "select",
+                            name = L["Skits.options.style_any_speech_font_name.title"],
+                            desc = L["Skits.options.style_any_speech_font_name.desc"],
+                            values = function()
+                                return LSM:HashTable("font")
+                            end,
+                            dialogControl = "LSM30_Font",
+                            arg = "style_tales_speech_font_name",
+                            order = 2,
+                            width = optionWidth,
+                        },   
+                        style_tales_speaker_name_enabled = {
+                            type = "toggle",
+                            name = L["Skits.options.style_tales_speaker_name_enabled.title"],
+                            desc = L["Skits.options.style_tales_speaker_name_enabled.desc"],
+                            arg = "style_tales_speaker_name_enabled",
+                            order = 3,
+                            width = optionWidth,
+                        },   
+                        style_tales_model_size = {
+                            type = "range",
+                            name = L["Skits.options.style_tales_model_size.title"],
+                            desc = L["Skits.options.style_tales_model_size.desc"],
+                            min = 50, max = 800, step = 50,
+                            arg = "style_tales_model_size",
+                            order = 4,
+                            width = optionWidth,
+                        },                                                                                   
+                    },
+                },                             
             },
-        },    
+        },                    
         tab_speech_duration = {
             type = "group",
             name = "Duration",
@@ -344,53 +551,7 @@ Skits_Options.options = {
             end,
             disabled = false,
             args = {          
-                speaker_name_enabled = {
-                    type = "toggle",
-                    name = L["Skits.options.speaker_name_enabled.title"],
-                    desc = L["Skits.options.speaker_name_enabled.desc"],
-                    arg = "speaker_name_enabled",
-                    order = 2,
-                    width = optionWidth,
-                },    
-                speech_font_size = {
-                    type = "range",
-                    name = L["Skits.options.speech_font_size.title"],
-                    desc = L["Skits.options.speech_font_size.desc"],
-                    min = 4, max = 30, step = 1,
-                    arg = "speech_font_size",
-                    order = 3,
-                    width = optionWidth,
-                },
-                speech_font_name = {
-                    type = "select",
-                    name = L["Skits.options.speech_font_name.title"],
-                    desc = L["Skits.options.speech_font_name.desc"],
-                    values = function()
-                        return LSM:HashTable("font")
-                    end,
-                    dialogControl = "LSM30_Font",
-                    arg = "speech_font_name",
-                    order = 4,
-                    width = optionWidth,
-                },
-                speech_frame_size = {
-                    type = "range",
-                    name = L["Skits.options.speech_frame_size.title"],
-                    desc = L["Skits.options.speech_frame_size.desc"],
-                    min = 150, max = 1000, step = 50,
-                    arg = "speech_frame_size",
-                    order = 5,
-                    width = optionWidth,
-                },  
-                speech_position_bottom_distance = {
-                    type = "range",
-                    name = L["Skits.options.speech_position_bottom_distance.title"],
-                    desc = L["Skits.options.speech_position_bottom_distance.desc"],
-                    min = 0, max = 1000, step = 50,
-                    arg = "speech_position_bottom_distance",
-                    order = 6,
-                    width = optionWidth,
-                }, 
+
                 speaker_marker_size = {
                     type = "range",
                     name = L["Skits.options.speaker_marker_size.title"],
@@ -401,37 +562,6 @@ Skits_Options.options = {
                     width = optionWidth,
                 },                                        
             },
-        },   
-        tab_speech_portrait = {
-            type = "group",
-            name = "Portrait",
-            order = 6,
-            get = function(info) return Skits_Options.db[info.arg] end,
-            set = function(info, v)
-                local arg = info.arg
-                Skits_Options.db[arg] = v
-                Skits:GeneralParameterChanges()
-            end,
-            disabled = false,
-            args = {
-                speaker_face_enabled = {
-                    type = "toggle",
-                    name = L["Skits.options.speaker_face_enabled.title"],
-                    desc = L["Skits.options.speaker_face_enabled.desc"],
-                    arg = "speaker_face_enabled",
-                    order = 1,
-                    width = optionWidth,
-                },
-                speaker_face_size = {
-                    type = "range",
-                    name = L["Skits.options.speaker_face_size.title"],
-                    desc = L["Skits.options.speaker_face_size.desc"],
-                    min = 20, max = 200, step = 10,
-                    arg = "speaker_face_size",
-                    order = 2,
-                    width = optionWidth,
-                },   
-            },
-        },                         
+        },                          
     },
 }

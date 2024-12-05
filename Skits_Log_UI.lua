@@ -57,8 +57,8 @@ end
 -- Function to populate the log frame with entries from Skits.msgMemory for the current page
 function Skits_Log_UI:PopulateLogFrame()
     local options = Skits_Options.db
-    local modelSize = options.speaker_face_size
-    local textAreaWidth = options.speech_frame_size
+    local modelSize = options.style_warcraft_speaker_face_size
+    local textAreaWidth = options.style_warcraft_speech_frame_size
 
     frameWidth = textAreaWidth + (modelSize*2) + 60
     logFrame:SetSize(frameWidth, frameHeight)
@@ -77,8 +77,8 @@ function Skits_Log_UI:PopulateLogFrame()
 
     -- Specs
     local altSpeakerSide = true
-    local font = LibStub("LibSharedMedia-3.0"):Fetch("font", options.speech_font_name)
-    local fontSize = options.speech_font_size 
+    local font = LibStub("LibSharedMedia-3.0"):Fetch("font", options.style_warcraft_speech_font_name)
+    local fontSize = options.style_warcraft_speech_font_size 
 
     -- Offseet based on dir
     spaceFilled = topBotPadding
@@ -117,7 +117,7 @@ function Skits_Log_UI:PopulateLogFrame()
             local createNewFrame = true
             if entry.creatureData.name == lastSpeaker then
                 if lastSpeakerTextFrame then
-                    if lastFillIncrement > options.speaker_face_size + gapBetweenSpeaks + 5 then -- 5 only for rounding issues
+                    if lastFillIncrement > options.style_warcraft_speaker_face_size + gapBetweenSpeaks + 5 then -- 5 only for rounding issues
                         createNewFrame = true
                     else 
                         createNewFrame = false
@@ -135,7 +135,7 @@ function Skits_Log_UI:PopulateLogFrame()
                     newText = entry.text .. "\n\n" .. oldText
                 end
 
-                Skits_Style_Warcraft:UpdateText(newText, lastSpeakerTextFrame, lastSpeakerTextLabel, options.speaker_face_enabled)
+                Skits_Style_Warcraft:UpdateText(newText, lastSpeakerTextFrame, lastSpeakerTextLabel, options.style_warcraft_speaker_face_enabled)
 
                 -- Temp variables (possible definitive)
                 local newHeight = lastSpeakerTextFrame:GetHeight()        
@@ -146,7 +146,7 @@ function Skits_Log_UI:PopulateLogFrame()
                 if newSpaceFilled > frameHeight then
                     -- Revert changes and set to create new frame
                     createNewFrame = true
-                    Skits_Style_Warcraft:UpdateText(oldText, lastSpeakerTextFrame, lastSpeakerTextLabel, options.speaker_face_enabled)
+                    Skits_Style_Warcraft:UpdateText(oldText, lastSpeakerTextFrame, lastSpeakerTextLabel, options.style_warcraft_speaker_face_enabled)
                 else
                     -- Keep changes
                     spaceFilled = newSpaceFilled
@@ -165,8 +165,9 @@ function Skits_Log_UI:PopulateLogFrame()
                     g = entry.color.g,
                     b = entry.color.b,
                 }       
-                
-                local displayOptions =  Skits_UI_Utils:BuildDisplayOptions(0.9, 0, {60}, nil, 0) 
+                local fallbackId = Skits_Style_Utils.fallbackId
+                local fallbackLight = Skits_Style_Utils.lightPresets.hidden
+                local displayOptions =  Skits_UI_Utils:BuildDisplayOptions(0.9, 0, 1, {60}, nil, 0, fallbackId, fallbackLight) 
                 local textFrame, textLabel, speakerNameFrame, modelFrame, borderFrame = Skits_Style_Warcraft:CreateSpeakFrame(entry.creatureData, textData, displayOptions, modelSize, logFrame, altSpeakerSide, textAreaWidth, font, fontSize, showSpeakerName)
                 if modelFrame then
                     modelFrame:SetPaused(true) 

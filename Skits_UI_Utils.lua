@@ -175,13 +175,16 @@ local npcIdsByRaceAndGender = {
     [85] = { [0] = 210158, [1] = 228111 },
 }
 
-function Skits_UI_Utils:BuildDisplayOptions(portraitZoom, rotation, animations, light, pauseAfter) 
+function Skits_UI_Utils:BuildDisplayOptions(portraitZoom, rotation, scale, animations, light, pauseAfter, fallbackId, fallbackLight) 
     local displayOptions = {
         portraitZoom = portraitZoom,
+        scale = scale,
         rotation = rotation,
         animations = animations,
         pauseAfter = pauseAfter,
         light = light,
+        fallbackId = fallbackId,
+        fallbackLight = fallbackLight,
     }
 
     return displayOptions
@@ -212,10 +215,21 @@ local function LoadModelApplyLoadOptions(loaderData, setAnimations)
         modelFrame:SetRotation(displayOptions.rotation)
     end  
     
+    if displayOptions.scale then
+        --local posx = Skits_Utils:Interpolation(-15, 15, 0, 2, displayOptions.scale)
+        --modelFrame:SetPosition(posx, 0, 0) 
+        modelFrame:SetModelScale(displayOptions.scale)
+    end  
 
-    if displayOptions.light then
-        modelFrame:SetLight(true, displayOptions.light)
-    end       
+    if loaderData.fallback then
+        if displayOptions.fallbackLight then
+            modelFrame:SetLight(true, displayOptions.fallbackLight)
+        end  
+    else
+        if displayOptions.light then
+            modelFrame:SetLight(true, displayOptions.light)
+        end  
+    end
 
     if setAnimations then
         if displayOptions.animations and #displayOptions.animations > 0 then
@@ -241,19 +255,9 @@ local function LoadModelStopTimer(loaderData)
         loaderData.loaderHandle:Cancel()
         loaderData.loaderHandle = nil
     end
-end
 
-
-local function LoadModelStartTimer(loaderData)
-    if not loaderData then
-        return
-    end
-
-    LoadModelStopTimer(loaderData)
-
-    loaderData.loaderHandle = C_Timer.NewTimer(0.2, function()
-        Skits_UI_Utils:LoadModelAux(loaderData)
-    end)    
+    local modelFrame = loaderData.loadOptions.modelFrame
+    modelFrame:SetScript("OnModelLoaded", nil)    
 end
 
 local function LoadModelIsLoaded(loaderData)
@@ -299,6 +303,24 @@ local function LoadModelFinished(loaderData)
     end    
 end
 
+local function LoadModelStartTimer(loaderData)
+    if not loaderData then
+        return
+    end
+
+    LoadModelStopTimer(loaderData)
+
+    local modelFrame = loaderData.loadOptions.modelFrame
+    modelFrame:SetScript("OnModelLoaded", function(self)
+        local tloaderData = loaderData
+        LoadModelFinished(tloaderData)
+    end)        
+
+    loaderData.loaderHandle = C_Timer.NewTimer(0.2, function()
+        Skits_UI_Utils:LoadModelAux(loaderData)
+    end)
+end
+
 function Skits_UI_Utils:LoadModel(creatureData, displayOptions, loadOptions)
     local attemptPhase = 1
     if (not creatureData.creatureIds or #creatureData.creatureIds == 0) and (not creatureData.displayIds or #creatureData.displayIds == 0) and (not creatureData.creatureId) and (not creatureData.displayId) then
@@ -317,6 +339,7 @@ function Skits_UI_Utils:LoadModel(creatureData, displayOptions, loadOptions)
         attemptTotal = 0,
         attemptLastId = 0,
         attemptLastIdIsDisplay = true,
+        fallback = false,
 
         loadModelAttemptsPerIdx = 2,
     } 
@@ -340,13 +363,15 @@ function Skits_UI_Utils:LoadModelAux(loaderData)
     -- Useful Variables
     local modelFrame = loaderData.loadOptions.modelFrame
 
-    -- Pre Set Model Frame Options
-    LoadModelApplyLoadOptions(loaderData, false)
+    if false then
+        -- Pre Set Model Frame Options
+        LoadModelApplyLoadOptions(loaderData, false)
 
-    -- Is model already loaded?
-    if LoadModelIsLoaded(loaderData) then
-        LoadModelFinished(loaderData)
-        return 
+        -- Is model already loaded?
+        if LoadModelIsLoaded(loaderData) then
+            LoadModelFinished(loaderData)
+            return 
+        end
     end
 
     -- Attempt Control
@@ -354,6 +379,8 @@ function Skits_UI_Utils:LoadModelAux(loaderData)
     loaderData.attemptTotal = loaderData.attemptTotal + 1    
     
     -- Set model (trying to load it)
+    modelFrame:SetPosition(0, 0, 0) 
+    modelFrame:SetModelScale(1.0)
     if creatureData.isPlayer then
         -- Player        
         if loaderData.attemptCurrent > loaderData.loadModelAttemptsPerIdx then
@@ -466,7 +493,17 @@ function Skits_UI_Utils:LoadModelAux(loaderData)
                 end
             end
         end
-    end 
+
+        -- Fallback Display Id
+        if loaderData.attemptPhase == 10 then
+            loaderData.attemptPhase = 99
+
+            loaderData.fallback = true
+            if loaderData.displayOptions.fallbackId then
+                modelFrame:SetDisplayInfo(loaderData.displayOptions.fallbackId)
+            end
+        end        
+    end
     
     -- Is model already loaded?
     if LoadModelIsLoaded(loaderData) then
@@ -475,7 +512,7 @@ function Skits_UI_Utils:LoadModelAux(loaderData)
     end    
     
     -- Timer to check again if the model has been loaded
-    if loaderData.attemptPhase < 10 then
+    if loaderData.attemptPhase < 99 then
         LoadModelStartTimer(loaderData)
     end        
 end

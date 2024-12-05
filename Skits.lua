@@ -210,6 +210,10 @@ frame:RegisterEvent("PLAYER_TARGET_CHANGED")
 frame:RegisterEvent("UPDATE_MOUSEOVER_UNIT")
 frame:RegisterEvent("GROUP_ROSTER_UPDATE")
 frame:RegisterEvent("TALKINGHEAD_REQUESTED")
+frame:RegisterEvent("PLAYER_REGEN_DISABLED")
+frame:RegisterEvent("PLAYER_REGEN_ENABLED")
+frame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+frame:RegisterEvent("PLAYER_ENTERING_WORLD")
 
 frame:SetScript("OnEvent", function(self, event, ...)
     if event == "NAME_PLATE_UNIT_ADDED" then
@@ -225,7 +229,9 @@ frame:SetScript("OnEvent", function(self, event, ...)
     elseif event == "GROUP_ROSTER_UPDATE" then
         Skits:HandleRosterChange(...)     
     elseif event == "TALKINGHEAD_REQUESTED" then
-        Skits:HandleTalkingHead(...)             
+        Skits:HandleTalkingHead(...)  
+    elseif event == "PLAYER_REGEN_DISABLED" or event == "PLAYER_REGEN_ENABLED" or event == "ZONE_CHANGED_NEW_AREA" or event == "PLAYER_ENTERING_WORLD" then
+        Skits:HandleSituationChangeEvent(...)            
     elseif event == "CHAT_MSG_MONSTER_SAY" or event == "CHAT_MSG_MONSTER_YELL" or event == "CHAT_MSG_MONSTER_WHISPER" or event == "CHAT_MSG_MONSTER_PARTY" then
         Skits:HandleNpcChatEvent(event, ...)                 
     else      
@@ -322,7 +328,7 @@ function Skits:FindUnitToken(unitName)
         -- Look for 
         for i = 1, GetNumGroupMembers() do
             local unittoken = "raid" .. i
-            local unittokenname = self:GetUnitTokenFullName(unittokenname)
+            local unittokenname = self:GetUnitTokenFullName(unittoken)
             if unittokenname == unitName then
                 return unittoken
             end
@@ -330,7 +336,7 @@ function Skits:FindUnitToken(unitName)
     elseif IsInGroup() then
         for i = 1, GetNumSubgroupMembers() do
             local unittoken = "party" .. i
-            local unittokenname = self:GetUnitTokenFullName(unittokenname)
+            local unittokenname = self:GetUnitTokenFullName(unittoken)
             if unittokenname == unitName then
                 return unittoken
             end
@@ -571,6 +577,13 @@ function Skits:HandleTalkingHeadAux()
         end
     end
 end
+
+-- Handle situation changes that could affect skit styles
+function Skits:HandleSituationChangeEvent()
+    Skits_Style:ShowSituationSkit(true)
+end
+
+ -- CMD ---------------------------------------------------------------------------------------------------------
 
 -- Quickly toggle skits
 SLASH_SkitsToggle1 = "/SkitsToggle"
