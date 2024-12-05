@@ -338,7 +338,8 @@ Skits_Options.options = {
                             min = 0, max = 50, step = 5,
                             arg = "style_general_speaker_marker_size",
                             order = 5,
-                            width = optionWidth,                                                
+                            width = optionWidth,  
+                        },                                              
                     },
                 },
                 tab_style_warcraft = {
