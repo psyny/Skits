@@ -18,8 +18,8 @@ L["Skits.options.speech_duration_max.title"] = "Speech Duration: Maximum [sec]"
 L["Skits.options.speech_duration_max.desc"] = "Adjust the maximum duration of a speech on screen before fading."
 L["Skits.options.speech_speed.title"] = "Speech Duration: Fade Speed"
 L["Skits.options.speech_speed.desc"] = "Adjust the speed at which speech text fades from the screen. Based on this factor and the number of latters on the speech."
-L["Skits.options.speaker_marker_size.title"] = "Speaker Marker Size"
-L["Skits.options.speaker_marker_size.desc"] = "Size of the marker that appears over the speakers unit in the game world."
+L["Skits.options.style_general_speaker_marker_size.title"] = "Speaker Marker Size"
+L["Skits.options.style_general_speaker_marker_size.desc"] = "Size of the marker that appears over the speakers unit in the game world."
 
 -- NPC Events
 L["Skits.options.event_msg_monster_yell.title"] = "NPC Yell"

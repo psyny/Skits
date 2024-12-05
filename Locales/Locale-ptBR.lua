@@ -19,8 +19,8 @@ L["Skits.options.speech_duration_max.title"] = "Duração do Discurso: Máxima [
 L["Skits.options.speech_duration_max.desc"] = "Ajusta a duração máxima de um discurso na tela antes de desaparecer."
 L["Skits.options.speech_speed.title"] = "Duração do Discurso: Velocidade de Desaparecimento"
 L["Skits.options.speech_speed.desc"] = "Ajusta a velocidade com que o texto do discurso desaparece da tela. Baseado nesse fator e no número de letras no discurso."
-L["Skits.options.speaker_marker_size.title"] = "Tamanho do Marcador do Orador"
-L["Skits.options.speaker_marker_size.desc"] = "Tamanho do marcador que aparece sobre a unidade do orador no mundo do jogo."
+L["Skits.options.style_general_speaker_marker_size.title"] = "Tamanho do Marcador do Orador"
+L["Skits.options.style_general_speaker_marker_size.desc"] = "Tamanho do marcador que aparece sobre a unidade do orador no mundo do jogo."
 
 -- NPC Events
 L["Skits.options.event_msg_monster_yell.title"] = "Grito de NPC"

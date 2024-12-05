@@ -13,58 +13,60 @@ Skits_Options.defaults = nil
 
 Skits_Options.defaults = {
 	profile = {
-		enabled                     = true,
-        block_talking_head          = true,        
-        speech_duration_min         = 5,        
-		speech_duration_max         = 30,
-        speech_speed                = 15,
-        speaker_marker_size         = 25,     
+        enabled                             = true,
+        block_talking_head                  = true,
+
+        -- Duration
+        speech_duration_min                 = 5,        
+        speech_duration_max                 = 30,
+        speech_speed                        = 15, 
+
+        -- NPC Events
+        event_msg_monster_yell       = true,
+        event_msg_monster_whisper    = true,
+        event_msg_monster_say        = true,
+        event_msg_monster_party      = true,
+
+        -- Player Events
+        event_msg_say                     = false,
+        event_msg_yell                    = false,
+        event_msg_whisper                 = false,
+        event_msg_party                   = false,
+        event_msg_party_leader            = false,
+        event_msg_raid                    = false,
+        event_msg_raid_leader             = false,
+        event_msg_instance_chat           = false,
+        event_msg_instance_chat_leader    = false,
+        event_msg_channel                 = false,
+        event_msg_guild                   = false,
+        event_msg_officer                 = false,
+
+        -- Style General
+        style_general_styleonsituation_explore           = "tales",
+        style_general_styleonsituation_combat            = "warcraft",
+        style_general_styleonsituation_instance_solo     = "warcraft",
+        style_general_styleonsituation_instance_group    = "undefined",
+        style_general_speaker_marker_size                = 25,    
+
+        -- Style Warcraft
+        style_warcraft_speech_font_size                        = 12,
+        style_warcraft_speech_font_name                        = "Friz Quadrata TT",        
+        style_warcraft_speech_position_bottom_distance         = 200,
+        style_warcraft_speech_screen_max                       = 4,        
+        style_warcraft_speech_screen_combat_max                = 2,        
+        style_warcraft_speech_screen_group_instance_max        = 0,
+        style_warcraft_speech_screen_solo_instance_max         = 2,
+        style_warcraft_speech_frame_size                       = 450,  
+        style_warcraft_speaker_face_enabled                    = true,
+        style_warcraft_speaker_face_size                       = 100,    
+        style_warcraft_speaker_name_enabled                    = true,   
         
-       -- NPC Events
-       event_msg_monster_yell       = true,
-       event_msg_monster_whisper    = true,
-       event_msg_monster_say        = true,
-       event_msg_monster_party      = true,
-
-       -- Player Events
-       event_msg_say                     = false,
-       event_msg_yell                    = false,
-       event_msg_whisper                 = false,
-       event_msg_party                   = false,
-       event_msg_party_leader            = false,
-       event_msg_raid                    = false,
-       event_msg_raid_leader             = false,
-       event_msg_instance_chat           = false,
-       event_msg_instance_chat_leader    = false,
-       event_msg_channel                 = false,
-       event_msg_guild                   = false,
-       event_msg_officer                 = false,
-
-       -- Style General
-       style_general_styleonsituation_explore           = "tales",
-       style_general_styleonsituation_combat            = "warcraft",
-       style_general_styleonsituation_instance_solo     = "warcraft",
-       style_general_styleonsituation_instance_group    = "undefined",
-
-       -- Style Warcraft
-       style_warcraft_speech_font_size                        = 12,
-       style_warcraft_speech_font_name                        = "Friz Quadrata TT",        
-       style_warcraft_speech_position_bottom_distance         = 200,
-       style_warcraft_speech_screen_max                       = 4,        
-       style_warcraft_speech_screen_combat_max                = 2,        
-       style_warcraft_speech_screen_group_instance_max        = 0,
-       style_warcraft_speech_screen_solo_instance_max         = 2,
-       style_warcraft_speech_frame_size                       = 450,  
-       style_warcraft_speaker_face_enabled                    = true,
-       style_warcraft_speaker_face_size                       = 100,    
-       style_warcraft_speaker_name_enabled                    = true,   
-       
-       -- Style Tales
-       style_tales_speech_font_size                 = 12,
-       style_tales_speech_font_name                 = "Friz Quadrata TT",        
-       style_tales_model_size                       = 500,    
-       style_tales_speaker_name_enabled             = true,        
-       style_tales_previous_speaker_lingertime      = 30,  
+        -- Style Tales
+        style_tales_speech_font_size                 = 12,
+        style_tales_speech_font_name                 = "Friz Quadrata TT",        
+        style_tales_model_size                       = 500,    
+        style_tales_speaker_name_enabled             = true,        
+        style_tales_previous_speaker_lingertime      = 30,  
 	},
 }
 
@@ -328,7 +330,15 @@ Skits_Options.options = {
                             arg = "style_general_styleonsituation_instance_group",
                             order = 4,
                             width = optionWidth,
-                        },                         
+                        }, 
+                        style_general_speaker_marker_size = {
+                            type = "range",
+                            name = L["Skits.options.style_general_speaker_marker_size.title"],
+                            desc = L["Skits.options.style_general_speaker_marker_size.desc"],
+                            min = 0, max = 50, step = 5,
+                            arg = "style_general_speaker_marker_size",
+                            order = 5,
+                            width = optionWidth,                                                
                     },
                 },
                 tab_style_warcraft = {
@@ -548,30 +558,6 @@ Skits_Options.options = {
                     width = optionWidth,
                 },   
             },
-        },   
-        tab_speech_text = {
-            type = "group",
-            name = "Text",
-            order = 5,
-            get = function(info) return Skits_Options.db[info.arg] end,
-            set = function(info, v)
-                local arg = info.arg
-                Skits_Options.db[arg] = v
-                Skits:GeneralParameterChanges()
-            end,
-            disabled = false,
-            args = {          
-
-                speaker_marker_size = {
-                    type = "range",
-                    name = L["Skits.options.speaker_marker_size.title"],
-                    desc = L["Skits.options.speaker_marker_size.desc"],
-                    min = 0, max = 50, step = 5,
-                    arg = "speaker_marker_size",
-                    order = 7,
-                    width = optionWidth,
-                },                                        
-            },
-        },                          
+        },                             
     },
 }

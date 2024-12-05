@@ -72,7 +72,7 @@ end
 
 function Skits_UI:SpeakerMarker_NameplateAdded(nameplateToken)  
     local options = Skits_Options.db
-    if options.speaker_marker_size == 0 then
+    if options.style_general_speaker_marker_size == 0 then
         return
     end
 
@@ -101,7 +101,7 @@ end
 
 function Skits_UI:SpeakerMarker_FindUnitAndAdd(unitName)
     local options = Skits_Options.db
-    if options.speaker_marker_size == 0 then
+    if options.style_general_speaker_marker_size == 0 then
         return
     end
 
@@ -122,7 +122,7 @@ end
 
 function Skits_UI:SpeakerMarker_AddToNameplate(nameplateToken)
     local options = Skits_Options.db
-    if options.speaker_marker_size == 0 then
+    if options.style_general_speaker_marker_size == 0 then
         return
     end
 
@@ -147,7 +147,7 @@ function Skits_UI:SpeakerMarker_AddToNameplate(nameplateToken)
         targetNameplate.Skits_SpeakerMarker:SetPoint("TOP", targetNameplate, "BOTTOM", 0, 10)  -- Position above the nameplate
     end 
 
-    local size = options.speaker_marker_size
+    local size = options.style_general_speaker_marker_size
 
     -- Set the texture (example uses a standard WoW icon)
     targetNameplate.Skits_SpeakerMarker:SetTexture("interface\\cursor\\crosshair\\speak")
