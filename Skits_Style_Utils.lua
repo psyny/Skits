@@ -78,7 +78,7 @@ Skits_Style_Utils.lightPresets.midnight = {
     ambientIntensity = 1,
     ambientColor = CreateColor(0.5, 0.5, 0.6),
     diffuseIntensity = 1,
-    diffuseColor = CreateColor(0.1, 0.2, 0.3),
+    diffuseColor = CreateColor(0.2, 0.3, 0.3),
 }
 
 function Skits_Style_Utils:PrintLight(light)
