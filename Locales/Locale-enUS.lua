@@ -98,4 +98,6 @@ L["Skits.options.style_tales_model_size.title"] = "Character Size"
 L["Skits.options.style_tales_model_size.desc"] = "On screen size of the speaking character."
 L["Skits.options.style_tales_speaker_name_enabled.title"] = "Speaker Name Enabled"
 L["Skits.options.style_tales_speaker_name_enabled.desc"] = "Show Speaker name on screen."
+L["Skits.options.style_tales_previous_speaker_lingertime.title"] = "Previous Speaker Linger Time"
+L["Skits.options.style_tales_previous_speaker_lingertime.desc"] = "How long a previous speaker stays lingering on the background (in seconds)."
 

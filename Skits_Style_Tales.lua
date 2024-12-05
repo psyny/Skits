@@ -40,6 +40,7 @@ for i = 1, numberOfSlots do
         slotExpireTimestamp = GetTime(),
         slotExpireHandler = nil,
         onLeft = tempOnLeft,
+        loaderData = nil,
         position = nil,
         positionUpdate = {ox = 0, oy = 0, tx = 0, ty = 0, cd = 0, td = 0, h = nil},
     }
@@ -215,6 +216,12 @@ local function SlotClearData(slot)
         slot.positionUpdate.h:Cancel()
     end
     slot.positionUpdate.h = nil    
+
+    -- Model Loader Stop
+    if slot.loaderData then
+        Skits_UI_Utils:LoadModelStopTimer(slot.loaderData)
+        slot.loaderData = nil
+    end
 end
 
 local function SlotExpireMsg(slot)
@@ -288,21 +295,31 @@ local function SlotToBack(slot)
         return
     end
 
+    local options = Skits_Options.db
+    if options.style_tales_previous_speaker_lingertime <= 0 then
+        slot.modelFrame:SetFrameLevel(40)
+        SlotExpireSlot(slot)
+    end
+
     -- Set Light to the Back Version
+    local light = slot.modelLight
+    if slot.loaderData and slot.loaderData.displayOptions and slot.loaderData.displayOptions.light then
+        light = slot.loaderData.displayOptions.light
+    end
     local dim = 0.8
-    local a = slot.modelLight.ambientIntensity
-    local d = slot.modelLight.diffuseIntensity
-    slot.modelLight.ambientIntensity = dim
-    slot.modelLight.diffuseIntensity = dim
-    slot.modelFrame:SetLight(true, slot.modelLight)
-    slot.modelLight.ambientIntensity = a
-    slot.modelLight.diffuseIntensity = d
+    local a = light.ambientIntensity
+    local d = light.diffuseIntensity
+    light.ambientIntensity = dim
+    light.diffuseIntensity = dim
+    slot.modelFrame:SetLight(true, light)
+    light.ambientIntensity = a
+    light.diffuseIntensity = d
 
     -- Add a expire timer
     if slot.slotExpireHandler then
         slot.slotExpireHandler:Cancel()
     end
-    slot.slotExpireHandler = C_Timer.NewTimer(slotLingerTimeSec, function()
+    slot.slotExpireHandler = C_Timer.NewTimer(options.style_tales_previous_speaker_lingertime, function()
         local tslot = slot
         SlotExpireSlot(tslot)
     end)   
@@ -650,7 +667,9 @@ local function ModelAdd(creatureData, textData, slot, duration)
         modelFrame = slot.modelFrame,
         callback = nil,
     }
-    Skits_UI_Utils:LoadModel(creatureData, displayOptions, loadOptions)
+    
+    local loaderData = Skits_UI_Utils:LoadModel(creatureData, displayOptions, loadOptions)
+    slot.loaderData = loaderData
 end
 
 -- EXTERNAL: Speak --------------------------------------------------------------------------------------------------------------

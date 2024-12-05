@@ -223,7 +223,8 @@ local function LoadModelApplyLoadOptions(loaderData, setAnimations)
 
     if loaderData.fallback then
         if displayOptions.fallbackLight then
-            modelFrame:SetLight(true, displayOptions.fallbackLight)
+            displayOptions.light = displayOptions.fallbackLight
+            modelFrame:SetLight(true, displayOptions.light)
         end  
     else
         if displayOptions.light then
@@ -246,7 +247,7 @@ local function LoadModelApplyLoadOptions(loaderData, setAnimations)
     end 
 end
 
-local function LoadModelStopTimer(loaderData)
+function Skits_UI_Utils:LoadModelStopTimer(loaderData)
     if not loaderData then
         return
     end
@@ -271,7 +272,7 @@ local function LoadModelIsLoaded(loaderData)
 end
 
 local function LoadModelFinished(loaderData)
-    LoadModelStopTimer(loaderData)
+    Skits_UI_Utils:LoadModelStopTimer(loaderData)
 
     local loadResults = {
         creatureData = loaderData.creatureData,
@@ -308,7 +309,7 @@ local function LoadModelStartTimer(loaderData)
         return
     end
 
-    LoadModelStopTimer(loaderData)
+    Skits_UI_Utils:LoadModelStopTimer(loaderData)
 
     local modelFrame = loaderData.loadOptions.modelFrame
     modelFrame:SetScript("OnModelLoaded", function(self)
@@ -347,6 +348,8 @@ function Skits_UI_Utils:LoadModel(creatureData, displayOptions, loadOptions)
     loadOptions.modelFrame:ClearModel()
 
     Skits_UI_Utils:LoadModelAux(loaderData)
+
+    return loaderData
 end
 
 

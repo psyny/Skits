@@ -63,7 +63,8 @@ Skits_Options.defaults = {
        style_tales_speech_font_size                 = 12,
        style_tales_speech_font_name                 = "Friz Quadrata TT",        
        style_tales_model_size                       = 500,    
-       style_tales_speaker_name_enabled             = true,          
+       style_tales_speaker_name_enabled             = true,        
+       style_tales_previous_speaker_lingertime      = 30,  
 	},
 }
 
@@ -493,7 +494,16 @@ Skits_Options.options = {
                             arg = "style_tales_model_size",
                             order = 4,
                             width = optionWidth,
-                        },                                                                                   
+                        },    
+                        style_tales_previous_speaker_lingertime = {
+                            type = "range",
+                            name = L["Skits.options.style_tales_previous_speaker_lingertime.title"],
+                            desc = L["Skits.options.style_tales_previous_speaker_lingertime.desc"],
+                            min = 0, max = 60, step = 1,
+                            arg = "style_tales_previous_speaker_lingertime",
+                            order = 5,
+                            width = optionWidth,
+                        },                                                                                                            
                     },
                 },                             
             },
