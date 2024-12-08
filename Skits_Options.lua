@@ -46,7 +46,7 @@ Skits_Options.defaults = {
         style_general_styleonsituation_combat            = "warcraft",
         style_general_styleonsituation_instance_solo     = "warcraft",
         style_general_styleonsituation_instance_group    = "undefined",
-        style_general_speaker_marker_size                = 25,    
+        style_general_speaker_marker_size                = 20,    
 
         -- Style Warcraft
         style_warcraft_speech_font_size                        = 12,
@@ -67,7 +67,17 @@ Skits_Options.defaults = {
         style_tales_model_size                       = 500,    
         style_tales_speaker_name_enabled             = true,        
         style_tales_previous_speaker_lingertime      = 30,  
-	},
+
+        -- Style Notification
+        style_notification_speech_font_size         = 12,
+        style_notification_speech_font_name         = "Friz Quadrata TT",        
+        style_notification_portrait_size            = 50, 
+        style_notification_onRight                  = false,
+        style_notification_max_messages             = 3,        
+        style_notification_textarea_size            = 300,
+        style_notification_dist_side                = 30,
+        style_notification_top_side                 = 300,
+	},  
 }
 
 ---------------------------------------------------------
@@ -78,6 +88,7 @@ local function GetStyleOptions()
         ["undefined"] = "Undefined",
         ["warcraft"] = "Warcraft",
         ["tales"] = "Tales",
+        ["notification"] = "Notification",
     }
 end
 
@@ -516,7 +527,95 @@ Skits_Options.options = {
                             width = optionWidth,
                         },                                                                                                            
                     },
-                },                             
+                },       
+                tab_style_notification = {
+                    type = "group",
+                    name = "Notification",
+                    order = 4,
+                    get = function(info) return Skits_Options.db[info.arg] end,
+                    set = function(info, v)
+                        local arg = info.arg
+                        Skits_Options.db[arg] = v
+                        Skits:GeneralParameterChanges()
+                    end,
+                    disabled = false,
+                    args = {
+                        style_notification_speech_font_size = {
+                            type = "range",
+                            name = L["Skits.options.style_any_speech_font_size.title"],
+                            desc = L["Skits.options.style_any_speech_font_size.desc"],
+                            min = 4, max = 30, step = 1,
+                            arg = "style_notification_speech_font_size",
+                            order = 1,
+                            width = optionWidth,
+                        },
+                        style_notification_speech_font_name = {
+                            type = "select",
+                            name = L["Skits.options.style_any_speech_font_name.title"],
+                            desc = L["Skits.options.style_any_speech_font_name.desc"],
+                            values = function()
+                                return LSM:HashTable("font")
+                            end,
+                            dialogControl = "LSM30_Font",
+                            arg = "style_notification_speech_font_name",
+                            order = 2,
+                            width = optionWidth,
+                        },   
+                        style_notification_onRight = {
+                            type = "toggle",
+                            name = L["Skits.options.style_notification_onRight.title"],
+                            desc = L["Skits.options.style_notification_onRight.desc"],
+                            arg = "style_notification_onRight",
+                            order = 3,
+                            width = optionWidth,
+                        },   
+                        style_notification_portrait_size = {
+                            type = "range",
+                            name = L["Skits.options.style_notification_portrait_size.title"],
+                            desc = L["Skits.options.style_notification_portrait_size.desc"],
+                            min = 5, max = 200, step = 5,
+                            arg = "style_notification_portrait_size",
+                            order = 4,
+                            width = optionWidth,
+                        },    
+                        style_notification_max_messages = {
+                            type = "range",
+                            name = L["Skits.options.style_notification_max_messages.title"],
+                            desc = L["Skits.options.style_notification_max_messages.desc"],
+                            min = 1, max = 10, step = 1,
+                            arg = "style_notification_max_messages",
+                            order = 5,
+                            width = optionWidth,
+                        },   
+                        style_notification_textarea_size = {
+                            type = "range",
+                            name = L["Skits.options.style_notification_textarea_size.title"],
+                            desc = L["Skits.options.style_notification_textarea_size.desc"],
+                            min = 50, max = 500, step = 50,
+                            arg = "style_notification_textarea_size",
+                            order = 6,
+                            width = optionWidth,
+                        },          
+                        style_notification_dist_side = {
+                            type = "range",
+                            name = L["Skits.options.style_notification_dist_side.title"],
+                            desc = L["Skits.options.style_notification_dist_side.desc"],
+                            min = 0, max = 500, step = 5,
+                            arg = "style_notification_dist_side",
+                            order = 7,
+                            width = optionWidth,
+                        },     
+                        style_notification_top_side = {
+                            type = "range",
+                            name = L["Skits.options.style_notification_top_side.title"],
+                            desc = L["Skits.options.style_notification_top_side.desc"],
+                            min = 0, max = 1000, step = 10,
+                            arg = "style_notification_top_side",
+                            order = 8,
+                            width = optionWidth,
+                        },                                                                                                                                                                        
+                    },
+                },                                       
             },
         },                    
         tab_speech_duration = {

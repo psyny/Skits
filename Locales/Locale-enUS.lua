@@ -101,3 +101,16 @@ L["Skits.options.style_tales_speaker_name_enabled.desc"] = "Show Speaker name on
 L["Skits.options.style_tales_previous_speaker_lingertime.title"] = "Previous Speaker Linger Time"
 L["Skits.options.style_tales_previous_speaker_lingertime.desc"] = "How long a previous speaker stays lingering on the background (in seconds)."
 
+-- Style Notification
+L["Skits.options.style_notification_portrait_size.title"] = "Portrait Size"
+L["Skits.options.style_notification_portrait_size.desc"] = "Set the size of the portrait displayed in notifications."
+L["Skits.options.style_notification_onRight.title"] = "Message on Right"
+L["Skits.options.style_notification_onRight.desc"] = "Toggle to display notifications on the right side of the screen."
+L["Skits.options.style_notification_max_messages.title"] = "Max Messages"
+L["Skits.options.style_notification_max_messages.desc"] = "Set the maximum number of notification messages displayed on screen."
+L["Skits.options.style_notification_textarea_size.title"] = "Text Area Size"
+L["Skits.options.style_notification_textarea_size.desc"] = "Set the width of the text area for notification speech display."
+L["Skits.options.style_notification_dist_side.title"] = "Side Distance"
+L["Skits.options.style_notification_dist_side.desc"] = "Set the distance from the side of the screen for notifications."
+L["Skits.options.style_notification_top_side.title"] = "Top Distance"
+L["Skits.options.style_notification_top_side.desc"] = "Set the distance from the top of the screen for notifications."

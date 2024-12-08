@@ -45,6 +45,7 @@ Skits_Style_Utils.lua
 Skits_Style_Hidden.lua
 Skits_Style_Warcraft.lua
 Skits_Style_Tales.lua
+Skits_Style_Notification.lua
 Skits_Style.lua
 
 # Texture files

@@ -319,8 +319,8 @@ local function SlotToBack(slot)
     if slot.slotExpireHandler then
         slot.slotExpireHandler:Cancel()
     end
-    slot.slotExpireHandler = C_Timer.NewTimer(options.style_tales_previous_speaker_lingertime, function()
-        local tslot = slot
+    local tslot = slot
+    slot.slotExpireHandler = C_Timer.NewTimer(options.style_tales_previous_speaker_lingertime, function()        
         SlotExpireSlot(tslot)
     end)   
 
@@ -490,9 +490,9 @@ local function PositionSetSlotToPosition(slot, toPosition, instant)
         if up.h then
             up.h:Cancel()
         end      
+        local tslot = slot
+        local tpos = toPosition        
         up.h = C_Timer.NewTimer(duration, function()
-            local tslot = slot
-            local tpos = toPosition
             PositionSetSlotToPosition(tslot, tpos, true)
         end)   
     end
@@ -594,9 +594,9 @@ local function MsgAdd(creatureData, textData, slot, duration)
     if slot.msgExpireHandler then
         slot.msgExpireHandler:Cancel()
     end
-    slot.msgExpireHandler = C_Timer.NewTimer(diff, function()
-        local lslot = slot
-        SlotExpireMsg(slot)
+    local lslot = slot
+    slot.msgExpireHandler = C_Timer.NewTimer(diff, function()        
+        SlotExpireMsg(lslot)
     end)    
 
     -- Update Skit Expire

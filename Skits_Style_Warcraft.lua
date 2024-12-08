@@ -179,8 +179,8 @@ function Skits_Style_Warcraft:SetMessageTimer(msgData)
         self.skitExpireTimestamp = skitExpireTimestamp
     end
 
-    local timerHandle = C_Timer.NewTimer(remainingDuration, function()
-        local thisMsgId = msgData.msgId
+    local thisMsgId = msgData.msgId
+    local timerHandle = C_Timer.NewTimer(remainingDuration, function()        
         self:RemoveMessage(thisMsgId)
     end)
     msgData.timerHandle = timerHandle

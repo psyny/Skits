@@ -101,3 +101,17 @@ L["Skits.options.style_tales_speaker_name_enabled.title"] = "Nome do Orador Ativ
 L["Skits.options.style_tales_speaker_name_enabled.desc"] = "Exibir o nome do orador na tela."
 L["Skits.options.style_tales_previous_speaker_lingertime.title"] = "Tempo de Permanência do Orador Anterior"
 L["Skits.options.style_tales_previous_speaker_lingertime.desc"] = "Quanto tempo um orador anterior permanece no fundo (em segundos)."
+
+-- Style Notification
+L["Skits.options.style_notification_portrait_size.title"] = "Tamanho do Retrato"
+L["Skits.options.style_notification_portrait_size.desc"] = "Define o tamanho do retrato exibido nas notificações."
+L["Skits.options.style_notification_onRight.title"] = "Mensagem à Direita"
+L["Skits.options.style_notification_onRight.desc"] = "Alternar para exibir notificações no lado direito da tela."
+L["Skits.options.style_notification_max_messages.title"] = "Máximo de Mensagens"
+L["Skits.options.style_notification_max_messages.desc"] = "Define o número máximo de mensagens de notificação exibidas na tela."
+L["Skits.options.style_notification_textarea_size.title"] = "Tamanho da Área de Texto"
+L["Skits.options.style_notification_textarea_size.desc"] = "Define a largura da área de texto para exibição de notificações."
+L["Skits.options.style_notification_dist_side.title"] = "Distância Lateral"
+L["Skits.options.style_notification_dist_side.desc"] = "Define a distância do lado da tela para as notificações."
+L["Skits.options.style_notification_top_side.title"] = "Distância Superior"
+L["Skits.options.style_notification_top_side.desc"] = "Define a distância da parte superior da tela para as notificações."

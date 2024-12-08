@@ -239,8 +239,8 @@ local function LoadModelApplyLoadOptions(loaderData, setAnimations)
         end
 
         if displayOptions.pauseAfter then
-            C_Timer.NewTimer(displayOptions.pauseAfter, function()
-                local thisModelFrame = modelFrame
+            local thisModelFrame = modelFrame
+            C_Timer.NewTimer(displayOptions.pauseAfter, function()                
                 thisModelFrame:SetPaused(true) 
             end)   
         end   
@@ -317,8 +317,9 @@ local function LoadModelStartTimer(loaderData)
         LoadModelFinished(tloaderData)
     end)        
 
+    local tloaderData = loaderData
     loaderData.loaderHandle = C_Timer.NewTimer(0.2, function()
-        Skits_UI_Utils:LoadModelAux(loaderData)
+        Skits_UI_Utils:LoadModelAux(tloaderData)
     end)
 end
 
@@ -518,4 +519,156 @@ function Skits_UI_Utils:LoadModelAux(loaderData)
     if loaderData.attemptPhase < 99 then
         LoadModelStartTimer(loaderData)
     end        
+end
+
+-- ---------------------------------------------------------------------------------
+-- Faded Frame
+-- ---------------------------------------------------------------------------------
+
+local fadedFrame_texCoords = {
+    TOPLEFT = { 0, 1/3, 0, 1/3 },      -- Top-left square
+    TOPMID = { 1/3, 2/3, 0, 1/3 },     -- Top-middle square
+    TOPRIGHT = { 2/3, 1, 0, 1/3 },     -- Top-right square
+    RIGHTMID = { 2/3, 1, 1/3, 2/3 },   -- Right-middle square
+    BOTTOMRIGHT = { 2/3, 1, 2/3, 1 },  -- Bottom-right square
+    BOTTOMMID = { 1/3, 2/3, 2/3, 1 },  -- Bottom-middle square
+    BOTTOMLEFT = { 0, 1/3, 2/3, 1 },   -- Bottom-left square
+    LEFTMID = { 0, 1/3, 1/3, 2/3 },    -- Left-middle square
+    CENTER = { 1/3, 2/3, 1/3, 2/3 },   -- Center square
+}
+local function CreateFadedFrame_aux_setTexture(texturePath, frame, alpha, position)
+    -- Create the texture
+    local texture = frame:CreateTexture(nil, "BACKGROUND")
+    texture:SetTexture(texturePath)
+    texture:SetAllPoints(frame)
+    texture:SetAlpha(alpha)
+
+    -- Get texcoords and rotation for the specified position
+    local coords = fadedFrame_texCoords[position]
+    if not coords then
+        coords = fadedFrame_texCoords["CENTER"]
+    end
+
+    -- Apply coords
+    local left, right, top, bottom = coords[1], coords[2], coords[3], coords[4]
+    texture:SetTexCoord(left, right, top, bottom)
+
+    return texture
+end
+
+local function FadedFrame_aux_setParameters(fadedFrame, parameters)
+    if not fadedFrame.parameters then
+        fadedFrame.parameters = parameters
+        return
+    end
+
+	for k, v in pairs(parameters) do 
+        if k and v then
+            fadedFrame.parameters[k] = v
+        end
+    end 
+end
+
+function Skits_UI_Utils:ResizeFadedFrame(fadedFrame, parameters)    
+    FadedFrame_aux_setParameters(fadedFrame, parameters)
+
+    local p = fadedFrame.parameters
+
+    local totalWidth = p.contentWidth + p.leftSize + p.rightSize
+    local totalHeight = p.contentHeight + p.topSize + p.bottomSize
+    
+    fadedFrame.main:SetSize(p.contentWidth, p.contentHeight)
+    fadedFrame.content:SetAllPoints(fadedFrame.main)
+    fadedFrame.bg:SetAllPoints(fadedFrame.main)
+
+    fadedFrame.center:SetSize(p.contentWidth, p.contentHeight)
+    fadedFrame.center:SetPoint("TOPLEFT", fadedFrame.bg, "TOPLEFT", 0, 0)
+
+    local c = fadedFrame.center
+
+    fadedFrame.topLeft:SetSize(p.leftSize, p.topSize)
+    fadedFrame.topLeft:SetPoint("BOTTOMRIGHT", c, "TOPLEFT", 0, 0)
+
+    fadedFrame.topMid:SetSize(p.contentWidth, p.topSize)
+    fadedFrame.topMid:SetPoint("BOTTOMLEFT", c, "TOPLEFT", 0, 0)    
+
+    fadedFrame.topRight:SetSize(p.rightSize, p.topSize)
+    fadedFrame.topRight:SetPoint("BOTTOMLEFT", c, "TOPRIGHT", 0, 0)       
+
+    fadedFrame.rightMid:SetSize(p.rightSize, p.contentHeight)
+    fadedFrame.rightMid:SetPoint("BOTTOMLEFT", c, "BOTTOMRIGHT", 0, 0)         
+    
+    fadedFrame.bottomRight:SetSize(p.rightSize, p.bottomSize)
+    fadedFrame.bottomRight:SetPoint("TOPLEFT", c, "BOTTOMRIGHT", 0, 0)      
+    
+    fadedFrame.bottomMid:SetSize(p.contentWidth, p.bottomSize)
+    fadedFrame.bottomMid:SetPoint("TOPLEFT", c, "BOTTOMLEFT", 0, 0)       
+
+    fadedFrame.bottomLeft:SetSize(p.leftSize, p.bottomSize)
+    fadedFrame.bottomLeft:SetPoint("TOPRIGHT", c, "BOTTOMLEFT", 0, 0)        
+
+    fadedFrame.leftMid:SetSize(p.leftSize, p.contentHeight)
+    fadedFrame.leftMid:SetPoint("TOPRIGHT", c, "TOPLEFT", 0, 0)          
+end
+
+function Skits_UI_Utils:CreateFadedFrame(parameters)
+    local fadedFrame = {
+        parameters = nil,
+        main = nil,
+        content = nil,
+        bg = nil,
+        center = nil,
+        topLeft = nil,
+        topMid = nil,
+        topRight = nil,
+        rightMid = nil,
+        bottomRight = nil,
+        bottomMid = nil,
+        bottomLeft = nil,
+        leftMid = nil,
+    }
+
+    -- Set parametrs
+    FadedFrame_aux_setParameters(fadedFrame, parameters)
+
+    -- Main Frame: Container of the frame
+    fadedFrame.main = CreateFrame("Frame", nil, parameters.parent)
+
+    -- Content Frame: Frame contents
+    fadedFrame.content = CreateFrame("Frame", nil, fadedFrame.main)
+    fadedFrame.content:SetFrameLevel(100)
+    
+    -- Background Frame: Background art container
+    fadedFrame.bg = CreateFrame("Frame", nil, fadedFrame.main)
+    fadedFrame.bg:SetFrameLevel(1)
+
+    -- Background Frame Parts: Parts of the bg container
+    fadedFrame.center = CreateFrame("Frame", nil, fadedFrame.bg)    
+    fadedFrame.topLeft = CreateFrame("Frame", nil, fadedFrame.bg)    
+    fadedFrame.topMid = CreateFrame("Frame", nil, fadedFrame.bg)    
+    fadedFrame.topRight = CreateFrame("Frame", nil, fadedFrame.bg)    
+    fadedFrame.rightMid = CreateFrame("Frame", nil, fadedFrame.bg)    
+    fadedFrame.bottomRight = CreateFrame("Frame", nil, fadedFrame.bg)    
+    fadedFrame.bottomMid = CreateFrame("Frame", nil, fadedFrame.bg)    
+    fadedFrame.bottomLeft = CreateFrame("Frame", nil, fadedFrame.bg)    
+    fadedFrame.leftMid = CreateFrame("Frame", nil, fadedFrame.bg)    
+
+    -- Set their sizes
+    Skits_UI_Utils:ResizeFadedFrame(fadedFrame, parameters)
+
+    -- Create textures
+    local texturePath = "Interface/AddOns/Skits/Textures/SkitsFadedFrame.tga"
+    local alpha = fadedFrame.parameters.alpha
+
+    CreateFadedFrame_aux_setTexture(texturePath, fadedFrame.center, alpha, "CENTER")
+    CreateFadedFrame_aux_setTexture(texturePath, fadedFrame.topLeft, alpha, "TOPLEFT")
+    CreateFadedFrame_aux_setTexture(texturePath, fadedFrame.topMid, alpha, "TOPMID")
+    CreateFadedFrame_aux_setTexture(texturePath, fadedFrame.topRight, alpha, "TOPRIGHT")
+    CreateFadedFrame_aux_setTexture(texturePath, fadedFrame.rightMid, alpha, "RIGHTMID")
+    CreateFadedFrame_aux_setTexture(texturePath, fadedFrame.bottomRight, alpha, "BOTTOMRIGHT")
+    CreateFadedFrame_aux_setTexture(texturePath, fadedFrame.bottomMid, alpha, "BOTTOMMID")
+    CreateFadedFrame_aux_setTexture(texturePath, fadedFrame.bottomLeft, alpha, "BOTTOMLEFT")
+    CreateFadedFrame_aux_setTexture(texturePath, fadedFrame.leftMid, alpha, "LEFTMID")        
+
+    return fadedFrame
 end

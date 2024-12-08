@@ -99,3 +99,16 @@ function Skits_Utils:PrintError(msg, debugOnly)
         print("Skits Addon Error: " .. msg) 
     end    
 end
+
+function Skits_Utils:TextIntoPhrases(text)
+    local phrases = {}
+    -- Use a pattern to match sentences ending with '.', '!', or '?' followed by optional whitespace
+    for phrase in text:gmatch("[^%.!?]+[%.!?]?") do
+        -- Trim any leading or trailing whitespace from the phrase
+        phrase = phrase:match("^%s*(.-)%s*$")
+        if phrase ~= "" then
+            table.insert(phrases, phrase)
+        end
+    end
+    return phrases
+end

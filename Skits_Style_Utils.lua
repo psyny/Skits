@@ -9,6 +9,7 @@ Skits_Style_Utils.enum_styles = {
     UNDEFINED = "undefined",
     WARCRAFT = "warcraft",
     TALES = "tales",
+    NOTIFICATION = "notification",
 }
 
 
@@ -17,6 +18,15 @@ Skits_Style_Utils.enum_styles = {
 Skits_Style_Utils.fallbackId = 114599
 
 Skits_Style_Utils.lightPresets = {}
+
+Skits_Style_Utils.lightPresets.pitchblack = {
+    omnidirectional = false,
+    point = CreateVector3D(0, 0, -1),
+    ambientIntensity = 0,
+    ambientColor = CreateColor(0, 0, 0),
+    diffuseIntensity = 0,
+    diffuseColor = CreateColor(0, 0, 0),
+}
 
 Skits_Style_Utils.lightPresets.hidden = {
     omnidirectional = false,
