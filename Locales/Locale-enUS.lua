@@ -5,10 +5,20 @@ local L = LibStub("AceLocale-3.0"):NewLocale("Skits", "enGB", true)
 
 L["Skits.options.Skits.title"] = "Skits"
 L["Skits.options.Skits.desc"] = "Skits"
+
+-- General
 L["Skits.options.enabled.title"] = "Enable Skits"
 L["Skits.options.enabled.desc"] = "Enable or disable Skits."
 L["Skits.options.block_talking_head.title"] = "Block Talking Heads"
 L["Skits.options.block_talking_head.desc"] = "Block standard WoW talking heads from appearing."
+L["Skits.options.combat_easy_in.title"] = "Combat mode easy in"
+L["Skits.options.combat_easy_in.desc"] = "If enabled, will not instantly change skits style to combat style when entering combat mode. Instead the addon will wait for the next chat message to change skit style."
+L["Skits.options.combat_easy_out.title"] = "Combat mode easy out"
+L["Skits.options.combat_easy_out.desc"] = "If enabled, will not instantly change skits style to exploring style when exiting combat mode. Instead the addon will wait for the next chat message to change skit style."
+L["Skits.options.combat_exit_delay.title"] = "Combat over delay"
+L["Skits.options.combat_exit_delay.desc"] = "How many seconds to wait before considring that combat is over to change skit styles"
+
+-- Duration and speed
 L["Skits.options.overall_settings.title"] = "Overall Settings"
 L["Skits.options.overall_settings.desc"] = "General settings affecting the addon."
 L["Skits.options.overall_settings.desc.title"] = "These settings control Skits's appearance and behavior."
@@ -18,8 +28,6 @@ L["Skits.options.speech_duration_max.title"] = "Speech Duration: Maximum [sec]"
 L["Skits.options.speech_duration_max.desc"] = "Adjust the maximum duration of a speech on screen before fading."
 L["Skits.options.speech_speed.title"] = "Speech Duration: Fade Speed"
 L["Skits.options.speech_speed.desc"] = "Adjust the speed at which speech text fades from the screen. Based on this factor and the number of latters on the speech."
-L["Skits.options.style_general_speaker_marker_size.title"] = "Speaker Marker Size"
-L["Skits.options.style_general_speaker_marker_size.desc"] = "Size of the marker that appears over the speakers unit in the game world."
 
 -- NPC Events
 L["Skits.options.event_msg_monster_yell.title"] = "NPC Yell"
@@ -58,6 +66,8 @@ L["Skits.options.event_msg_officer.title"] = "Officer Chat"
 L["Skits.options.event_msg_officer.desc"] = "Toggle to display officer chat messages on screen."
 
 -- Style General
+L["Skits.options.style_general_speaker_marker_size.title"] = "Speaker Marker Size"
+L["Skits.options.style_general_speaker_marker_size.desc"] = "Size of the marker that appears over the speakers unit in the game world."
 L["Skits.options.style_general_styleonsituation_explore.title"] = "Exploring skit style"
 L["Skits.options.style_general_styleonsituation_explore.desc"] = "Skit style to display when exploring."
 L["Skits.options.style_general_styleonsituation_combat.title"] = "Combat skit style"

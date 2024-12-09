@@ -6,10 +6,20 @@ if not L then return end
 
 L["Skits.options.Skits.title"] = "Skits"
 L["Skits.options.Skits.desc"] = "Skits"
+
+-- General
 L["Skits.options.enabled.title"] = "Ativar Skits"
 L["Skits.options.enabled.desc"] = "Ativar ou desativar o Skits."
 L["Skits.options.block_talking_head.title"] = "Bloquear Heads Falantes"
 L["Skits.options.block_talking_head.desc"] = "Bloquear os heads falantes padrão do WoW de aparecerem."
+L["Skits.options.combat_easy_in.title"] = "Entrada suave em combate"
+L["Skits.options.combat_easy_in.desc"] = "Se ativado, não mudará instantaneamente o estilo de Skits para o estilo de combate ao entrar em modo de combate. Em vez disso, o addon aguardará a próxima mensagem de chat para mudar o estilo de Skit."
+L["Skits.options.combat_easy_out.title"] = "Saida suave de combate"
+L["Skits.options.combat_easy_out.desc"] = "Se ativado, não mudará instantaneamente o estilo de Skits para o estilo de exploração ao sair do modo de combate. Em vez disso, o addon aguardará a próxima mensagem de chat para mudar o estilo de Skit."
+L["Skits.options.combat_exit_delay.title"] = "Atraso ao sair do combate"
+L["Skits.options.combat_exit_delay.desc"] = "Quantos segundos esperar antes de considerar que o combate acabou para mudar os estilos de Skit."
+
+-- Duration and speed
 L["Skits.options.overall_settings.title"] = "Configurações Gerais"
 L["Skits.options.overall_settings.desc"] = "Configurações gerais que afetam o addon."
 L["Skits.options.overall_settings.desc.title"] = "Essas configurações controlam a aparência e o comportamento do Skits."
@@ -19,8 +29,6 @@ L["Skits.options.speech_duration_max.title"] = "Duração do Discurso: Máxima [
 L["Skits.options.speech_duration_max.desc"] = "Ajusta a duração máxima de um discurso na tela antes de desaparecer."
 L["Skits.options.speech_speed.title"] = "Duração do Discurso: Velocidade de Desaparecimento"
 L["Skits.options.speech_speed.desc"] = "Ajusta a velocidade com que o texto do discurso desaparece da tela. Baseado nesse fator e no número de letras no discurso."
-L["Skits.options.style_general_speaker_marker_size.title"] = "Tamanho do Marcador do Orador"
-L["Skits.options.style_general_speaker_marker_size.desc"] = "Tamanho do marcador que aparece sobre a unidade do orador no mundo do jogo."
 
 -- NPC Events
 L["Skits.options.event_msg_monster_yell.title"] = "Grito de NPC"
@@ -59,6 +67,8 @@ L["Skits.options.event_msg_officer.title"] = "Chat dos Oficiais"
 L["Skits.options.event_msg_officer.desc"] = "Alternar para exibir mensagens do chat dos oficiais na tela."
 
 -- Style General
+L["Skits.options.style_general_speaker_marker_size.title"] = "Tamanho do Marcador do Orador"
+L["Skits.options.style_general_speaker_marker_size.desc"] = "Tamanho do marcador que aparece sobre a unidade do orador no mundo do jogo."   
 L["Skits.options.style_general_styleonsituation_explore.title"] = "Estilo de Skit para Exploração"
 L["Skits.options.style_general_styleonsituation_explore.desc"] = "Estilo de skit exibido durante a exploração."
 L["Skits.options.style_general_styleonsituation_combat.title"] = "Estilo de Skit para Combate"

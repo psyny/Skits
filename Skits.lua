@@ -231,7 +231,7 @@ frame:SetScript("OnEvent", function(self, event, ...)
     elseif event == "TALKINGHEAD_REQUESTED" then
         Skits:HandleTalkingHead(...)  
     elseif event == "PLAYER_REGEN_DISABLED" or event == "PLAYER_REGEN_ENABLED" or event == "ZONE_CHANGED_NEW_AREA" or event == "PLAYER_ENTERING_WORLD" then
-        Skits:HandleSituationChangeEvent(...)            
+        Skits:HandleSituationChangeEvent(event, ...)            
     elseif event == "CHAT_MSG_MONSTER_SAY" or event == "CHAT_MSG_MONSTER_YELL" or event == "CHAT_MSG_MONSTER_WHISPER" or event == "CHAT_MSG_MONSTER_PARTY" then
         Skits:HandleNpcChatEvent(event, ...)                 
     else      
@@ -579,8 +579,23 @@ function Skits:HandleTalkingHeadAux()
 end
 
 -- Handle situation changes that could affect skit styles
-function Skits:HandleSituationChangeEvent()
-    Skits_Style:ShowSituationSkit(true)
+function Skits:HandleSituationChangeEvent(event)
+    if not Skits_Style then
+        return
+    end
+
+    if event == "PLAYER_REGEN_DISABLED" then
+        -- Entered Combat
+        Skits_Style:SituationEnterCombat(true)
+    elseif event == "PLAYER_REGEN_ENABLED" then
+        -- Exited Combat
+        Skits_Style:SituationExitCombat(true)
+    else
+        -- Instance changes
+        -- ZONE_CHANGED_NEW_AREA
+        -- PLAYER_ENTERING_WORLD    
+        Skits_Style:SituationAreaChanged(true)  
+    end
 end
 
  -- CMD ---------------------------------------------------------------------------------------------------------

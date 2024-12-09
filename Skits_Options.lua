@@ -15,6 +15,9 @@ Skits_Options.defaults = {
 	profile = {
         enabled                             = true,
         block_talking_head                  = true,
+        combat_easy_in                      = false,
+        combat_easy_out                     = true,
+        combat_exit_delay                   = 3,
 
         -- Duration
         speech_duration_min                 = 5,        
@@ -43,8 +46,8 @@ Skits_Options.defaults = {
 
         -- Style General
         style_general_styleonsituation_explore           = "tales",
-        style_general_styleonsituation_combat            = "warcraft",
-        style_general_styleonsituation_instance_solo     = "warcraft",
+        style_general_styleonsituation_combat            = "notification",
+        style_general_styleonsituation_instance_solo     = "undefined",
         style_general_styleonsituation_instance_group    = "undefined",
         style_general_speaker_marker_size                = 20,    
 
@@ -108,31 +111,55 @@ Skits_Options.options = {
             type = "group",
             name = "General",
             order = 1,
+            get = function(info) return Skits_Options.db[info.arg] end,
+            set = function(info, v)
+                local arg = info.arg
+                Skits_Options.db[arg] = v
+                Skits:GeneralParameterChanges()
+            end,   
+            disabled = false,         
             args = {
                 enabled = {
                     type = "toggle",
                     name = L["Skits.options.enabled.title"],
                     desc = L["Skits.options.enabled.desc"],
+                    arg = "enabled",
                     order = 1,
                     width = optionWidth,
-                    get = function(info) return Skits_Options.db.enabled end,
-                    set = function(info, v)
-                        Skits_Options.db.enabled = v
-                    end,
-                    disabled = false,
                 },
                 block_talking_head = {
                     type = "toggle",
                     name = L["Skits.options.block_talking_head.title"],
                     desc = L["Skits.options.block_talking_head.desc"],
+                    arg = "block_talking_head",
                     order = 2,
                     width = optionWidth,
-                    get = function(info) return Skits_Options.db.block_talking_head end,
-                    set = function(info, v)
-                        Skits_Options.db.block_talking_head = v
-                    end,
-                    disabled = false,
-                },                
+                },      
+                combat_easy_in = {
+                    type = "toggle",
+                    name = L["Skits.options.combat_easy_in.title"],
+                    desc = L["Skits.options.combat_easy_in.desc"],
+                    arg = "combat_easy_in",
+                    order = 3,
+                    width = optionWidth,
+                },      
+                combat_easy_out = {
+                    type = "toggle",
+                    name = L["Skits.options.combat_easy_out.title"],
+                    desc = L["Skits.options.combat_easy_out.desc"],
+                    arg = "combat_easy_out",
+                    order = 4,
+                    width = optionWidth,
+                },   
+                combat_exit_delay = {
+                    type = "range",
+                    name = L["Skits.options.combat_exit_delay.title"],
+                    desc = L["Skits.options.combat_exit_delay.desc"],
+                    min = 0, max = 60, step = 1,
+                    arg = "combat_exit_delay",
+                    order = 5,
+                    width = optionWidth,  
+                },                                                        
             },
         },
         tab_speech_events = {

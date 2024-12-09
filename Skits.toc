@@ -1,8 +1,8 @@
 ## Interface: 110002 
 ## Title: Skits
-## Notes: Displays 3D portraits of NPCs speaking in chat.
+## Notes: Immersive chats.
 ## Author: Psyny
-## Version: 2.0.1
+## Version: 2.1.0
 ## DefaultState: enabled
 
 ## SavedVariables: SkitsDB

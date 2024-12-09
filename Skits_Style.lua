@@ -3,6 +3,9 @@
 Skits_Style = {}
 Skits_Style.ativeStyles = {}
 
+Skits_Style.inCombat = false
+Skits_Style.inCombatDelayedHandler = nil
+
 local styleIdToFunc = {
     [Skits_Style_Utils.enum_styles.HIDDEN] = Skits_Style_Hidden,
     [Skits_Style_Utils.enum_styles.UNDEFINED] = Skits_Style_Hidden,
@@ -75,7 +78,7 @@ function Skits_Style:StyleToDisplay()
     end
 
     -- Check if we are in combat, and if combat display is enabled
-    if Skits_Utils:IsInCombat() then
+    if self.inCombat then
         style = options.style_general_styleonsituation_combat
         if style ~= Skits_Style_Utils.enum_styles.UNDEFINED then
             return styleNameToObj(style, false)
@@ -110,4 +113,57 @@ end
 function Skits_Style:ShowSituationSkit(onlyIfActive)  
     local styleToShow = Skits_Style:StyleToDisplay()
     Skits_Style:ShowSkitStyle(styleToShow, onlyIfActive)
+end
+
+function Skits_Style:SituationEnterCombat(onlyIfActive)
+    local options = Skits_Options.db
+
+    self.inCombat = true
+    if not options.combat_easy_in then
+        self:ShowSituationSkit(onlyIfActive)
+    end
+
+    -- Stop delayed combat checks
+    if self.inCombatDelayedHandler then
+        self.inCombatDelayedHandler:Cancel()
+    end
+    self.inCombatDelayedHandler = nil    
+end
+
+function Skits_Style:DelayedCombatExit(onlyIfActive)
+    local options = Skits_Options.db
+
+    self.inCombat = Skits_Utils:IsInCombat()
+
+    if not options.combat_easy_out then
+        self:ShowSituationSkit(onlyIfActive)
+    end    
+
+    -- Stop delayed combat checks
+    if self.inCombatDelayedHandler then
+        self.inCombatDelayedHandler:Cancel()
+    end
+    self.inCombatDelayedHandler = nil
+end
+
+function Skits_Style:SituationExitCombat(onlyIfActive)
+    local options = Skits_Options.db
+
+    if options.combat_exit_delay <= 0 then
+        -- Update combat status now
+        self:DelayedCombatExit(onlyIfActive)
+    else
+        -- Start a timer to recheck combat status
+        if self.inCombatDelayedHandler then
+            self.inCombatDelayedHandler:Cancel()
+        end
+        local tOnlyIfActive = onlyIfActive
+        self.inCombatDelayedHandler = C_Timer.NewTimer(options.combat_exit_delay, function()        
+            self:DelayedCombatExit(tOnlyIfActive)
+        end)   
+    end
+end
+
+function Skits_Style:SituationAreaChanged(onlyIfActive)
+    self:ShowSituationSkit(onlyIfActive)
 end
