@@ -100,10 +100,8 @@ function Skits_Style:ShowSkitStyle(styleToShow, onlyIfActive)
         end
 
         if shouldShow then
-            print("SHOW: " .. style.name)
             style:ShowSkit()
         else
-            print("HIDE: " .. style.name)
             style:HideSkit()
         end
     end
