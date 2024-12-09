@@ -49,6 +49,7 @@ for i = 1, numberOfSlots do
     local modelFrame = CreateFrame("PlayerModel", nil, Skits_Style_Tales.mainFrame)
     speakerSlot.modelFrame = modelFrame
     speakerSlot.modelFrame.slot = speakerSlot
+    speakerSlot.modelFrame:Show()
     table.insert(Skits_Style_Tales.speakerSlots, speakerSlot)
 end
 
@@ -192,6 +193,9 @@ local function SlotClearData(slot)
         return
     end
 
+    slot.modelFrame:SetDisplayInfo(0)
+    slot.modelFrame:ClearModel()
+    
     slot.creatureData = nil
 
     if slot.msgExpireHandler then
@@ -669,6 +673,7 @@ local function ModelAdd(creatureData, textData, slot, duration)
     }
     
     local loaderData = Skits_UI_Utils:LoadModel(creatureData, displayOptions, loadOptions)
+    slot.modelFrame:Show()
     slot.loaderData = loaderData
 end
 
@@ -768,7 +773,6 @@ function Skits_Style_Tales:CloseSkit()
     -- Reset Slots
     for i = 1, numberOfSlots do
         local speakerSlot = self.speakerSlots[i]
-        speakerSlot.modelFrame:ClearModel()
         speakerSlot.modelFrame:Hide()
         SlotClearData(speakerSlot)
     end

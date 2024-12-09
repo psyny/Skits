@@ -58,7 +58,8 @@ function Skits_UI_Utils:GetRadAngle(degree)
 end
 
 
--- MODEL LOADER ---------------------------------------
+-- MODEL LOADER -----------------------------------------------------------------------------------
+
 local displayIdsByRaceAndGender = {
     -- HUMAN
     [1] = { [0] = 53652, [1] = 1474 },
@@ -272,9 +273,13 @@ local function LoadModelIsLoaded(loaderData)
 end
 
 local function LoadModelFinished(loaderData)
+    local lastPhase = loaderData.attemptPhase
+
+    loaderData.attemptPhase = 99
     Skits_UI_Utils:LoadModelStopTimer(loaderData)
 
     local loadResults = {
+        loaderData = loaderData,
         creatureData = loaderData.creatureData,
         loadedIsDisplay = loaderData.attemptLastIdIsDisplay,
         loadedId = loaderData.attemptLastId,
@@ -289,19 +294,15 @@ local function LoadModelFinished(loaderData)
     LoadModelApplyLoadOptions(loaderData, true)
 
     -- Debug Print
-    if SkitsDB.debugMode then
-        if not loaderData.creatureData.isPlayer then
-            print("[FRAME MODEL LOADED]")
-            print("Creature Name: " .. loaderData.creatureData.name)
-            print("Attempts: " .. loaderData.attemptTotal)
-            print("Phase: " .. loaderData.attemptPhase)
-            if loaderData.attemptLastIdIsDisplay then
-                print("Display Id: " .. loaderData.attemptLastId)
-            else
-                print("Npc Id: " .. loaderData.attemptLastId)
-            end    
-        end
-    end    
+    Skits_Utils:PrintInfo("[FRAME MODEL LOADED]", true)
+    Skits_Utils:PrintInfo("Creature Name: " .. loaderData.creatureData.name, true)
+    Skits_Utils:PrintInfo("Attempts: " .. loaderData.attemptTotal, true)
+    Skits_Utils:PrintInfo("Last Phase: " .. lastPhase, true)
+    if loaderData.attemptLastIdIsDisplay then
+        Skits_Utils:PrintInfo("Display Id: " .. loaderData.attemptLastId, true)
+    else
+        Skits_Utils:PrintInfo("Npc Id: " .. loaderData.attemptLastId, true)
+    end
 end
 
 local function LoadModelStartTimer(loaderData)
@@ -312,8 +313,8 @@ local function LoadModelStartTimer(loaderData)
     Skits_UI_Utils:LoadModelStopTimer(loaderData)
 
     local modelFrame = loaderData.loadOptions.modelFrame
-    modelFrame:SetScript("OnModelLoaded", function(self)
-        local tloaderData = loaderData
+    local tloaderData = loaderData
+    modelFrame:SetScript("OnModelLoaded", function(self)     
         LoadModelFinished(tloaderData)
     end)        
 
@@ -349,7 +350,6 @@ function Skits_UI_Utils:LoadModel(creatureData, displayOptions, loadOptions)
     loadOptions.modelFrame:ClearModel()
 
     Skits_UI_Utils:LoadModelAux(loaderData)
-
     return loaderData
 end
 
@@ -363,6 +363,8 @@ function Skits_UI_Utils:LoadModelAux(loaderData)
     if not creatureData then
         return
     end
+
+    --Skits_Utils:PrintInfo("Trying to load a model: " .. creatureData.name .. " | Phase: " .. loaderData.attemptPhase .. " | Attempt: " .. loaderData.attemptTotal, true)
 
     -- Useful Variables
     local modelFrame = loaderData.loadOptions.modelFrame
@@ -386,24 +388,24 @@ function Skits_UI_Utils:LoadModelAux(loaderData)
     modelFrame:SetPosition(0, 0, 0) 
     modelFrame:SetModelScale(1.0)
     if creatureData.isPlayer then
-        -- Player        
-        if loaderData.attemptCurrent > loaderData.loadModelAttemptsPerIdx then
-            loaderData.attemptCurrent = 1
-            loaderData.attemptPhase = 10
-        else        
-            -- Model for Player
-            if creatureData.unitToken then
-                -- Unit Token
-                modelFrame:SetUnit(creatureData.unitToken)
-                modelSet = true
-            elseif creatureData.raceId then
-                -- Generic Model
-                local genderModels = displayIdsByRaceAndGender[creatureData.raceId]
-                if genderModels then
-                    local displayId = genderModels[creatureData.genderId]
-                    if displayId then
-                        modelFrame:SetDisplayInfo(displayId)
-                        modelSet = true
+        -- Player   
+        if loaderData.attemptPhase == 1 then    
+            if loaderData.attemptCurrent > loaderData.loadModelAttemptsPerIdx then
+                loaderData.attemptCurrent = 1
+                loaderData.attemptPhase = 10
+            else        
+                -- Model for Player
+                if creatureData.unitToken then
+                    -- Unit Token
+                    modelFrame:SetUnit(creatureData.unitToken)
+                elseif creatureData.raceId then
+                    -- Generic Model
+                    local genderModels = displayIdsByRaceAndGender[creatureData.raceId]
+                    if genderModels then
+                        local displayId = genderModels[creatureData.genderId]
+                        if displayId then
+                            modelFrame:SetDisplayInfo(displayId)
+                        end
                     end
                 end
             end
@@ -413,16 +415,20 @@ function Skits_UI_Utils:LoadModelAux(loaderData)
 
         -- We still dont have a model, try fetch it (maybe we got this information after the frame was created)
         if loaderData.attemptPhase == 0 then
-            local creatureData, _ = Skits_ID_Store:GetCreatureDataByName(loaderData.speakerName, false)
-            if creatureData then
-                creatureData.creatureId = creatureData.creatureId
-                creatureData.ids = creatureData.ids
+            --Skits_Utils:PrintInfo("No display id data for: " .. creatureData.name, true)  
+
+            local newCreatureData, _ = Skits_ID_Store:GetCreatureDataByName(creatureData.name, false)
+            if newCreatureData then
+                --Skits_Utils:PrintInfo("New display data found for: " .. creatureData.name, true)  
+                creatureData.creatureId = newCreatureData.creatureId
+                creatureData.displayId = newCreatureData.displayId
+                creatureData.ids = newCreatureData.ids
                 loaderData.attemptPhase = 1
             else
-                loaderData.attemptCurrent = 1
-                if loaderData.attemptCurrent > loaderData.loadModelAttemptsPerIdx * 5 then
-                    loaderData.attemptIdx = 1
-                    loaderData.attemptCurrent = 1
+                if loaderData.attemptCurrent > loaderData.loadModelAttemptsPerIdx then
+                    --Skits_Utils:PrintInfo("No display data found for: " .. creatureData.name, true)  
+                    loaderData.attemptCurrent = 0
+                    loaderData.attemptIdx = 1                    
                     loaderData.attemptPhase = 10
                 end
             end            
@@ -435,7 +441,7 @@ function Skits_UI_Utils:LoadModelAux(loaderData)
             else
                 local shouldAttempt = true
                 if loaderData.attemptCurrent > loaderData.loadModelAttemptsPerIdx then
-                    loaderData.attemptCurrent = 1
+                    loaderData.attemptCurrent = 0
                     loaderData.attemptIdx = loaderData.attemptIdx + 1
                     if loaderData.attemptIdx > #creatureData.ids then
                         loaderData.attemptIdx = 1
@@ -458,9 +464,7 @@ function Skits_UI_Utils:LoadModelAux(loaderData)
                             modelFrame:SetCreature(currId)
                         end
 
-                        if SkitsDB.debugMode then
-                            print("Attempting to load id: " .. currId)
-                        end                            
+                        --Skits_Utils:PrintInfo("Attempting to load id: " .. currId .. " | for: " .. loaderData.creatureData.name, true)                        
                     end
                 end                                 
             end
@@ -496,18 +500,21 @@ function Skits_UI_Utils:LoadModelAux(loaderData)
                     modelFrame:SetCreature(creatureData.creatureId)
                 end
             end
-        end
+        end      
+    end
 
-        -- Fallback Display Id
-        if loaderData.attemptPhase == 10 then
+    -- Fallback Display Id
+    if loaderData.attemptPhase == 10 then
+        if not LoadModelIsLoaded(loaderData) then
+            --Skits_Utils:PrintInfo("Swithing to fallback: " .. loaderData.creatureData.name, true)    
             loaderData.attemptPhase = 99
-
+    
             loaderData.fallback = true
             if loaderData.displayOptions.fallbackId then
                 modelFrame:SetDisplayInfo(loaderData.displayOptions.fallbackId)
             end
-        end        
-    end
+        end    
+    end      
     
     -- Is model already loaded?
     if LoadModelIsLoaded(loaderData) then
@@ -516,7 +523,7 @@ function Skits_UI_Utils:LoadModelAux(loaderData)
     end    
     
     -- Timer to check again if the model has been loaded
-    if loaderData.attemptPhase < 99 then
+    if loaderData.attemptPhase < 99 and loaderData.attemptTotal < 20 then
         LoadModelStartTimer(loaderData)
     end        
 end

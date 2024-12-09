@@ -214,6 +214,7 @@ frame:RegisterEvent("PLAYER_REGEN_DISABLED")
 frame:RegisterEvent("PLAYER_REGEN_ENABLED")
 frame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 frame:RegisterEvent("PLAYER_ENTERING_WORLD")
+--frame:RegisterEvent("PLAYER_STARTED_MOVING")
 
 frame:SetScript("OnEvent", function(self, event, ...)
     if event == "NAME_PLATE_UNIT_ADDED" then
@@ -230,6 +231,8 @@ frame:SetScript("OnEvent", function(self, event, ...)
         Skits:HandleRosterChange(...)     
     elseif event == "TALKINGHEAD_REQUESTED" then
         Skits:HandleTalkingHead(...)  
+    elseif event == "PLAYER_STARTED_MOVING" then
+        Skits:HandlePlayerMoving(...)         
     elseif event == "PLAYER_REGEN_DISABLED" or event == "PLAYER_REGEN_ENABLED" or event == "ZONE_CHANGED_NEW_AREA" or event == "PLAYER_ENTERING_WORLD" then
         Skits:HandleSituationChangeEvent(event, ...)            
     elseif event == "CHAT_MSG_MONSTER_SAY" or event == "CHAT_MSG_MONSTER_YELL" or event == "CHAT_MSG_MONSTER_WHISPER" or event == "CHAT_MSG_MONSTER_PARTY" then
@@ -595,6 +598,16 @@ function Skits:HandleSituationChangeEvent(event)
         -- ZONE_CHANGED_NEW_AREA
         -- PLAYER_ENTERING_WORLD    
         Skits_Style:SituationAreaChanged(true)  
+    end
+end
+
+local debugCombat = true
+function Skits:HandlePlayerMoving()
+    if SkitsDB.debugMode then
+        print("MOVED")
+        debugCombat = not debugCombat
+        Skits_Style.inCombat = debugCombat
+        Skits_Style:SituationAreaChanged(false)  
     end
 end
 

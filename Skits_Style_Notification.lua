@@ -191,6 +191,7 @@ function Skits_Style_Notification:CreateSpeakFrame(creatureData, text, textColor
         callback = nil,
     }
     speakFrame.portraitLoaderData = Skits_UI_Utils:LoadModel(creatureData, portraitDisplayOptions, portraitLoadOptions)
+    speakFrame.portrait:Show()
 
     -- Portrait Bg Frame: Load Model
     -- TODO: It would make more sense if we try to load this model as part of the portrait callback...
@@ -200,6 +201,7 @@ function Skits_Style_Notification:CreateSpeakFrame(creatureData, text, textColor
         callback = nil,
     }
     speakFrame.portraitBgLoaderData = Skits_UI_Utils:LoadModel(creatureData, portraitBgDisplayOptions, portraitBgLoadOptions)
+    speakFrame.portraitBg:Show()
 
     -- Finals    
     speakFrame.height = math.max(parameters.portraitSize + portraitYoffset, textAreaHeight)

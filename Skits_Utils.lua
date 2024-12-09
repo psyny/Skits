@@ -100,6 +100,12 @@ function Skits_Utils:PrintError(msg, debugOnly)
     end    
 end
 
+function Skits_Utils:PrintInfo(msg, debugOnly)
+    if not debugOnly or (SkitsDB.debugMode and debugOnly) then
+        print(msg) 
+    end    
+end
+
 function Skits_Utils:TextIntoPhrases(text)
     local phrases = {}
     -- Use a pattern to match sentences ending with '.', '!', or '?' followed by optional whitespace
