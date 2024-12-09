@@ -1,17 +1,17 @@
 # Skits
-World of Warcraft Addon for conversation Skits
+Skits: A World of Warcraft Addon for Immersive Conversation
 
-An immersion addon for people that like Skits like conversations.
+Step into a more immersive World of Warcraft experience with Skits, an addon designed to bring a fresh, cinematic flair to in-game conversations. Inspired by skit-like dialogues in JRPGs, this addon transforms chat messages into an engaging sequence of talking heads, adding depth and storytelling to every interaction.
 
-Chat messages will be displayed in a skit like format. Like a sequence of talking heads.
+Key Features:
 
-The addon as an option to see the past skits in a sstorybook like format (`/skitslog`).
+Immersive Skit Format: Chat messages are displayed as dynamic, skit-style dialogues, complete with character portraits and a smooth sequence of talking heads.
+Storybook Log: Revisit past conversations with a storybook-like interface. Use /skitslog to relive your favorite skits anytime!
+Roleplayer-Friendly: Works with player messages, making it perfect for roleplaying scenarios. Add an extra layer of immersion to your stories and interactions.
+Fully Customizable: Tailor the experience to your liking. Decide which chat messages become skits, toggle talking heads or speaker portraits, and configure when skits appear—whether during combat, in dungeons, or other specific situations.
+Skits isn’t just an addon—it’s a tool to enhance immersion and bring storytelling to life. Whether you're a roleplayer, a fan of JRPG-style dialogue, or simply looking for a unique way to interact with the world around you, Skits has something special to offer.
 
-It even works for player messages, adding value to roleplaying scenarios.
-
-I made this addon as customizable as I can. The user can choose which type of chat messages to turn into skits, to disable talking heads, to show the speaker portraits, and the situations that the skits can happen (combat, dungeons, etc).
-
-## Recomendations
+## Recommendations
 
 Have the CreatureDisplayDB addon installed. This will vastly improve the experience with this addon.
 
