@@ -245,7 +245,7 @@ function Skits_Style_Notification:msgMoveUp(msgData, ammount)
         up.cd = 0
         up.td = 0
 
-        self.msgData.speakFrame.main:SetPoint(up.anchor, self.mainFrame, up.anchor, up.x, up.ty) 
+        msgData.speakFrame.main:SetPoint(up.anchor, self.mainFrame, up.anchor, up.x, up.ty) 
     else
         up.x = up.x
         up.oy = Skits_Utils:Interpolation(up.oy, up.ty, 0, up.td, up.cd)     
@@ -362,9 +362,6 @@ function Skits_Style_Notification:NewSpeak(creatureData, textData)
 
     -- Create Message
     self:msgCreate(creatureData, textData, adjustedDuration)
-
-    -- Show skit
-    self:ShowSkit()
 end
 
 function Skits_Style_Notification:ResetLayout()
