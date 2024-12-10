@@ -391,14 +391,25 @@ function Skits_UI_Utils:LoadModelAux(loaderData)
     if creatureData.isPlayer then        
         -- Player   
         maxAttempts = 10
-        
+
         if loaderData.attemptPhase == 1 then    
             if loaderData.attemptCurrent > loaderData.loadModelAttemptsPerIdx then
                 loaderData.attemptCurrent = 1
                 loaderData.attemptPhase = 10
             else        
                 -- Model for Player
-                if creatureData.unitToken then
+                local isTokenValid = true
+
+                if not creatureData.unitToken then
+                    isTokenValid = false
+                else
+                    local currTokenName = Skits_Utils:GetUnitTokenFullName(creatureData.unitToken)
+                    if currTokenName == "" or creatureData.name ~= currTokenName then
+                        isTokenValid = false
+                    end
+                end
+
+                if isTokenValid then
                     -- Unit Token
                     modelFrame:SetUnit(creatureData.unitToken)
                 elseif creatureData.raceId then

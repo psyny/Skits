@@ -118,3 +118,69 @@ function Skits_Utils:TextIntoPhrases(text)
     end
     return phrases
 end
+
+function Skits_Utils:FindUnitToken(unitName)
+    -- Check the player
+    local unittokenname = self:GetUnitTokenFullName("player")    
+    if unittokenname == unitName then
+        return "player"
+    end
+
+    -- Check the target
+    local unittokenname = self:GetUnitTokenFullName("target")    
+    if unittokenname == unitName then
+        return "target"
+    end    
+
+    -- Check the party members
+    if IsInRaid() then
+        -- Look for 
+        for i = 1, GetNumGroupMembers() do
+            local unittoken = "raid" .. i
+            local unittokenname = self:GetUnitTokenFullName(unittoken)
+            if unittokenname == unitName then
+                return unittoken
+            end
+        end
+    elseif IsInGroup() then
+        for i = 1, GetNumSubgroupMembers() do
+            local unittoken = "party" .. i
+            local unittokenname = self:GetUnitTokenFullName(unittoken)
+            if unittokenname == unitName then
+                return unittoken
+            end
+        end
+    end
+
+    -- Check the nameplates
+    for _, nameplate in ipairs(C_NamePlate.GetNamePlates()) do
+        if nameplate.UnitFrame then
+            local unittoken = nameplate.UnitFrame.unit
+            local unittokenname = self:GetUnitTokenFullName(unittoken)
+            if unittokenname == unitName then
+                return unittoken
+            end
+        end
+    end
+
+    return nil
+end
+
+function Skits_Utils:GetUnitTokenFullName(unitToken)
+    local creatureName, creatureServer = UnitName(unitToken)
+
+    if not creatureName then
+        return ""
+    end 
+
+    if not UnitIsPlayer(unitToken) then
+        return creatureName
+    end
+
+    if not creatureServer then
+        creatureServer = GetRealmName()
+    end
+    
+    creatureName = creatureName .. "-" .. creatureServer
+    return creatureName
+end

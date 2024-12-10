@@ -35,7 +35,7 @@ function Skits_Deque:CreateListFromDeque()
 
     while current do
         table.insert(values, current.value)
-        current = current.next
+        current = current.prev
     end
 
     return values

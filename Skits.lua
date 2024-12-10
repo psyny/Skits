@@ -29,7 +29,7 @@ Skits.speakerColorMapQueueLimit = 30
 
 -- Memory table for last 1000 speaks
 Skits.msgMemoryLimit = 1000
-Skits.msgMemoryQueue = Skits_Deque:New()
+Skits.msgMemoryQueue = nil
 
 -- TempDisable
 Skits.skitsActive = true
@@ -51,7 +51,7 @@ function Skits:OnInitialize()
 	self.db = LibStub("AceDB-3.0"):New("SkitsDB", defaults)
 	self.db.RegisterCallback(self, "OnProfileChanged", "OnProfileChanged")
 	self.db.RegisterCallback(self, "OnProfileCopied", "OnProfileChanged")
-	self.db.RegisterCallback(self, "OnProfileReset", "OnProfileChanged")
+	self.db.RegisterCallback(self, "OnProfileReset", "OnProfileChanged")   
 	addonOptions = self.db.profile
     Skits_Options.db = addonOptions    
 
@@ -89,6 +89,10 @@ function Skits:OnEnable()
 		self:Disable()
 		return
 	end
+
+    self:RegisterEvent("PLAYER_LOGOUT", "PrepareDatabaseForSave")
+    self:RegisterEvent("PLAYER_LEAVING_WORLD", "PrepareDatabaseForSave")             
+
     self:GeneralParameterChanges()
     Skits_ID_Store:Initialize()
 end
@@ -214,6 +218,10 @@ end
 local frame = CreateFrame("Frame")
 
 -- Register events
+-- Loaders
+frame:RegisterEvent("PLAYER_LOGOUT")
+frame:RegisterEvent("PLAYER_LEAVING_WORLD")
+
 -- NPC Say
 frame:RegisterEvent("CHAT_MSG_MONSTER_YELL")
 frame:RegisterEvent("CHAT_MSG_MONSTER_WHISPER")
@@ -265,7 +273,9 @@ frame:SetScript("OnEvent", function(self, event, ...)
     elseif event == "TALKINGHEAD_REQUESTED" then
         Skits:HandleTalkingHead(...)  
     elseif event == "PLAYER_STARTED_MOVING" then
-        Skits:HandlePlayerMoving(...)         
+        Skits:HandlePlayerMoving(...)    
+    elseif event == "PLAYER_LOGOUT" or event == "PLAYER_LEAVING_WORLD" then
+        Skits:HandleLogout(event, ...)                
     elseif event == "PLAYER_REGEN_DISABLED" or event == "PLAYER_REGEN_ENABLED" or event == "ZONE_CHANGED_NEW_AREA" or event == "PLAYER_ENTERING_WORLD" then
         Skits:HandleSituationChangeEvent(event, ...)            
     elseif event == "CHAT_MSG_MONSTER_SAY" or event == "CHAT_MSG_MONSTER_YELL" or event == "CHAT_MSG_MONSTER_WHISPER" or event == "CHAT_MSG_MONSTER_PARTY" then
@@ -318,8 +328,8 @@ end
 
 -- Store a speak in memory
 function Skits:StoreInMemory(creatureData, text, color)
-    local memoryIdx = SkitsDB.nextIdx
-    SkitsDB.nextIdx = SkitsDB.nextIdx + 1
+    local memoryIdx = SkitsDB.conversationLog.nextIdx
+    SkitsDB.conversationLog.nextIdx = SkitsDB.conversationLog.nextIdx + 1
 
     local creatureName, creatureServer = UnitName("player")
     if not creatureServer then
@@ -335,12 +345,12 @@ function Skits:StoreInMemory(creatureData, text, color)
         creatureData = creatureData,
         text = text,
         color = color,
-        timestamp = GetTime()
+        timestamp = time(),
         zoneName = zoneName,
         playerName = playerName,
     }
 
-    SkitsDB.messages[memoryIdx] = msgEntry
+    SkitsDB.conversationLog.messages[memoryIdx] = msgEntry
 
     -- Deque Control
     self.msgMemoryQueue:AddToHead(memoryIdx)
@@ -351,72 +361,10 @@ function Skits:StoreInMemory(creatureData, text, color)
         removeds = self.msgMemoryQueue:RemoveFirstX(overlimit)   
         for _, dataIdx in ipairs(removeds) do
             if dataIdx then
-                SkitsDB.message[dataIdx] = nil
+                SkitsDB.conversationLog.message[dataIdx] = nil
             end
         end        
     end
-end
-
-function Skits:FindUnitToken(unitName)
-    -- Check the player
-    local unittokenname = self:GetUnitTokenFullName("player")    
-    if unittokenname == unitName then
-        return "player"
-    end
-
-    -- Check the target
-    local unittokenname = self:GetUnitTokenFullName("target")    
-    if unittokenname == unitName then
-        return "target"
-    end    
-
-    -- Check the party members
-    if IsInRaid() then
-        -- Look for 
-        for i = 1, GetNumGroupMembers() do
-            local unittoken = "raid" .. i
-            local unittokenname = self:GetUnitTokenFullName(unittoken)
-            if unittokenname == unitName then
-                return unittoken
-            end
-        end
-    elseif IsInGroup() then
-        for i = 1, GetNumSubgroupMembers() do
-            local unittoken = "party" .. i
-            local unittokenname = self:GetUnitTokenFullName(unittoken)
-            if unittokenname == unitName then
-                return unittoken
-            end
-        end
-    end
-
-    -- Check the nameplates
-    for _, nameplate in ipairs(C_NamePlate.GetNamePlates()) do
-        if nameplate.UnitFrame then
-            local unittoken = nameplate.UnitFrame.unit
-            local unittokenname = self:GetUnitTokenFullName(unittoken)
-            if unittokenname == unitName then
-                return unittoken
-            end
-        end
-    end
-
-    return nil
-end
-
-function Skits:GetUnitTokenFullName(unitToken)
-    local creatureName, creatureServer = UnitName(unitToken)
-
-    if not UnitIsPlayer(unitToken) then
-        return creatureName
-    end
-
-    if not creatureServer then
-        creatureServer = GetRealmName()
-    end
-    
-    creatureName = creatureName .. "-" .. creatureServer
-    return creatureName
 end
 
 
@@ -446,9 +394,11 @@ function Skits:HandlePlayerChatEvent(event, msg, sender, languageName, channelNa
     end
 
     -- Update if player is the current
-    local unittoken = self:FindUnitToken(sender)
+    local unittoken = Skits_Utils:FindUnitToken(sender)
+    local tempCreatureData = {}
     if unittoken then
         self:SetCreatureDataOfToken(unittoken)
+        tempCreatureData = self:BuildCreatureDataOfToken(unittoken)
     end
 
     -- Retrieve or set creature ID based on sender name
@@ -464,6 +414,15 @@ function Skits:HandlePlayerChatEvent(event, msg, sender, languageName, channelNa
 
     creatureData.isPlayer = true
     creatureData.name = sender
+
+    -- Merge with our temp creature data
+    if tempCreatureData then
+        for k, v in pairs(tempCreatureData) do
+            if not creatureData[k] then
+                creatureData[k] = v
+            end
+        end
+    end
 
     self:ChatEvent(creatureData, msg)
 end
@@ -490,8 +449,9 @@ function Skits:ChatEvent(creatureData, text)
     Skits.lastSpeaker = creatureData.name
 end
 
+function Skits:BuildCreatureDataOfToken(unittoken)
+    local creatureData = nil
 
-function Skits:SetCreatureDataOfToken(unittoken)
     -- Check if the target is an NPC
     if UnitExists(unittoken) then
         local creatureName, creatureServer = UnitName(unittoken)
@@ -501,15 +461,15 @@ function Skits:SetCreatureDataOfToken(unittoken)
             if guid then
                 local creatureId = tonumber(guid:match("[Creature|Vehicle|Pet|Vignette|Instance]%-.-%-.-%-.-%-.-%-(%d+)"))
                 if creatureId then
-                    local creatureData = {
+                    creatureData = {
                         name = creatureName,
                         creatureId = creatureId,
+                        isPlayer = false,
                     }
-                    Skits_ID_Store:SetCreatureData(creatureData, false)
                 end
             end
         else
-            -- target is player
+            -- Is Player
 
             -- Get name
             if not creatureServer then
@@ -523,16 +483,27 @@ function Skits:SetCreatureDataOfToken(unittoken)
             local genderID = (gender == 2) and 0 or 1
 
             -- Build Creature data
-            local creatureData = {
+            creatureData = {
                 name = playerName,
                 creatureId = playerName,
                 raceId = raceID,
                 genderId = genderID,
-            }            
-          
-            Skits_ID_Store:SetCreatureData(creatureData, true)
+                isPlayer = true,
+            }         
         end
     end
+
+    return creatureData
+end
+
+function Skits:SetCreatureDataOfToken(unittoken)
+    local creatureData = Skits:BuildCreatureDataOfToken(unittoken)
+
+    if not creatureData then
+        return
+    end
+
+    Skits_ID_Store:SetCreatureData(creatureData, creatureData.isPlayer)
 end
 
 
@@ -650,11 +621,14 @@ function Skits:HandlePlayerMoving()
     Skits_Style:SituationMoveExitExploration(true)
 
     if SkitsDB.debugMode and false then
-        print("MOVED")
         debugCombat = not debugCombat
         Skits_Style.inCombat = debugCombat
         Skits_Style:SituationAreaChanged(false)  
     end
+end
+
+function Skits:HandleLogout(event)
+    --self:PrepareDatabaseForSave()
 end
 
  -- CMD ---------------------------------------------------------------------------------------------------------

@@ -76,7 +76,7 @@ function Skits_UI:SpeakerMarker_NameplateAdded(nameplateToken)
         return
     end
 
-    local unitName = Skits:GetUnitTokenFullName(nameplateToken)
+    local unitName = Skits_Utils:GetUnitTokenFullName(nameplateToken)
     if not self.speakerData[unitName] then
         return 
     end
@@ -95,7 +95,7 @@ function Skits_UI:SpeakerMarker_NameplateAdded(nameplateToken)
 end
 
 function Skits_UI:SpeakerMarker_NameplateRemoved(nameplateToken)
-    local unitName = Skits:GetUnitTokenFullName(nameplateToken)
+    local unitName = Skits_Utils:GetUnitTokenFullName(nameplateToken)
     self:SpeakerMarker_RemoveFromUnit(unitName)
 end
 
@@ -111,7 +111,7 @@ function Skits_UI:SpeakerMarker_FindUnitAndAdd(unitName)
     for _, nameplate in ipairs(C_NamePlate.GetNamePlates()) do
         if nameplate.UnitFrame then
             local unittoken = nameplate.UnitFrame.unit
-            local unittokenname = Skits:GetUnitTokenFullName(unittoken)
+            local unittokenname = Skits_Utils:GetUnitTokenFullName(unittoken)
             if unittokenname == unitName then    
                 self:SpeakerMarker_AddToNameplate(unittoken)
                 break
@@ -133,7 +133,7 @@ function Skits_UI:SpeakerMarker_AddToNameplate(nameplateToken)
     end  
     
     -- Collect Unit Name
-    local unitName = Skits:GetUnitTokenFullName(nameplateToken)    
+    local unitName = Skits_Utils:GetUnitTokenFullName(nameplateToken)    
     
     -- speaker  Data
     local speakerData = self.speakerData[unitName]

@@ -6,7 +6,7 @@ Skits_Log_UI.frames = {}
 local textAreaWidth = 300
 local showSpeakerName = true   
 local topBotPadding = 50
-local gapBetweenSpeaks = 10
+local gapBetweenSpeaks = 20
 
 -- Control Vars
 local isMostRecent = false
@@ -49,6 +49,66 @@ nextButton:SetSize(80, 20)
 nextButton:SetText("Next")
 nextButton:SetPoint("BOTTOMRIGHT", logFrame, "BOTTOMRIGHT", -10, 10)
 
+-- Separator
+function Skits_Log_UI:CreateSeparator(msgEntry, parentFrame, width)
+    local options = Skits_Options.db
+    local font = LibStub("LibSharedMedia-3.0"):Fetch("font", options.style_warcraft_speech_font_name)
+    local fontSize = options.style_warcraft_speech_font_size 
+
+    local separatorFrame = CreateFrame("Frame", nil, parentFrame)
+    separatorFrame:SetSize(width, 100)
+    separatorFrame:SetPoint("BOTTOM", parentFrame, "BOTTOM", 0, options.style_warcraft_speech_position_bottom_distance)
+
+    local textOffset = 0
+
+    local playerNameEle = separatorFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    playerNameEle:SetPoint("TOP", separatorFrame, "TOP", 0, 0)
+    playerNameEle:SetSize(width, 1)
+    playerNameEle:SetFont(font, fontSize)
+    playerNameEle:SetJustifyH("CENTER")
+    playerNameEle:SetWordWrap(true)
+    playerNameEle:SetText(msgEntry.playerName .. ", " .. msgEntry.zoneName)
+    textOffset = textOffset + playerNameEle:GetStringHeight()
+
+    if false then
+        local zoneNameEle = separatorFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        zoneNameEle:SetPoint("TOP", separatorFrame, "TOP", 0, -textOffset)
+        zoneNameEle:SetSize(width, 1)    
+        zoneNameEle:SetFont(font, fontSize)
+        zoneNameEle:SetJustifyH("CENTER")
+        zoneNameEle:SetWordWrap(true)
+        zoneNameEle:SetText(msgEntry.zoneName)    
+        textOffset = textOffset + zoneNameEle:GetStringHeight()
+    end
+
+    local dateEle = separatorFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    dateEle:SetPoint("TOP", separatorFrame, "TOP", 0, -textOffset)
+    dateEle:SetSize(width, 1)    
+    dateEle:SetFont(font, fontSize * 0.75)
+    dateEle:SetJustifyH("CENTER")
+    dateEle:SetWordWrap(true)
+    local timeStr = date("%Y-%m-%d %H:%M", msgEntry.timestamp)
+    dateEle:SetText(timeStr)    
+    textOffset = textOffset + dateEle:GetStringHeight()  
+    
+    separatorFrame:SetSize(width, textOffset)
+
+    local fadedFrameParameters = {
+        parent = separatorFrame,
+        alpha = 0.8,
+        contentHeight = 1,
+        contentWidth = width * 0.5,
+        leftSize = width * 0.2,
+        rightSize = width * 0.2,
+        topSize = 5,
+        bottomSize = textOffset,
+    }   
+    local bgFrame = Skits_UI_Utils:CreateFadedFrame(fadedFrameParameters) 
+    bgFrame.main:SetPoint("TOP", separatorFrame, "TOP", 0, 0)  
+
+    return separatorFrame 
+end
+
 -- Function to populate the log frame with entries from memory for the current page
 function Skits_Log_UI:PopulateLogFrame()
     local options = Skits_Options.db
@@ -62,6 +122,7 @@ function Skits_Log_UI:PopulateLogFrame()
     local lastFillIncrement = 0 -- Last fill increment
 
     -- Clear Speaker data
+    local lastSeparator = nil
     local lastSpeaker = ''
     local lastSpeakerTextLabel = nil
     local lastSpeakerTextFrame = nil 
@@ -75,16 +136,16 @@ function Skits_Log_UI:PopulateLogFrame()
     local font = LibStub("LibSharedMedia-3.0"):Fetch("font", options.style_warcraft_speech_font_name)
     local fontSize = options.style_warcraft_speech_font_size 
 
-    -- Offseet based on dir
+    -- Offset based on dir
     spaceFilled = topBotPadding
 
-    -- Loop through `SkitsDB.messages` for the entries on the current page
+    -- Loop through `SkitsDB.conversationLog.messages` for the entries on the current page
     for i = 1, 100 do -- 100 is the max msgs in a page, usually waaay less than this (4)
         if msgEleCurr == nil then
             break
         end
 
-        local entry = SkitsDB.messages[msgEleCurr.value]
+        local entry = SkitsDB.conversationLog.messages[msgEleCurr.value]
         if entry ~= nil then    
             if lastSpeaker ~= entry.creatureData.name then
                 altSpeakerSide = not altSpeakerSide
@@ -97,20 +158,56 @@ function Skits_Log_UI:PopulateLogFrame()
                 msgEleTop = msgEleCurr
             end
 
-            local hasModel = false
-            if entry.creatureData.isPlayer then
-                if entry.creatureData.raceId then
-                    hasModel = true
-                end
+            -- Check if need a separator
+            local lastMsgEle = nil
+            if msgEleDir > 0 then
+                lastMsgEle = msgEleCurr.next
             else
-                if entry.creatureData.creatureId or entry.creatureData.creatureIds or entry.creatureData.displayIds then
-                    hasModel = true
+                lastMsgEle = msgEleCurr.next
+            end
+            local lastEntry = nil
+            if lastMsgEle then
+                lastEntry = SkitsDB.conversationLog.messages[lastMsgEle.value]
+            end
+            local shouldHaveSeparator = false
+            if lastEntry then                
+                if lastEntry.zoneName ~= entry.zoneName then
+                    shouldHaveSeparator = true
+                elseif lastEntry.playerName ~= entry.playerName then
+                    shouldHaveSeparator = true
+                else
+                    local timeDiff = entry.timestamp - lastEntry.timestamp
+                    timeDiff = math.abs(timeDiff)
+                    if timeDiff > (60*5) then
+                        shouldHaveSeparator = true
+                    end
                 end
+            end
+
+            -- Put a separator before message case 
+            if shouldHaveSeparator and msgEleDir > 0 then
+                lastSeparator = Skits_Log_UI:CreateSeparator(entry, logFrame, frameWidth)
+
+                -- Postion and update offset
+                local textHeight = lastSeparator:GetHeight()
+                local fillIncrement = textHeight + gapBetweenSpeaks
+                lastFillIncrement = fillIncrement
+                local yOffset = 0
+                if msgEleDir > 0 then
+                    yOffset = frameHeight - (spaceFilled + fillIncrement)
+                else
+                    yOffset = spaceFilled
+                end
+                lastSeparator:SetPoint("BOTTOM", logFrame, "BOTTOM", 0, yOffset)
+                table.insert(Skits_Log_UI.frames, lastSeparator)
+
+                -- Update Space Filled qty
+                spaceFilled = spaceFilled + fillIncrement                
             end
 
             -- Create speaker frame or attach to the last one?
             local createNewFrame = true
-            if entry.creatureData.name == lastSpeaker then
+            if not shouldHaveSeparator and entry.creatureData.name == lastSpeaker then
                 if lastSpeakerTextFrame then
                     if lastFillIncrement > options.style_warcraft_speaker_face_size + gapBetweenSpeaks + 5 then -- 5 only for rounding issues
                         createNewFrame = true
@@ -196,6 +293,8 @@ function Skits_Log_UI:PopulateLogFrame()
                 
                 -- Check limit for this page
                 if spaceFilled + topBotPadding > frameHeight then
+                    shouldHaveSeparator = false
+                    
                     if msgEleDir > 0 then
                         msgEleBottom = msgEleBottom.next
                     else
@@ -210,6 +309,27 @@ function Skits_Log_UI:PopulateLogFrame()
                     break
                 end                
             end
+
+            -- Put a separator after message case 
+            if shouldHaveSeparator and msgEleDir <= 0 then
+                lastSeparator = Skits_Log_UI:CreateSeparator(entry, logFrame, frameWidth)
+
+                -- Postion and update offset
+                local textHeight = lastSeparator:GetHeight()
+                local fillIncrement = textHeight + gapBetweenSpeaks
+                lastFillIncrement = fillIncrement
+                local yOffset = 0
+                if msgEleDir > 0 then
+                    yOffset = frameHeight - (spaceFilled + fillIncrement)
+                else
+                    yOffset = spaceFilled
+                end
+                lastSeparator:SetPoint("BOTTOM", logFrame, "BOTTOM", 0, yOffset)
+                table.insert(Skits_Log_UI.frames, lastSeparator)
+
+                -- Update Space Filled qty
+                spaceFilled = spaceFilled + fillIncrement                
+            end            
 
             -- Update current indexes
             if msgEleDir > 0 then
