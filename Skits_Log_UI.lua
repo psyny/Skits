@@ -49,12 +49,7 @@ nextButton:SetSize(80, 20)
 nextButton:SetText("Next")
 nextButton:SetPoint("BOTTOMRIGHT", logFrame, "BOTTOMRIGHT", -10, 10)
 
--- Function to calculate total pages
-local function GetTotalMessages()
-    return Skits.msgMemoryQueue.size
-end
-
--- Function to populate the log frame with entries from Skits.msgMemory for the current page
+-- Function to populate the log frame with entries from memory for the current page
 function Skits_Log_UI:PopulateLogFrame()
     local options = Skits_Options.db
     local modelSize = options.style_warcraft_speaker_face_size
@@ -83,13 +78,13 @@ function Skits_Log_UI:PopulateLogFrame()
     -- Offseet based on dir
     spaceFilled = topBotPadding
 
-    -- Loop through `Skits.msgMemory` for the entries on the current page
+    -- Loop through `SkitsDB.messages` for the entries on the current page
     for i = 1, 100 do -- 100 is the max msgs in a page, usually waaay less than this (4)
         if msgEleCurr == nil then
             break
         end
 
-        local entry = Skits.msgMemory[msgEleCurr.value]
+        local entry = SkitsDB.messages[msgEleCurr.value]
         if entry ~= nil then    
             if lastSpeaker ~= entry.creatureData.name then
                 altSpeakerSide = not altSpeakerSide

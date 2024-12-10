@@ -3,6 +3,7 @@
 Skits_Style = {}
 Skits_Style.ativeStyles = {}
 
+Skits_Style.inImmersive = false
 Skits_Style.inCombat = false
 Skits_Style.inCombatDelayedHandler = nil
 
@@ -42,6 +43,7 @@ function Skits_Style:Initialize()
 
     -- Add styles defined on options
     Skits_Style.ativeStyles = {}
+    initialize_aux_addActiveStyleByName(options.style_general_styleonsituation_immersive)
     initialize_aux_addActiveStyleByName(options.style_general_styleonsituation_explore)
     initialize_aux_addActiveStyleByName(options.style_general_styleonsituation_combat)
     initialize_aux_addActiveStyleByName(options.style_general_styleonsituation_instance_solo)
@@ -60,6 +62,14 @@ function Skits_Style:StyleToDisplay()
     local options = Skits_Options.db
 
     local style = Skits_Style_Utils.enum_styles.UNDEFINED
+
+    -- Check if we are in immersive mode
+    if Skits_Style.inImmersive then
+        style = options.style_general_styleonsituation_immersive
+        if style ~= Skits_Style_Utils.enum_styles.UNDEFINED then
+            return styleNameToObj(style, false)
+        end
+    end
 
     -- Check if we are in a solo instance, and if solo instance display is enabled
     if Skits_Utils:IsInInstanceSolo() then
@@ -164,6 +174,38 @@ function Skits_Style:SituationExitCombat(onlyIfActive)
     end
 end
 
+function Skits_Style:SituationMoveExitExploration(onlyIfActive)
+    local options = Skits_Options.db
+
+    if options.move_exit_exploration_for <= 0 then
+        return
+    end
+
+    -- Set for inCombat (the effects are the same as we only have Combat and Exploration)
+    self.inCombat = true
+    self:ShowSituationSkit(onlyIfActive)
+
+    -- Start a timer to recheck combat status
+    if self.inCombatDelayedHandler then
+        self.inCombatDelayedHandler:Cancel()
+    end
+    local tOnlyIfActive = onlyIfActive
+    self.inCombatDelayedHandler = C_Timer.NewTimer(options.move_exit_exploration_for, function()        
+        self:DelayedCombatExit(tOnlyIfActive)
+    end) 
+end
+
 function Skits_Style:SituationAreaChanged(onlyIfActive)
     self:ShowSituationSkit(onlyIfActive)
+end
+
+-- Immersive Toggle
+SLASH_SkitsImmersive1 = "/SkitsImmersive"
+SlashCmdList["SkitsImmersive"] = function()   
+    Skits_Style.inImmersive = not Skits_Style.inImmersive
+    if Skits_Style.inImmersive then
+        print("Skits: Immersive mode is now enabled")
+    else
+        print("Skits: Immersive mode is now disabled")
+    end
 end

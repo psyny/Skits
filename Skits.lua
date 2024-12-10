@@ -9,6 +9,32 @@ local addonOptions
 
 local allowedTalkEvents = {}
 
+-- Define 5 pastel colors with perceptual differences
+Skits.colorPalette = {
+    {0.9, 0.7, 0.7},  -- Light pink
+    {0.7, 0.9, 0.7},  -- Light green
+    {0.7, 0.7, 0.9},  -- Light blue
+    {0.9, 0.8, 0.7},  -- Light peach
+    {0.8, 0.7, 0.9},  -- Light purple
+}
+
+-- Color assignment map to track speaker-color relationships and order
+Skits.speakerColorMap = {}  -- Maps speaker names to color indices
+Skits.colorUsageOrder = {1, 2, 3, 4, 5}  -- Track the usage order of color indices
+Skits.nextColor = 1
+Skits.lastSpeaker = ""
+Skits.lastSpeakerColor = 0
+Skits.speakerColorMapQueue = Skits_Deque:New()
+Skits.speakerColorMapQueueLimit = 30
+
+-- Memory table for last 1000 speaks
+Skits.msgMemoryLimit = 1000
+Skits.msgMemoryQueue = Skits_Deque:New()
+
+-- TempDisable
+Skits.skitsActive = true
+
+
 ---------------------------------------------------------
 -- Addon events
 
@@ -36,6 +62,20 @@ function Skits:OnInitialize()
 
 	-- Get the option table for profiles
 	options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
+
+    -- Conversation Log
+    self.msgMemoryLimit = 1000
+    self.msgMemoryQueue = Skits_Deque:New()
+
+    if SkitsDB.conversationLog and SkitsDB.conversationLog.messagesIdx then
+        self.msgMemoryQueue:BuildDequeFromList(SkitsDB.conversationLog.messagesIdx)
+    else 
+        SkitsDB.conversationLog = {
+            messages = {},
+            messagesIdx = {},
+            nextIdx = 1,
+        }
+    end
 
     -- Update
     self:GeneralParameterChanges()
@@ -82,6 +122,26 @@ end
 function Skits:OnPlayerLogout()
     -- Prepare ID store for saving
     Skits_ID_Store:Initialize()
+end
+
+function Skits:PrepareDatabaseForSave()
+    -- Runs when logout or reload
+
+    -- Save Message Idxs
+    if self.msgMemoryQueue then
+        if not SkitsDB.conversationLog then
+            SkitsDB.conversationLog = {
+                messages = {},
+                messagesIdx = {},
+                nextIdx = 1,
+            }
+        end
+
+        SkitsDB.conversationLog.messagesIdx = self.msgMemoryQueue:CreateListFromDeque()      
+    end
+
+    -- Save ID Store
+    Skits_ID_Store:PrepareDataForSave()
 end
 
 ---------------------------------------------------------
@@ -153,33 +213,6 @@ end
 
 local frame = CreateFrame("Frame")
 
--- Define 5 pastel colors with perceptual differences
-Skits.colorPalette = {
-    {0.9, 0.7, 0.7},  -- Light pink
-    {0.7, 0.9, 0.7},  -- Light green
-    {0.7, 0.7, 0.9},  -- Light blue
-    {0.9, 0.8, 0.7},  -- Light peach
-    {0.8, 0.7, 0.9},  -- Light purple
-}
-
--- Color assignment map to track speaker-color relationships and order
-Skits.speakerColorMap = {}  -- Maps speaker names to color indices
-Skits.colorUsageOrder = {1, 2, 3, 4, 5}  -- Track the usage order of color indices
-Skits.nextColor = 1
-Skits.lastSpeaker = ""
-Skits.lastSpeakerColor = 0
-Skits.speakerColorMapQueue = Skits_Deque:New()
-Skits.speakerColorMapQueueLimit = 30
-
--- Memory table for last 1000 speaks
-Skits.msgMemory = {}
-Skits.msgMemoryLimit = 1000
-Skits.msgMemoryNextIdx = 1
-Skits.msgMemoryQueue = Skits_Deque:New()
-
--- TempDisable
-Skits.skitsActive = true
-
 -- Register events
 -- NPC Say
 frame:RegisterEvent("CHAT_MSG_MONSTER_YELL")
@@ -214,7 +247,7 @@ frame:RegisterEvent("PLAYER_REGEN_DISABLED")
 frame:RegisterEvent("PLAYER_REGEN_ENABLED")
 frame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 frame:RegisterEvent("PLAYER_ENTERING_WORLD")
---frame:RegisterEvent("PLAYER_STARTED_MOVING")
+frame:RegisterEvent("PLAYER_STARTED_MOVING")
 
 frame:SetScript("OnEvent", function(self, event, ...)
     if event == "NAME_PLATE_UNIT_ADDED" then
@@ -285,8 +318,17 @@ end
 
 -- Store a speak in memory
 function Skits:StoreInMemory(creatureData, text, color)
-    local memoryIdx = self.msgMemoryNextIdx
-    self.msgMemoryNextIdx = self.msgMemoryNextIdx + 1
+    local memoryIdx = SkitsDB.nextIdx
+    SkitsDB.nextIdx = SkitsDB.nextIdx + 1
+
+    local creatureName, creatureServer = UnitName("player")
+    if not creatureServer then
+        creatureServer = GetRealmName()
+    end
+    local playerName = creatureName .. "-" .. creatureServer
+
+    local zoneName = GetZoneText()
+    --local zoneID = C_Map.GetBestMapForUnit("player")     
 
     local msgEntry = {
         memoryIdx = memoryIdx,
@@ -294,9 +336,11 @@ function Skits:StoreInMemory(creatureData, text, color)
         text = text,
         color = color,
         timestamp = GetTime()
+        zoneName = zoneName,
+        playerName = playerName,
     }
 
-    self.msgMemory[memoryIdx] = msgEntry
+    SkitsDB.messages[memoryIdx] = msgEntry
 
     -- Deque Control
     self.msgMemoryQueue:AddToHead(memoryIdx)
@@ -307,7 +351,7 @@ function Skits:StoreInMemory(creatureData, text, color)
         removeds = self.msgMemoryQueue:RemoveFirstX(overlimit)   
         for _, dataIdx in ipairs(removeds) do
             if dataIdx then
-                self.msgMemory[dataIdx] = nil
+                SkitsDB.message[dataIdx] = nil
             end
         end        
     end
@@ -603,7 +647,9 @@ end
 
 local debugCombat = true
 function Skits:HandlePlayerMoving()
-    if SkitsDB.debugMode then
+    Skits_Style:SituationMoveExitExploration(true)
+
+    if SkitsDB.debugMode and false then
         print("MOVED")
         debugCombat = not debugCombat
         Skits_Style.inCombat = debugCombat

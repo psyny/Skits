@@ -56,7 +56,7 @@ function Skits_Style_Notification:ResetLayouts()
         self.mainFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", sideDist, topDist)
     end
     
-    self.mainFrame:SetFrameStrata("TOOLTIP")
+    self.mainFrame:SetFrameStrata(options.style_notification_strata)
     self.mainFrame:EnableMouse(false) -- Allow clicks to pass through
     self.mainFrame:EnableMouseWheel(false) -- Ignore mouse wheel events
 end
@@ -73,7 +73,6 @@ function Skits_Style_Notification:CreateSpeakFrame(creatureData, text, textColor
         portraitLoaderData = nil,
         portraitBg = nil,
         portraitBgLoaderData = nil,
-        portraitBorder = nil,
         textEle = nil,
         height = 0,
     }
@@ -90,7 +89,7 @@ function Skits_Style_Notification:CreateSpeakFrame(creatureData, text, textColor
 
     -- Main Frame: Container of the frame
     speakFrame.main = CreateFrame("Frame", nil, parameters.parent)
-    speakFrame.main:SetSize(parameters.portraitSize, parameters.portraitSize)    
+    speakFrame.main:SetSize(parameters.portraitSize, parameters.portraitSize)
     speakFrame.main:SetPoint(ancorRef1, parameters.parent, ancorRef2, 0, 0)
 
     -- Portrait frame
@@ -104,20 +103,6 @@ function Skits_Style_Notification:CreateSpeakFrame(creatureData, text, textColor
     speakFrame.portraitBg = CreateFrame("PlayerModel", nil, speakFrame.main)
     speakFrame.portraitBg:SetSize(parameters.portraitSize, parameters.portraitSize)
     speakFrame.portraitBg:SetPoint("BOTTOMLEFT", speakFrame.portrait, "BOTTOMLEFT", 0, portraitBgOffsetY)    
-
-    -- Portrait border frame
-    speakFrame.portraitBorder = CreateFrame("Frame", nil, speakFrame.portrait)
-    speakFrame.portraitBorder:SetSize(parameters.portraitSize, parameters.portraitSize * 0.05)
-    speakFrame.portraitBorder:SetPoint("BOTTOMLEFT", speakFrame.portrait, "BOTTOMLEFT", 0, 0)     
-
-    if false then
-        -- WIP: Still not good enough
-        local portraitBorderTex = speakFrame.portraitBorder:CreateTexture(nil, "BACKGROUND")
-        portraitBorderTex:SetTexture("Interface/AddOns/Skits/Textures/SkitsFadedFrame.tga")
-        portraitBorderTex:SetAllPoints(speakFrame.portraitBorder)
-        portraitBorderTex:SetAlpha(1.0)
-        portraitBorderTex:SetTexCoord(1/3, 2/3, 0, 1/3)
-    end
 
     -- Content Frame: Frame contents
     local textAreaWidth = parameters.textAreaWidth 
@@ -149,7 +134,7 @@ function Skits_Style_Notification:CreateSpeakFrame(creatureData, text, textColor
     textAreaWidth = textWidth
 
     -- Bg:
-    fadedFrameParameters = {
+    local fadedFrameParameters = {
         parent = speakFrame.main,
         alpha = 0.6,
         contentHeight = textAreaHeight,
@@ -157,16 +142,15 @@ function Skits_Style_Notification:CreateSpeakFrame(creatureData, text, textColor
         leftSize = 100,
         rightSize = 100,
         topSize = 2,
-        bottomSize = 3,
+        bottomSize = 2,
     }   
     speakFrame.bg = Skits_UI_Utils:CreateFadedFrame(fadedFrameParameters) 
     speakFrame.bg.main:SetPoint(ancorRef1, speakFrame.main, ancorRef2, contentOffsetX, 0) 
 
     -- Organize Levels -------------------------------------------------------------------------------------------
-    speakFrame.content:SetFrameLevel(100)        
-    speakFrame.portraitBg:SetFrameLevel(50)        
-    speakFrame.portrait:SetFrameLevel(51)   
-    speakFrame.portraitBorder:SetFrameLevel(52)        
+    speakFrame.content:SetFrameLevel(100)
+    speakFrame.portraitBg:SetFrameLevel(50)
+    speakFrame.portrait:SetFrameLevel(51)
     speakFrame.bg.main:SetFrameLevel(1)
     speakFrame.bg.bg:SetFrameLevel(1)
     

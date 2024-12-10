@@ -389,6 +389,9 @@ function Skits_Style_Warcraft:NewSpeak(creatureData, textData)
 end
 
 function Skits_Style_Warcraft:ResetLayout()
+    local options = Skits_Options.db
+    self.mainFrame:SetAllPoints(UIParent)
+    self.mainFrame:SetFrameStrata(options.style_warcraft_strata)
     return
 end
 

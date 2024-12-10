@@ -387,8 +387,11 @@ function Skits_UI_Utils:LoadModelAux(loaderData)
     -- Set model (trying to load it)
     modelFrame:SetPosition(0, 0, 0) 
     modelFrame:SetModelScale(1.0)
-    if creatureData.isPlayer then
+    local maxAttempts = 50
+    if creatureData.isPlayer then        
         -- Player   
+        maxAttempts = 10
+        
         if loaderData.attemptPhase == 1 then    
             if loaderData.attemptCurrent > loaderData.loadModelAttemptsPerIdx then
                 loaderData.attemptCurrent = 1
@@ -412,6 +415,7 @@ function Skits_UI_Utils:LoadModelAux(loaderData)
         end
     else
         -- NPC
+        maxAttempts = 30
 
         -- We still dont have a model, try fetch it (maybe we got this information after the frame was created)
         if loaderData.attemptPhase == 0 then
@@ -523,7 +527,7 @@ function Skits_UI_Utils:LoadModelAux(loaderData)
     end    
     
     -- Timer to check again if the model has been loaded
-    if loaderData.attemptPhase < 99 and loaderData.attemptTotal < 20 then
+    if loaderData.attemptPhase < 99 and loaderData.attemptTotal < maxAttempts then
         LoadModelStartTimer(loaderData)
     end        
 end

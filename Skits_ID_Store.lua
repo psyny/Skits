@@ -450,6 +450,8 @@ function Skits_ID_Store:SetCreatureData(creatureData, isPlayer)
 end
 
 
+-- COMMANDs -------------------------------------------------
+
 
 -- Command to see local db stats
 SLASH_SkitsLocalDBStats1 = "/Skitslocaldbstats"

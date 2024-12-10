@@ -3,6 +3,7 @@
 
 local L = LibStub("AceLocale-3.0"):NewLocale("Skits", "enGB", true)
 
+
 L["Skits.options.Skits.title"] = "Skits"
 L["Skits.options.Skits.desc"] = "Skits"
 
@@ -17,6 +18,8 @@ L["Skits.options.combat_easy_out.title"] = "Combat mode easy out"
 L["Skits.options.combat_easy_out.desc"] = "If enabled, will not instantly change skits style to exploring style when exiting combat mode. Instead the addon will wait for the next chat message to change skit style."
 L["Skits.options.combat_exit_delay.title"] = "Combat over delay"
 L["Skits.options.combat_exit_delay.desc"] = "How many seconds to wait before considring that combat is over to change skit styles"
+L["Skits.options.move_exit_exploration_for.title"] = "Moving exit exploration for"
+L["Skits.options.move_exit_exploration_for.desc"] = "Moving the character exits exploration mode for this amount of seconds (entering combat mode skit style)."
 
 -- Duration and speed
 L["Skits.options.overall_settings.title"] = "Overall Settings"
@@ -68,6 +71,8 @@ L["Skits.options.event_msg_officer.desc"] = "Toggle to display officer chat mess
 -- Style General
 L["Skits.options.style_general_speaker_marker_size.title"] = "Speaker Marker Size"
 L["Skits.options.style_general_speaker_marker_size.desc"] = "Size of the marker that appears over the speakers unit in the game world."
+L["Skits.options.style_general_styleonsituation_immersive.title"] = "Immersion skit style"
+L["Skits.options.style_general_styleonsituation_immersive.desc"] = "Skit style to display when on immersion mode (/SkitsImmersive command)."
 L["Skits.options.style_general_styleonsituation_explore.title"] = "Exploring skit style"
 L["Skits.options.style_general_styleonsituation_explore.desc"] = "Skit style to display when exploring."
 L["Skits.options.style_general_styleonsituation_combat.title"] = "Combat skit style"
@@ -82,6 +87,8 @@ L["Skits.options.style_any_speech_font_size.title"] = "Speech Font Size"
 L["Skits.options.style_any_speech_font_size.desc"] = "Set the font size for speech text."
 L["Skits.options.style_any_speech_font_name.title"] = "Speech Font"
 L["Skits.options.style_any_speech_font_name.desc"] = "Select the font used for speech text."
+L["Skits.options.style_any_strata.title"] = "Style Strata"
+L["Skits.options.style_any_strata.desc"] = "Frame strata for this skit style."
 
 -- Style Warcraft
 L["Skits.options.style_warcraft_speech_screen_max.title"] = "Max number of Speeches"
@@ -106,10 +113,14 @@ L["Skits.options.style_warcraft_speech_frame_size.desc"] = "Set the width of the
 -- Style Tales
 L["Skits.options.style_tales_model_size.title"] = "Character Size"
 L["Skits.options.style_tales_model_size.desc"] = "On screen size of the speaking character."
+L["Skits.options.style_tales_model_poser.title"] = "Character Poser"
+L["Skits.options.style_tales_model_poser.desc"] = "Show the speaking chracter posing during a skit."
 L["Skits.options.style_tales_speaker_name_enabled.title"] = "Speaker Name Enabled"
 L["Skits.options.style_tales_speaker_name_enabled.desc"] = "Show Speaker name on screen."
 L["Skits.options.style_tales_previous_speaker_lingertime.title"] = "Previous Speaker Linger Time"
 L["Skits.options.style_tales_previous_speaker_lingertime.desc"] = "How long a previous speaker stays lingering on the background (in seconds)."
+L["Skits.options.style_tales_always_fullscreen.title"] = "Always Fullscreen"
+L["Skits.options.style_tales_always_fullscreen.desc"] = "Always show the skit fullscreen, ignoring the side of the speaking character on the screen."
 
 -- Style Notification
 L["Skits.options.style_notification_portrait_size.title"] = "Portrait Size"
