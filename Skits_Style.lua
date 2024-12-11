@@ -13,6 +13,7 @@ local styleIdToFunc = {
     [Skits_Style_Utils.enum_styles.WARCRAFT] = Skits_Style_Warcraft,
     [Skits_Style_Utils.enum_styles.TALES] = Skits_Style_Tales,
     [Skits_Style_Utils.enum_styles.NOTIFICATION] = Skits_Style_Notification,
+    [Skits_Style_Utils.enum_styles.DEPARTURE] = Skits_Style_Departure,
 }
 
 local function styleNameToObj(styleName, allowNil)

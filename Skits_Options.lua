@@ -75,7 +75,7 @@ Skits_Options.defaults = {
         style_tales_model_poser                      = true,   
         style_tales_speaker_name_enabled             = true,        
         style_tales_previous_speaker_lingertime      = 30,  
-        style_tales_always_fullscreen                = false,
+        style_tales_always_fullscreen                = true,
 
         -- Style Notification
         style_notification_strata                   = "TOOLTIP",
@@ -87,6 +87,14 @@ Skits_Options.defaults = {
         style_notification_textarea_size            = 300,
         style_notification_dist_side                = 30,
         style_notification_top_side                 = 300,
+
+        -- Style Departure
+        style_departure_strata                           = "TOOLTIP",
+        style_departure_speech_font_size                 = 12,
+        style_departure_speech_font_name                 = "Friz Quadrata TT",        
+        style_departure_model_size                       = 500, 
+        style_departure_model_poser                      = true,       
+        style_departure_previous_speaker_lingertime      = 30,       
 	},  
 }
 
@@ -100,6 +108,7 @@ local function GetStyleOptions()
         ["warcraft"] = "Warcraft",
         ["tales"] = "Tales",
         ["notification"] = "Notification",
+        ["departure"] = "Departure",
     }
 end
 
@@ -732,7 +741,79 @@ Skits_Options.options = {
                             width = optionWidth,
                         },                                                                                                                                                                        
                     },
-                },                                       
+                },   
+                tab_style_departure = {
+                    type = "group",
+                    name = "Departure",
+                    order = 5,
+                    get = function(info) return Skits_Options.db[info.arg] end,
+                    set = function(info, v)
+                        local arg = info.arg
+                        Skits_Options.db[arg] = v
+                        Skits:GeneralParameterChanges()
+                    end,
+                    disabled = false,
+                    args = {
+                        style_departure_strata = {
+                            type = "select",
+                            name = L["Skits.options.style_any_strata.title"],
+                            desc = L["Skits.options.style_any_strata.desc"],
+                            values = function()
+                                return GetStrataOptions()
+                            end,
+                            arg = "style_departure_strata",
+                            order = 1,
+                            width = optionWidth,
+                        },                                                     
+                        style_departure_speech_font_size = {
+                            type = "range",
+                            name = L["Skits.options.style_any_speech_font_size.title"],
+                            desc = L["Skits.options.style_any_speech_font_size.desc"],
+                            min = 4, max = 30, step = 1,
+                            arg = "style_departure_speech_font_size",
+                            order = 2,
+                            width = optionWidth,
+                        },
+                        style_departure_speech_font_name = {
+                            type = "select",
+                            name = L["Skits.options.style_any_speech_font_name.title"],
+                            desc = L["Skits.options.style_any_speech_font_name.desc"],
+                            values = function()
+                                return LSM:HashTable("font")
+                            end,
+                            dialogControl = "LSM30_Font",
+                            arg = "style_departure_speech_font_name",
+                            order = 3,
+                            width = optionWidth,
+                        },                         
+                        style_departure_model_size = {
+                            type = "range",
+                            name = L["Skits.options.style_departure_model_size.title"],
+                            desc = L["Skits.options.style_departure_model_size.desc"],
+                            min = 50, max = 800, step = 50,
+                            arg = "style_departure_model_size",
+                            order = 4,
+                            width = optionWidth,
+                        },   
+                        style_departure_model_poser = {
+                            type = "toggle",
+                            name = L["Skits.options.style_departure_model_poser.title"],
+                            desc = L["Skits.options.style_departure_model_poser.desc"],
+                            arg = "style_departure_model_poser",
+                            order = 5,
+                            width = optionWidth,
+                        },                              
+                        style_departure_previous_speaker_lingertime = {
+                            type = "range",
+                            name = L["Skits.options.style_departure_previous_speaker_lingertime.title"],
+                            desc = L["Skits.options.style_departure_previous_speaker_lingertime.desc"],
+                            min = 0, max = 60, step = 1,
+                            arg = "style_departure_previous_speaker_lingertime",
+                            order = 6,
+                            width = optionWidth,
+                        },                                                                                                                                   
+                    },
+                },                                      
             },
         },                    
         tab_speech_duration = {

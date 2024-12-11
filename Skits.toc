@@ -2,7 +2,7 @@
 ## Title: Skits
 ## Notes: Immersive chats.
 ## Author: Psyny
-## Version: 2.2.0
+## Version: 2.3.0
 ## DefaultState: enabled
 
 ## SavedVariables: SkitsDB
@@ -46,4 +46,5 @@ Skits_Style_Hidden.lua
 Skits_Style_Warcraft.lua
 Skits_Style_Tales.lua
 Skits_Style_Notification.lua
+Skits_Style_Departure.lua
 Skits_Style.lua

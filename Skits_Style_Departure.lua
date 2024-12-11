@@ -1,60 +1,29 @@
--- Skits_Style_Tales.lua
+-- Skits_Style_Departure.lua
 
-Skits_Style_Tales = {}
-Skits_Style_Tales.name = Skits_Style_Utils.enum_styles.TALES
+Skits_Style_Departure = {}
+Skits_Style_Departure.name = Skits_Style_Utils.enum_styles.DEPARTURE
 
-local numberOfSlots = 8
-local slotLingerTimeSec = 30
-local screenCenterGap = 0.25
-local modelDist = 150
-local textAreaHeight = 70
-
+local numberOfSlots = 2
 local needsLayoutReset = true
+local textAreaHeight = 100
 
 -- MainFrames
-Skits_Style_Tales.mainFrame = CreateFrame("Frame", "SkitsStyleTales", UIParent)
+Skits_Style_Departure.mainFrame = CreateFrame("Frame", "SkitsStyleDeparture", UIParent)
 
 -- Model Bg Frames
-Skits_Style_Tales.modelFullBgFrame = CreateFrame("Frame", nil, Skits_Style_Tales.mainFrame)
-Skits_Style_Tales.modelFullBgFrameTexture = Skits_Style_Tales.modelFullBgFrame:CreateTexture(nil, "BACKGROUND")
+Skits_Style_Departure.modelLeftBgFrame = CreateFrame("Frame", nil, Skits_Style_Departure.mainFrame)
+Skits_Style_Departure.modelLeftBgFrameTexture = Skits_Style_Departure.modelLeftBgFrame:CreateTexture(nil, "BACKGROUND")
 
-Skits_Style_Tales.modelLeftBgFrame = CreateFrame("Frame", nil, Skits_Style_Tales.mainFrame)
-Skits_Style_Tales.modelLeftBgFrameTexture = Skits_Style_Tales.modelLeftBgFrame:CreateTexture(nil, "BACKGROUND")
-Skits_Style_Tales.modelLeftBgBorderFrame = CreateFrame("Frame", nil, Skits_Style_Tales.modelLeftBgFrame)
-Skits_Style_Tales.modelLeftBgBorderFrameTexture = Skits_Style_Tales.modelLeftBgBorderFrame:CreateTexture(nil, "BACKGROUND")
-
-Skits_Style_Tales.modelRightBgFrame = CreateFrame("Frame", nil, Skits_Style_Tales.mainFrame)
-Skits_Style_Tales.modelRightBgFrameTexture = Skits_Style_Tales.modelLeftBgFrame:CreateTexture(nil, "BACKGROUND")
-Skits_Style_Tales.modelRightBgBorderFrame = CreateFrame("Frame", nil, Skits_Style_Tales.modelRightBgFrame)
-Skits_Style_Tales.modelRightBgBorderFrameTexture = Skits_Style_Tales.modelRightBgBorderFrame:CreateTexture(nil, "BACKGROUND")
-
--- Full Text Frame
-local fadedFrameParameters = nil
-Skits_Style_Tales.textFullFrame = CreateFrame("Frame", nil, Skits_Style_Tales.mainFrame)
-Skits_Style_Tales.textFullFrameBg = CreateFrame("Frame", nil, Skits_Style_Tales.textFullFrame)
-Skits_Style_Tales.textFullFrameBgTexture = Skits_Style_Tales.textFullFrameBg:CreateTexture(nil, "BACKGROUND")
-
-fadedFrameParameters = {
-    parent = Skits_Style_Tales.textFullFrame,
-    alpha = 1.0,
-    contentHeight = textAreaHeight,
-    contentWidth = GetScreenWidth(),
-    leftSize = 2,
-    rightSize = 2,
-    topSize = 20,
-    bottomSize = 2,
-}  
-Skits_Style_Tales.textFullFrameBgBorder = Skits_UI_Utils:CreateFadedFrame(fadedFrameParameters) 
+Skits_Style_Departure.modelRightBgFrame = CreateFrame("Frame", nil, Skits_Style_Departure.mainFrame)
+Skits_Style_Departure.modelRightBgFrameTexture = Skits_Style_Departure.modelLeftBgFrame:CreateTexture(nil, "BACKGROUND")
 
 -- Left Text Frames
-Skits_Style_Tales.textLeftFrame = CreateFrame("Frame", nil, Skits_Style_Tales.mainFrame)
-Skits_Style_Tales.textLeftSpeakerText = Skits_Style_Tales.textLeftFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-Skits_Style_Tales.textLeftMessageText = Skits_Style_Tales.textLeftFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-Skits_Style_Tales.textLeftFrameBg = CreateFrame("Frame", nil, Skits_Style_Tales.textLeftFrame)
-Skits_Style_Tales.textLeftFrameBgTexture = Skits_Style_Tales.textLeftFrameBg:CreateTexture(nil, "BACKGROUND")
+Skits_Style_Departure.textLeftFrame = CreateFrame("Frame", nil, Skits_Style_Departure.mainFrame)
+Skits_Style_Departure.textLeftSpeakerText = Skits_Style_Departure.textLeftFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+Skits_Style_Departure.textLeftMessageText = Skits_Style_Departure.textLeftFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 fadedFrameParameters = {
-    parent = Skits_Style_Tales.textLeftFrame,
-    alpha = 1.0,
+    parent = Skits_Style_Departure.textLeftFrame,
+    alpha = 0.9,
     contentHeight = textAreaHeight,
     contentWidth = GetScreenWidth() * 0.5,
     leftSize = 2,
@@ -62,17 +31,15 @@ fadedFrameParameters = {
     topSize = 20,
     bottomSize = 2,
 }  
-Skits_Style_Tales.textLeftFrameBgBorder = Skits_UI_Utils:CreateFadedFrame(fadedFrameParameters) 
+Skits_Style_Departure.textLeftFrameBgBorder = Skits_UI_Utils:CreateFadedFrame(fadedFrameParameters) 
 
 -- Right Text Frames
-Skits_Style_Tales.textRightFrame = CreateFrame("Frame", nil, Skits_Style_Tales.mainFrame)
-Skits_Style_Tales.textRightSpeakerText = Skits_Style_Tales.textRightFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-Skits_Style_Tales.textRightMessageText = Skits_Style_Tales.textRightFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-Skits_Style_Tales.textRightFrameBg = CreateFrame("Frame", nil, Skits_Style_Tales.textRightFrame)
-Skits_Style_Tales.textRightFrameBgTexture = Skits_Style_Tales.textRightFrameBg:CreateTexture(nil, "BACKGROUND")
+Skits_Style_Departure.textRightFrame = CreateFrame("Frame", nil, Skits_Style_Departure.mainFrame)
+Skits_Style_Departure.textRightSpeakerText = Skits_Style_Departure.textRightFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+Skits_Style_Departure.textRightMessageText = Skits_Style_Departure.textRightFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 fadedFrameParameters = {
-    parent = Skits_Style_Tales.textRightFrame,
-    alpha = 1.0,
+    parent = Skits_Style_Departure.textRightFrame,
+    alpha = 0.9,
     contentHeight = textAreaHeight,
     contentWidth = GetScreenWidth() * 0.5,
     leftSize = GetScreenWidth() * 0.25,
@@ -80,10 +47,10 @@ fadedFrameParameters = {
     topSize = 20,
     bottomSize = 2,
 }  
-Skits_Style_Tales.textRightFrameBgBorder = Skits_UI_Utils:CreateFadedFrame(fadedFrameParameters) 
+Skits_Style_Departure.textRightFrameBgBorder = Skits_UI_Utils:CreateFadedFrame(fadedFrameParameters) 
 
 -- Create Speaker Slots
-Skits_Style_Tales.speakerSlots = {}
+Skits_Style_Departure.speakerSlots = {}
 local tempOnLeft = true
 for i = 1, numberOfSlots do
     local speakerSlot = {
@@ -104,209 +71,149 @@ for i = 1, numberOfSlots do
     }
     tempOnLeft = not tempOnLeft
 
-    local modelFrame = CreateFrame("PlayerModel", nil, Skits_Style_Tales.mainFrame)
+    local modelFrame = CreateFrame("PlayerModel", nil, Skits_Style_Departure.mainFrame)
     speakerSlot.modelFrame = modelFrame
     speakerSlot.modelFrame.slot = speakerSlot
     speakerSlot.modelFrame:Show()
-    table.insert(Skits_Style_Tales.speakerSlots, speakerSlot)
+    table.insert(Skits_Style_Departure.speakerSlots, speakerSlot)
 end
 
 -- Speaker Positions
-Skits_Style_Tales.speakerPositions = {
+Skits_Style_Departure.speakerPositions = {
     left = {},
     right = {},
     leftOut = {x = 0, y = 0, slot = nil, idx = 0, onLeft = true},
     rightOut = {x = 0, y = 0, slot = nil, idx = 0, onLeft = false},
 }
 for i = 1, numberOfSlots do
-    table.insert(Skits_Style_Tales.speakerPositions.left, {x = 0, y = 0, slot = nil, idx = i, onLeft = true})
-    table.insert(Skits_Style_Tales.speakerPositions.right, {x = 0, y = 0, slot = nil, idx = i, onLeft = false})
+    table.insert(Skits_Style_Departure.speakerPositions.left, {x = 0, y = 0, slot = nil, idx = i, onLeft = true})
+    table.insert(Skits_Style_Departure.speakerPositions.right, {x = 0, y = 0, slot = nil, idx = i, onLeft = false})
 end
 
 -- Last Speak Data
-Skits_Style_Tales.lastSpeak = {
+Skits_Style_Departure.lastSpeak = {
     slotGeneral = nil,
     slotLeft = nil,
     slotRight = nil,
 }
 
 -- Controls
-Skits_Style_Tales.controls = {
+Skits_Style_Departure.controls = {
     skitExpire = GetTime(),
     skitExpireHandler = nil,
 }
 
-function Skits_Style_Tales:ResetLayouts()
+function Skits_Style_Departure:ResetLayouts()
     local options = Skits_Options.db
-    local font = LibStub("LibSharedMedia-3.0"):Fetch("font", options.style_tales_speech_font_name)    
-    local fontSize = options.style_tales_speech_font_size
+    local font = LibStub("LibSharedMedia-3.0"):Fetch("font", options.style_departure_speech_font_name)    
+    local fontSize = options.style_departure_speech_font_size
 
-    local optionsModelSize = options.style_tales_model_size
-    local modelBgSize = (optionsModelSize * 0.5) + 50
+    local optionsModelSize = options.style_departure_model_size
     local modelFrameSize = optionsModelSize
-    modelDist = GetScreenWidth() / (numberOfSlots)
+    local modelDist = optionsModelSize * 0.2
 
     -- MainFrame
     self.mainFrame:SetSize(GetScreenWidth(), GetScreenHeight()) -- Full screen
     self.mainFrame:SetPoint("CENTER")
-    self.mainFrame:SetFrameStrata(options.style_tales_strata)
+    self.mainFrame:SetFrameStrata(options.style_departure_strata)
     self.mainFrame:EnableMouse(false) -- Allow clicks to pass through
     self.mainFrame:EnableMouseWheel(false) -- Ignore mouse wheel events
 
     -- Model Background Frame Adjustments --------------------------------------------------
 
-    -- Full 
-    self.modelFullBgFrame:SetSize(GetScreenWidth(), modelBgSize)
-    self.modelFullBgFrame:SetPoint("BOTTOMLEFT", 0, textAreaHeight)
-    self.modelFullBgFrame:SetFrameLevel(50)
-
-    self.modelFullBgFrameTexture:SetTexture("Interface/AddOns/Skits/Textures/ModelBgLinear.tga")
-    self.modelFullBgFrameTexture:SetAllPoints(self.modelFullBgFrame)
-    self.modelFullBgFrameTexture:SetHorizTile(true)
-    self.modelFullBgFrameTexture:SetVertTile(false)
-
     -- Left
-    self.modelLeftBgFrame:SetSize(GetScreenWidth() * 0.5, modelBgSize)
-    self.modelLeftBgFrame:SetPoint("BOTTOMLEFT", 0, textAreaHeight)
+    self.modelLeftBgFrame:SetSize(optionsModelSize * 0.9, optionsModelSize * 0.7)
+    self.modelLeftBgFrame:SetPoint("BOTTOMLEFT", 0, 0)
     self.modelLeftBgFrame:SetFrameLevel(50)
 
-    self.modelLeftBgFrameTexture:SetTexture("Interface/AddOns/Skits/Textures/ModelBgLinear.tga")
+    self.modelLeftBgFrameTexture:SetTexture("Interface/AddOns/Skits/Textures/ModelBgCircular.tga")
+    self.modelLeftBgFrameTexture:SetTexCoord(1, 0, 0, 1)
     self.modelLeftBgFrameTexture:SetAllPoints(self.modelLeftBgFrame)
-    self.modelLeftBgFrameTexture:SetHorizTile(true)
+    self.modelLeftBgFrameTexture:SetHorizTile(false)
     self.modelLeftBgFrameTexture:SetVertTile(false)
 
-    self.modelLeftBgBorderFrame:SetSize(GetScreenWidth() * 0.2, modelBgSize)
-    self.modelLeftBgBorderFrame:SetPoint("BOTTOMLEFT", self.modelLeftBgFrame, "BOTTOMRIGHT", 0, 0)
-    self.modelLeftBgBorderFrame:SetFrameLevel(50)
-
-    self.modelLeftBgBorderFrameTexture:SetTexture("Interface/AddOns/Skits/Textures/ModelBgLinearFade.tga")
-    self.modelLeftBgBorderFrameTexture:SetAllPoints(self.modelLeftBgBorderFrame)
-    self.modelLeftBgBorderFrameTexture:SetHorizTile(false)
-    self.modelLeftBgBorderFrameTexture:SetVertTile(false)
-
     -- Right
-    self.modelRightBgFrame:SetSize(GetScreenWidth() * 0.5, modelBgSize)
-    self.modelRightBgFrame:SetPoint("BOTTOMRIGHT", 0, textAreaHeight)
+    self.modelRightBgFrame:SetSize(optionsModelSize * 0.9, optionsModelSize * 0.7)
+    self.modelRightBgFrame:SetPoint("BOTTOMRIGHT", 0, 0)
     self.modelRightBgFrame:SetFrameLevel(50)
 
-    self.modelRightBgFrameTexture:SetTexture("Interface/AddOns/Skits/Textures/ModelBgLinear.tga")
+    self.modelRightBgFrameTexture:SetTexture("Interface/AddOns/Skits/Textures/ModelBgCircular.tga")
     self.modelRightBgFrameTexture:SetAllPoints(self.modelRightBgFrame)
-    self.modelRightBgFrameTexture:SetHorizTile(true)
+    self.modelRightBgFrameTexture:SetHorizTile(false)
     self.modelRightBgFrameTexture:SetVertTile(false)
 
-    self.modelRightBgBorderFrame:SetSize(GetScreenWidth() * 0.2, modelBgSize)
-    self.modelRightBgBorderFrame:SetPoint("BOTTOMRIGHT", self.modelRightBgFrame, "BOTTOMLEFT", 0, 0)
-    self.modelRightBgBorderFrame:SetFrameLevel(50)
-
-    self.modelRightBgBorderFrameTexture:SetTexture("Interface/AddOns/Skits/Textures/ModelBgLinearFade.tga")
-    self.modelRightBgBorderFrameTexture:SetAllPoints(self.modelRightBgBorderFrame)
-    self.modelRightBgBorderFrameTexture:SetHorizTile(false)
-    self.modelRightBgBorderFrameTexture:SetVertTile(false)    
-
     -- Text Frame Adjustments --------------------------------------------------
-    local textWidth = (GetScreenWidth() * 0.5) - 40
+    local textWidth = (GetScreenWidth() * 0.25)
     local fadedFrameParameters = nil
     local speakerNameHeight = 0
 
-    -- Full Frame
-    self.textFullFrame:SetSize(GetScreenWidth(), textAreaHeight)
-    self.textFullFrame:SetPoint("BOTTOMLEFT", 0, 0)
-    self.textFullFrameBg:SetSize(GetScreenWidth(), textAreaHeight)
-    self.textFullFrameBg:SetPoint("BOTTOMLEFT", 0, 0)
-    self.textFullFrameBgTexture:SetAllPoints(self.textFullFrameBg)
-    self.textFullFrameBgTexture:SetColorTexture(0, 0, 0, 1) -- r,g,b,a        
-    fadedFrameParameters = {
-        parent = Skits_Style_Tales.textFullFrame,
-        alpha = 1.0,
-        contentHeight = textAreaHeight,
-        contentWidth = GetScreenWidth(),
-        leftSize = 2,
-        rightSize = 2,
-        topSize = 10,
-        bottomSize = 2,
-    }  
-    Skits_UI_Utils:ResizeFadedFrame(self.textFullFrameBgBorder, fadedFrameParameters)
-    self.textFullFrameBgBorder.main:SetPoint("BOTTOMLEFT", Skits_Style_Tales.textFullFrame, "BOTTOMLEFT", 0, 0)
-
     -- Left Frame
-    self.textLeftFrame:SetSize(GetScreenWidth() * 0.5, textAreaHeight)
-    self.textLeftFrame:SetPoint("BOTTOMLEFT", 0, 0)
-    self.textLeftFrameBg:SetSize(GetScreenWidth() * 0.5, textAreaHeight)
-    self.textLeftFrameBg:SetPoint("BOTTOMLEFT", 0, 0)
-    self.textLeftFrameBgTexture:SetAllPoints(self.textLeftFrameBg)
-    self.textLeftFrameBgTexture:SetColorTexture(0, 0, 0, 1) -- r,g,b,a       
+    self.textLeftFrame:SetSize(textWidth, textAreaHeight)
+    self.textLeftFrame:SetPoint("BOTTOMLEFT", 0, 0)   
     fadedFrameParameters = {
-        parent = Skits_Style_Tales.textLeftFrame,
-        alpha = 1.0,
+        parent = Skits_Style_Departure.textLeftFrame,
+        alpha = 0.1,
         contentHeight = textAreaHeight,
-        contentWidth = GetScreenWidth() * 0.5,
-        leftSize = 2,
-        rightSize = GetScreenWidth() * 0.25,
-        topSize = 10,
+        contentWidth = textWidth,
+        leftSize = textWidth,
+        rightSize = textWidth,
+        topSize = 2,
         bottomSize = 2,
     }  
     Skits_UI_Utils:ResizeFadedFrame(self.textLeftFrameBgBorder, fadedFrameParameters)
-    self.textLeftFrameBgBorder.main:SetPoint("BOTTOMLEFT", Skits_Style_Tales.textLeftFrame, "BOTTOMLEFT", 0, 0)   
+    self.textLeftFrameBgBorder.main:SetPoint("BOTTOMLEFT", Skits_Style_Departure.textLeftFrame, "BOTTOMLEFT", 0, 0)   
     
-    self.textLeftSpeakerText:SetPoint("CENTER", self.textLeftFrame, "TOP", 0, 0)
+    self.textLeftSpeakerText:SetPoint("LEFT", self.textLeftFrame, "BOTTOMLEFT", 0, 0)
     self.textLeftSpeakerText:SetFont(font, fontSize)
-    self.textLeftSpeakerText:SetJustifyH("CENTER")
+    self.textLeftSpeakerText:SetJustifyH("LEFT")
+    self.textLeftSpeakerText:SetJustifyV("MIDDLE")
     self.textLeftSpeakerText:SetWordWrap(true)
     self.textLeftSpeakerText:SetText(" ")
     speakerNameHeight = self.textLeftSpeakerText:GetStringHeight() + 5
 
-    self.textLeftMessageText:SetPoint("BOTTOM", self.textLeftFrame, "BOTTOM", 0, 0)
+    self.textLeftMessageText:SetPoint("BOTTOMLEFT", self.textLeftFrame, "BOTTOMLEFT", 0, 0) -- Centered horizontally and vertically
     self.textLeftMessageText:SetSize(textWidth, textAreaHeight)
     self.textLeftMessageText:SetFont(font, fontSize)
-    self.textLeftMessageText:SetJustifyH("CENTER")
-    self.textLeftMessageText:SetJustifyV("MIDDLE")
+    self.textLeftMessageText:SetJustifyH("LEFT")
+    self.textLeftMessageText:SetJustifyV("BOTTOM")
     self.textLeftMessageText:SetWordWrap(true)    
 
     -- Right Frame
-    self.textRightFrame:SetSize(GetScreenWidth() * 0.5, textAreaHeight)
+    self.textRightFrame:SetSize(textWidth, textAreaHeight)
     self.textRightFrame:SetPoint("BOTTOMRIGHT", 0, 0)
-    self.textRightFrameBg:SetSize(GetScreenWidth() * 0.5, textAreaHeight)
-    self.textRightFrameBg:SetPoint("BOTTOMRIGHT", 0, 0)
-    self.textRightFrameBgTexture:SetAllPoints(self.textRightFrameBg)
-    self.textRightFrameBgTexture:SetColorTexture(0, 0, 0, 1) -- r,g,b,a   
     fadedFrameParameters = {
-        parent = Skits_Style_Tales.textRightFrame,
-        alpha = 1.0,
+        parent = Skits_Style_Departure.textRightFrame,
+        alpha = 0.1,
         contentHeight = textAreaHeight,
-        contentWidth = GetScreenWidth() * 0.5,
-        leftSize = GetScreenWidth() * 0.25,
-        rightSize = 2,
-        topSize = 10,
+        contentWidth = textWidth,
+        leftSize = textWidth,
+        rightSize = textWidth,
+        topSize = 2,
         bottomSize = 2,
     }  
     Skits_UI_Utils:ResizeFadedFrame(self.textRightFrameBgBorder, fadedFrameParameters)
-    self.textRightFrameBgBorder.main:SetPoint("BOTTOMRIGHT", Skits_Style_Tales.textRightFrame, "BOTTOMRIGHT", 0, 0)   
+    self.textRightFrameBgBorder.main:SetPoint("BOTTOMRIGHT", Skits_Style_Departure.textRightFrame, "BOTTOMRIGHT", 0, 0)   
     
-    self.textRightSpeakerText:SetPoint("CENTER", self.textRightFrame, "TOP", 0, 0)
+    self.textRightSpeakerText:SetPoint("RIGHT", self.textRightFrame, "BOTTOMRIGHT", 0, 0)
     self.textRightSpeakerText:SetFont(font, fontSize)
-    self.textRightSpeakerText:SetJustifyH("CENTER")
+    self.textRightSpeakerText:SetJustifyH("RIGHT")
+    self.textRightSpeakerText:SetJustifyV("MIDDLE")
     self.textRightSpeakerText:SetWordWrap(true)
     self.textRightSpeakerText:SetText(" ")
     speakerNameHeight = self.textRightSpeakerText:GetStringHeight() + 5
 
-    self.textRightMessageText:SetPoint("BOTTOM", self.textRightFrame, "BOTTOM", 0, 0)
+    self.textRightMessageText:SetPoint("BOTTOMRIGHT", self.textRightFrame, "BOTTOMRIGHT", 0, -speakerNameHeight) -- Centered horizontally and vertically
     self.textRightMessageText:SetSize(textWidth, textAreaHeight)
     self.textRightMessageText:SetFont(font, fontSize)
-    self.textRightMessageText:SetJustifyH("CENTER")
-    self.textRightMessageText:SetJustifyV("MIDDLE")
+    self.textRightMessageText:SetJustifyH("RIGHT")
+    self.textRightMessageText:SetJustifyV("BOTTOM")
     self.textRightMessageText:SetWordWrap(true)    
 
     -- Text Frame Levels
-    self.textFullFrame:SetFrameLevel(100)
-    self.textFullFrameBg:SetFrameLevel(90)
-    self.textFullFrameBgBorder.main:SetFrameLevel(95)
-    self.textFullFrameBgBorder.bg:SetFrameLevel(95)
     self.textLeftFrame:SetFrameLevel(100)
-    self.textLeftFrameBg:SetFrameLevel(90)
     self.textLeftFrameBgBorder.main:SetFrameLevel(95)
     self.textLeftFrameBgBorder.bg:SetFrameLevel(95)
     self.textRightFrame:SetFrameLevel(100)
-    self.textRightFrameBg:SetFrameLevel(90)
     self.textRightFrameBgBorder.main:SetFrameLevel(95)
     self.textRightFrameBgBorder.bg:SetFrameLevel(95)
 
@@ -319,30 +226,24 @@ function Skits_Style_Tales:ResetLayouts()
    end    
 
     -- Slot Positions
-    local slotPosY = textAreaHeight + 30 - (modelFrameSize * 0.40)
-    local slotPosCenterDist = GetScreenWidth() / 4
-    local slotPosCenterDistMult = 0
+    local slotPosY = -(modelFrameSize * 0.35)
+    local slotBaseX = -(modelFrameSize * 0.25)
     local slotPosX = 0
     for i = 1, numberOfSlots do
         -- Calculate Position
-        if i % 2 == 0 then
-            slotPosCenterDistMult = slotPosCenterDistMult + 1
-            slotPosX = slotPosCenterDist - (slotPosCenterDistMult * modelDist)
-        else
-            slotPosX = slotPosCenterDist + (slotPosCenterDistMult * modelDist)
-        end
+        slotPosX = slotBaseX + ((i-1) * modelDist * -1)
 
         -- Register it
-        self.speakerPositions.left[i].x = -slotPosX
+        self.speakerPositions.left[i].x = slotPosX
         self.speakerPositions.left[i].y = slotPosY
 
-        self.speakerPositions.right[i].x = slotPosX
+        self.speakerPositions.right[i].x = -slotPosX
         self.speakerPositions.right[i].y = slotPosY
     end
-    self.speakerPositions.leftOut.x = -(GetScreenWidth() * 0.6)
+    self.speakerPositions.leftOut.x = -(modelFrameSize)
     self.speakerPositions.leftOut.y = slotPosY
 
-    self.speakerPositions.rightOut.x = GetScreenWidth() * 0.6
+    self.speakerPositions.rightOut.x = (modelFrameSize)
     self.speakerPositions.rightOut.y = slotPosY
 end
 
@@ -407,20 +308,20 @@ local function SlotFindOldest()
     local oldestTimestamp = nil
 
     for i = 1, numberOfSlots do
-        local slot = Skits_Style_Tales.speakerSlots[i]      
+        local slot = Skits_Style_Departure.speakerSlots[i]      
         if not oldestTimestamp or slot.speakTimestamp < oldestTimestamp then
             oldestIdx = i
             oldestTimestamp = slot.speakTimestamp
         end
     end
 
-    return Skits_Style_Tales.speakerSlots[oldestIdx]
+    return Skits_Style_Departure.speakerSlots[oldestIdx]
 end
 
 local function SlotFindOneToUse()
     -- Use a Free Slot
     for i = 1, numberOfSlots do
-        local slot = Skits_Style_Tales.speakerSlots[i]
+        local slot = Skits_Style_Departure.speakerSlots[i]
         if not slot.creatureData then
             return slot
         end
@@ -433,7 +334,7 @@ end
 local function SlotFindSpeaker(speakerName)
     local currTime = GetTime()
     for i = 1, numberOfSlots do
-        local slot = Skits_Style_Tales.speakerSlots[i]
+        local slot = Skits_Style_Departure.speakerSlots[i]
         if slot.creatureData and slot.creatureData.name == speakerName then
             return slot
         end
@@ -442,12 +343,12 @@ local function SlotFindSpeaker(speakerName)
 end
 
 local function SlotSetCurrentSpeaker(slot, creatureData)
-    Skits_Style_Tales.lastSpeak.slotGeneral = slot
+    Skits_Style_Departure.lastSpeak.slotGeneral = slot
 
     if slot.onLeft then
-        Skits_Style_Tales.lastSpeak.slotLeft = slot
+        Skits_Style_Departure.lastSpeak.slotLeft = slot
     else
-        Skits_Style_Tales.lastSpeak.slotRight = slot
+        Skits_Style_Departure.lastSpeak.slotRight = slot
     end
 
     slot.creatureData = creatureData
@@ -459,7 +360,7 @@ local function SlotToBack(slot)
     end
 
     local options = Skits_Options.db
-    if options.style_tales_previous_speaker_lingertime <= 0 then
+    if options.style_departure_previous_speaker_lingertime <= 0 then
         slot.modelFrame:SetFrameLevel(40)
         SlotExpireSlot(slot)
     end
@@ -483,7 +384,7 @@ local function SlotToBack(slot)
         slot.slotExpireHandler:Cancel()
     end
     local tslot = slot
-    slot.slotExpireHandler = C_Timer.NewTimer(options.style_tales_previous_speaker_lingertime, function()        
+    slot.slotExpireHandler = C_Timer.NewTimer(options.style_departure_previous_speaker_lingertime, function()        
         SlotExpireSlot(tslot)
     end)   
 
@@ -512,9 +413,9 @@ end
 
 -- POSITION FUNCTIONS --------------------------------------------------------------------------------------------------------------
 local function PositionGetFreeSecondayOriented(onLeft)
-    local positionArray = Skits_Style_Tales.speakerPositions.right
+    local positionArray = Skits_Style_Departure.speakerPositions.right
     if onLeft then
-        positionArray = Skits_Style_Tales.speakerPositions.left
+        positionArray = Skits_Style_Departure.speakerPositions.left
     end
 
     for i = 2, math.ceil(numberOfSlots) do
@@ -529,9 +430,9 @@ end
 
 
 local function PositionGetOldestSecondayOriented(onLeft)
-    local positionArray = Skits_Style_Tales.speakerPositions.right
+    local positionArray = Skits_Style_Departure.speakerPositions.right
     if onLeft then
-        positionArray = Skits_Style_Tales.speakerPositions.left
+        positionArray = Skits_Style_Departure.speakerPositions.left
     end
 
     local oldestPos = nil
@@ -570,8 +471,8 @@ end
 
 
 local function PositionGetMainOldest()
-    local leftPos = Skits_Style_Tales.speakerPositions.left[1]
-    local rightPos = Skits_Style_Tales.speakerPositions.right[1]
+    local leftPos = Skits_Style_Departure.speakerPositions.left[1]
+    local rightPos = Skits_Style_Departure.speakerPositions.right[1]
 
     if not leftPos.slot then
         return leftPos
@@ -599,7 +500,11 @@ local function PositionSetSlotToPositionUpdate(self, delta)
     local cx = Skits_Utils:Interpolation(up.ox, up.tx, 0, up.td, up.cd)
     local cy = Skits_Utils:Interpolation(up.oy, up.ty, 0, up.td, up.cd)
 
-    slot.modelFrame:SetPoint("BOTTOM", Skits_Style_Tales.mainFrame, "BOTTOM", cx, cy) 
+    if slot.position.onLeft then
+        slot.modelFrame:SetPoint("BOTTOMLEFT", Skits_Style_Departure.mainFrame, "BOTTOMLEFT", cx, cy) 
+    else
+        slot.modelFrame:SetPoint("BOTTOMRIGHT", Skits_Style_Departure.mainFrame, "BOTTOMRIGHT", cx, cy) 
+    end
     
     if ending then
         self:SetScript("OnUpdate", nil)
@@ -610,7 +515,7 @@ local function PositionSetSlotToPosition(slot, toPosition, instant)
     local duration = 0.25
 
     -- Reasons to be instant (besides given parameter)
-    if not Skits_Style_Tales.mainFrame:IsShown() then
+    if not Skits_Style_Departure.mainFrame:IsShown() then
         instant = true
     elseif duration <= 0 then
         instant = true
@@ -638,7 +543,11 @@ local function PositionSetSlotToPosition(slot, toPosition, instant)
         end
         up.h = nil
 
-        slot.modelFrame:SetPoint("BOTTOM", Skits_Style_Tales.mainFrame, "BOTTOM", toPosition.x, toPosition.y)        
+        if slot.position.onLeft then
+            slot.modelFrame:SetPoint("BOTTOMLEFT", Skits_Style_Departure.mainFrame, "BOTTOMLEFT", toPosition.x, toPosition.y) 
+        else
+            slot.modelFrame:SetPoint("BOTTOMRIGHT", Skits_Style_Departure.mainFrame, "BOTTOMRIGHT", toPosition.x, toPosition.y) 
+        end
     else         
         local up = slot.positionUpdate
         up.ox = Skits_Utils:Interpolation(up.ox, up.tx, 0, up.td, up.cd)
@@ -663,7 +572,7 @@ end
 
 local function PositionGoto(slot, position, instant)
     -- Reasons to be instant (besides given parameter)
-    if not Skits_Style_Tales.mainFrame:IsShown() then
+    if not Skits_Style_Departure.mainFrame:IsShown() then
         instant = true
     elseif not slot.position then
         instant = true
@@ -691,7 +600,7 @@ end
 
 local function PositionSwap(slot1, slot2, instant)
     -- Reasons to be instant (besides given parameter)
-    if not Skits_Style_Tales.mainFrame:IsShown() then
+    if not Skits_Style_Departure.mainFrame:IsShown() then
         instant = true
     elseif not slot.position then
         instant = true
@@ -724,14 +633,14 @@ local function MsgAdd(creatureData, textData, slot, duration)
 
     local lastTimestamp = nil
     if slot.position.onLeft then
-        if Skits_Style_Tales.lastSpeak.slotRight then
-            lastTimestamp = Skits_Style_Tales.lastSpeak.slotRight.msgExpireTimestamp
-            maxDuration = maxDuration + Skits_Style_Tales.lastSpeak.slotRight.msgExpireDuration
+        if Skits_Style_Departure.lastSpeak.slotRight then
+            lastTimestamp = Skits_Style_Departure.lastSpeak.slotRight.msgExpireTimestamp
+            maxDuration = maxDuration + Skits_Style_Departure.lastSpeak.slotRight.msgExpireDuration
         end
     else
-        if Skits_Style_Tales.lastSpeak.slotLeft then
-            lastTimestamp = Skits_Style_Tales.lastSpeak.slotLeft.msgExpireTimestamp
-            maxDuration = maxDuration + Skits_Style_Tales.lastSpeak.slotLeft.msgExpireDuration
+        if Skits_Style_Departure.lastSpeak.slotLeft then
+            lastTimestamp = Skits_Style_Departure.lastSpeak.slotLeft.msgExpireTimestamp
+            maxDuration = maxDuration + Skits_Style_Departure.lastSpeak.slotLeft.msgExpireDuration
         end
     end
 
@@ -763,40 +672,78 @@ local function MsgAdd(creatureData, textData, slot, duration)
     end)    
 
     -- Update Skit Expire
-    if Skits_Style_Tales.controls.skitExpire < slot.msgExpireTimestamp then
+    if Skits_Style_Departure.controls.skitExpire < slot.msgExpireTimestamp then
         -- Update Timestamp
-        Skits_Style_Tales.controls.skitExpire = slot.msgExpireTimestamp
+        Skits_Style_Departure.controls.skitExpire = slot.msgExpireTimestamp
 
         -- Update Timer
-        diff = Skits_Style_Tales.controls.skitExpire - currTime
-        if Skits_Style_Tales.controls.skitExpireHandler then
-            Skits_Style_Tales.controls.skitExpireHandler:Cancel()
+        diff = Skits_Style_Departure.controls.skitExpire - currTime
+        if Skits_Style_Departure.controls.skitExpireHandler then
+            Skits_Style_Departure.controls.skitExpireHandler:Cancel()
         end
-        Skits_Style_Tales.controls.skitExpireHandler = C_Timer.NewTimer(diff, function()
-            Skits_Style_Tales:CloseSkit()
+        Skits_Style_Departure.controls.skitExpireHandler = C_Timer.NewTimer(diff, function()
+            Skits_Style_Departure:CloseSkit()
         end)    
     end
 
     -- Add Message Text
-    local speakerTextEle = nil
-    local messageTextEle = nil
+    local speakerTextHeight = 0
+    local messageTextHeight = 0
+    local textWidth = GetScreenWidth() * 0.25
+    local fadedFrameParameters = nil
     if slot.position.onLeft then
-        speakerTextEle = Skits_Style_Tales.textLeftSpeakerText
-        messageTextEle = Skits_Style_Tales.textLeftMessageText
+        Skits_Style_Departure.textLeftSpeakerText:SetText(creatureData.name)
+        Skits_Style_Departure.textLeftSpeakerText:SetTextColor(1, 1, 1)
+        eleTextHeight = Skits_Style_Departure.textLeftSpeakerText:GetStringHeight()
+
+        Skits_Style_Departure.textLeftMessageText:SetText(textData.text)
+        Skits_Style_Departure.textLeftMessageText:SetTextColor(textData.r, textData.g, textData.b)
+        Skits_Style_Departure.textLeftMessageText:SetPoint("BOTTOMLEFT", Skits_Style_Departure.textLeftFrame, "BOTTOMLEFT", (eleTextHeight*2), eleTextHeight * 2)
+        messageTextHeight = Skits_Style_Departure.textLeftMessageText:GetStringHeight()
+        textWidth = math.min(textWidth, Skits_Style_Departure.textLeftMessageText:GetStringWidth())
+
+        Skits_Style_Departure.textLeftSpeakerText:SetPoint("LEFT", Skits_Style_Departure.textLeftFrame, "BOTTOMLEFT", (eleTextHeight*2), messageTextHeight + (eleTextHeight * 3) )
+
+        fadedFrameParameters = {
+            parent = Skits_Style_Departure.textLeftFrame,
+            alpha = 0.9,
+            contentHeight = messageTextHeight + (eleTextHeight*1.8),
+            contentWidth = math.max(1, textWidth - (eleTextHeight*5)),
+            leftSize = (eleTextHeight*1),
+            rightSize = (eleTextHeight*20),
+            topSize = 4,
+            bottomSize = 4,
+        }  
+        Skits_UI_Utils:ResizeFadedFrame(Skits_Style_Departure.textLeftFrameBgBorder, fadedFrameParameters)
+        Skits_Style_Departure.textLeftFrameBgBorder.main:SetPoint("BOTTOMLEFT", Skits_Style_Departure.textLeftFrame, "BOTTOMLEFT", (eleTextHeight*2), eleTextHeight)     
+
     else
-        speakerTextEle = Skits_Style_Tales.textRightSpeakerText
-        messageTextEle = Skits_Style_Tales.textRightMessageText
-    end
 
-    speakerNameDisplayed = ""
-    if options.style_tales_speaker_name_enabled then
-        speakerNameDisplayed = creatureData.name
-    end
-    speakerTextEle:SetText(speakerNameDisplayed)
-    speakerTextEle:SetTextColor(1, 1, 1)
+        Skits_Style_Departure.textRightSpeakerText:SetText(creatureData.name)
+        Skits_Style_Departure.textRightSpeakerText:SetTextColor(1, 1, 1)
+        eleTextHeight = Skits_Style_Departure.textRightSpeakerText:GetStringHeight()
 
-    messageTextEle:SetText(textData.text)
-    messageTextEle:SetTextColor(textData.r, textData.g, textData.b)
+        Skits_Style_Departure.textRightMessageText:SetText(textData.text)
+        Skits_Style_Departure.textRightMessageText:SetTextColor(textData.r, textData.g, textData.b)
+        Skits_Style_Departure.textRightMessageText:SetPoint("BOTTOMRIGHT", Skits_Style_Departure.textRightFrame, "BOTTOMRIGHT", -(eleTextHeight*2), eleTextHeight * 2)
+        messageTextHeight = Skits_Style_Departure.textRightMessageText:GetStringHeight()
+        textWidth = math.min(textWidth, Skits_Style_Departure.textRightMessageText:GetStringWidth())
+
+        Skits_Style_Departure.textRightSpeakerText:SetPoint("RIGHT", Skits_Style_Departure.textRightFrame, "BOTTOMRIGHT", -(eleTextHeight*2), messageTextHeight + (eleTextHeight * 3) )
+
+        fadedFrameParameters = {
+            parent = Skits_Style_Departure.textRightFrame,
+            alpha = 0.9,
+            contentHeight = messageTextHeight + (eleTextHeight*1.8),
+            contentWidth = math.max(1, textWidth - (eleTextHeight*5)),
+            leftSize = (eleTextHeight*20),
+            rightSize = (eleTextHeight*1),
+            topSize = 4,
+            bottomSize = 4,
+        }  
+        Skits_UI_Utils:ResizeFadedFrame(Skits_Style_Departure.textRightFrameBgBorder, fadedFrameParameters)
+        Skits_Style_Departure.textRightFrameBgBorder.main:SetPoint("BOTTOMRIGHT", Skits_Style_Departure.textRightFrame, "BOTTOMRIGHT", -(eleTextHeight*2), eleTextHeight)    
+    end
 end
 
 -- MODEL FUNCTIONS --------------------------------------------------------------------------------------------------------------
@@ -822,7 +769,7 @@ local function ModelAdd(creatureData, textData, slot, duration)
     local pauseAfter = 0
     local fallbackId = Skits_Style_Utils.fallbackId
     local fallbackLight = Skits_Style_Utils.lightPresets.hidden    
-    if options.style_tales_model_poser then
+    if options.style_departure_model_poser then
         animations = Skits_UI_Utils:GetAnimationIdsFromText(textData.text, true)
         pauseAfter = 1 + (math.random() * 1)
     end    
@@ -844,79 +791,46 @@ local function LayoutUpdateBackgrounds()
     local options = Skits_Options.db
 
     -- Update Message Frames
-    local mainSlotLeft = Skits_Style_Tales.speakerPositions.left[1].slot
-    local mainSlotRight = Skits_Style_Tales.speakerPositions.right[1].slot
+    local mainSlotLeft = Skits_Style_Departure.speakerPositions.left[1].slot
+    local mainSlotRight = Skits_Style_Departure.speakerPositions.right[1].slot
 
-    if options.style_tales_always_fullscreen or (mainSlotLeft and mainSlotRight) then
-        Skits_Style_Tales.textFullFrameBg:Show()
-        Skits_Style_Tales.textFullFrameBgBorder.main:Show()
-        Skits_Style_Tales.textFullFrameBgTexture:Show()
-        Skits_Style_Tales.textLeftFrameBg:Hide()
-        Skits_Style_Tales.textLeftFrameBgBorder.main:Hide()
-        Skits_Style_Tales.textLeftFrameBgTexture:Hide()
-        Skits_Style_Tales.textRightFrameBg:Hide()
-        Skits_Style_Tales.textRightFrameBgBorder.main:Hide()     
-        Skits_Style_Tales.textRightFrameBgTexture:Hide()
+    if mainSlotLeft and mainSlotRight then
+        Skits_Style_Departure.textLeftFrame:Show()
+        Skits_Style_Departure.textLeftFrameBgBorder.bg:Show()        
+        Skits_Style_Departure.textRightFrame:Show()
+        Skits_Style_Departure.textRightFrameBgBorder.bg:Show()
         
-        Skits_Style_Tales.modelFullBgFrame:Show()
-        Skits_Style_Tales.modelFullBgFrameTexture:Show()
-        Skits_Style_Tales.modelLeftBgFrame:Hide()
-        Skits_Style_Tales.modelLeftBgBorderFrame:Hide()
-        Skits_Style_Tales.modelLeftBgFrameTexture:Hide()
-        Skits_Style_Tales.modelLeftBgBorderFrameTexture:Hide()
-        Skits_Style_Tales.modelRightBgFrame:Hide()
-        Skits_Style_Tales.modelRightBgBorderFrame:Hide()
-        Skits_Style_Tales.modelRightBgFrameTexture:Hide()
-        Skits_Style_Tales.modelRightBgBorderFrameTexture:Hide()
+        Skits_Style_Departure.modelLeftBgFrame:Show()
+        Skits_Style_Departure.modelLeftBgFrameTexture:Show()
+        Skits_Style_Departure.modelRightBgFrame:Show()
+        Skits_Style_Departure.modelRightBgFrameTexture:Show()
 
     elseif mainSlotLeft then
-        Skits_Style_Tales.textFullFrameBg:Hide()
-        Skits_Style_Tales.textFullFrameBgBorder.main:Hide()
-        Skits_Style_Tales.textFullFrameBgTexture:Hide()
-        Skits_Style_Tales.textLeftFrameBg:Show()
-        Skits_Style_Tales.textLeftFrameBgBorder.main:Show()
-        Skits_Style_Tales.textLeftFrameBgTexture:Show()
-        Skits_Style_Tales.textRightFrameBg:Hide()
-        Skits_Style_Tales.textRightFrameBgBorder.main:Hide()   
-        Skits_Style_Tales.textRightFrameBgTexture:Hide()
+        Skits_Style_Departure.textLeftFrame:Show()
+        Skits_Style_Departure.textLeftFrameBgBorder.bg:Show()        
+        Skits_Style_Departure.textRightFrame:Hide()
+        Skits_Style_Departure.textRightFrameBgBorder.bg:Hide()
         
-        Skits_Style_Tales.modelFullBgFrame:Hide()
-        Skits_Style_Tales.modelFullBgFrameTexture:Hide()
-        Skits_Style_Tales.modelLeftBgFrame:Show()
-        Skits_Style_Tales.modelLeftBgBorderFrame:Show()
-        Skits_Style_Tales.modelLeftBgFrameTexture:Show()
-        Skits_Style_Tales.modelLeftBgBorderFrameTexture:Show()
-        Skits_Style_Tales.modelRightBgFrame:Hide()
-        Skits_Style_Tales.modelRightBgBorderFrame:Hide()
-        Skits_Style_Tales.modelRightBgFrameTexture:Hide()
-        Skits_Style_Tales.modelRightBgBorderFrameTexture:Hide()
+        Skits_Style_Departure.modelLeftBgFrame:Show()
+        Skits_Style_Departure.modelLeftBgFrameTexture:Show()
+        Skits_Style_Departure.modelRightBgFrame:Hide()
+        Skits_Style_Departure.modelRightBgFrameTexture:Hide()
 
     elseif mainSlotRight then
-        Skits_Style_Tales.textFullFrameBg:Hide()
-        Skits_Style_Tales.textFullFrameBgBorder.main:Hide()
-        Skits_Style_Tales.textFullFrameBgTexture:Hide()
-        Skits_Style_Tales.textLeftFrameBg:Hide()
-        Skits_Style_Tales.textLeftFrameBgBorder.main:Hide()
-        Skits_Style_Tales.textLeftFrameBgTexture:Hide()
-        Skits_Style_Tales.textRightFrameBg:Show()
-        Skits_Style_Tales.textRightFrameBgBorder.main:Show()   
-        Skits_Style_Tales.textRightFrameBgTexture:Show()
+        Skits_Style_Departure.textLeftFrame:Hide()
+        Skits_Style_Departure.textLeftFrameBgBorder.bg:Hide()        
+        Skits_Style_Departure.textRightFrame:Show()
+        Skits_Style_Departure.textRightFrameBgBorder.bg:Show()
         
-        Skits_Style_Tales.modelFullBgFrame:Hide()
-        Skits_Style_Tales.modelFullBgFrameTexture:Hide()
-        Skits_Style_Tales.modelLeftBgFrame:Hide()
-        Skits_Style_Tales.modelLeftBgBorderFrame:Hide()
-        Skits_Style_Tales.modelLeftBgFrameTexture:Hide()
-        Skits_Style_Tales.modelLeftBgBorderFrameTexture:Hide()
-        Skits_Style_Tales.modelRightBgFrame:Show()
-        Skits_Style_Tales.modelRightBgBorderFrame:Show()
-        Skits_Style_Tales.modelRightBgFrameTexture:Show()
-        Skits_Style_Tales.modelRightBgBorderFrameTexture:Show()           
+        Skits_Style_Departure.modelLeftBgFrame:Hide()
+        Skits_Style_Departure.modelLeftBgFrameTexture:Hide()
+        Skits_Style_Departure.modelRightBgFrame:Show()
+        Skits_Style_Departure.modelRightBgFrameTexture:Show()         
     end
 end
 
 -- EXTERNAL: Speak --------------------------------------------------------------------------------------------------------------
-function Skits_Style_Tales:NewSpeak(creatureData, textData)
+function Skits_Style_Departure:NewSpeak(creatureData, textData)
     if needsLayoutReset then
         self:ResetLayouts()
         needsLayoutReset = false
@@ -935,8 +849,8 @@ function Skits_Style_Tales:NewSpeak(creatureData, textData)
     if slot then
         slot.modelLight = hourLight
 
-        local mainSlotLeft = Skits_Style_Tales.speakerPositions.left[1].slot
-        local mainSlotRight = Skits_Style_Tales.speakerPositions.right[1].slot
+        local mainSlotLeft = Skits_Style_Departure.speakerPositions.left[1].slot
+        local mainSlotRight = Skits_Style_Departure.speakerPositions.right[1].slot
 
         if (mainSlotLeft and mainSlotLeft.idx == slot.idx) or (mainSlotRight and mainSlotRight.idx == slot.idx) then
             -- Aready in a main position
@@ -977,9 +891,9 @@ function Skits_Style_Tales:NewSpeak(creatureData, textData)
         mainOldestPos = PositionGetMainOldest()        
 
         -- Instantly send current slot to an outside position
-        local outsidePos = Skits_Style_Tales.speakerPositions.rightOut
+        local outsidePos = Skits_Style_Departure.speakerPositions.rightOut
         if mainOldestPos.onLeft then
-            outsidePos = Skits_Style_Tales.speakerPositions.leftOut
+            outsidePos = Skits_Style_Departure.speakerPositions.leftOut
         end
         PositionGoto(slot, outsidePos, true)
 
@@ -1005,12 +919,12 @@ function Skits_Style_Tales:NewSpeak(creatureData, textData)
     SlotSetCurrentSpeaker(slot, creatureData)
 end
 
-function Skits_Style_Tales:ResetLayout()
+function Skits_Style_Departure:ResetLayout()
     self:ResetLayouts()
 end
 
 
-function Skits_Style_Tales:CloseSkit()
+function Skits_Style_Departure:CloseSkit()
     -- Reset Slots
     for i = 1, numberOfSlots do
         local speakerSlot = self.speakerSlots[i]
@@ -1044,24 +958,24 @@ function Skits_Style_Tales:CloseSkit()
     self:HideSkit() 
 end
 
-function Skits_Style_Tales:HideSkit()
+function Skits_Style_Departure:HideSkit()
     if self.mainFrame:IsShown() then
         self.mainFrame:Hide()
     end
 end
 
-function Skits_Style_Tales:ShowSkit()
+function Skits_Style_Departure:ShowSkit()
     if not self.mainFrame:IsShown() then
         self.mainFrame:Show()
     end
 end
 
-function Skits_Style_Tales:ShouldDisplay()
+function Skits_Style_Departure:ShouldDisplay()
     local options = Skits_Options.db
     return true
 end
 
-function Skits_Style_Tales:IsActive()
+function Skits_Style_Departure:IsActive()
     local isActive = false
     if self.controls.skitExpire > GetTime() then
         isActive = true

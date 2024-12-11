@@ -135,3 +135,12 @@ L["Skits.options.style_notification_dist_side.title"] = "Side Distance"
 L["Skits.options.style_notification_dist_side.desc"] = "Set the distance from the side of the screen for notifications."
 L["Skits.options.style_notification_top_side.title"] = "Top Distance"
 L["Skits.options.style_notification_top_side.desc"] = "Set the distance from the top of the screen for notifications."
+
+-- Style Departure
+L["Skits.options.style_departure_model_size.title"] = "Character Size"
+L["Skits.options.style_departure_model_size.desc"] = "On screen size of the speaking character."
+L["Skits.options.style_departure_model_poser.title"] = "Character Poser"
+L["Skits.options.style_departure_model_poser.desc"] = "Show the speaking chracter posing during a skit."
+L["Skits.options.style_departure_previous_speaker_lingertime.title"] = "Previous Speaker Linger Time"
+L["Skits.options.style_departure_previous_speaker_lingertime.desc"] = "How long a previous speaker stays lingering on the background (in seconds)."
+

@@ -598,7 +598,7 @@ function Skits_UI_Utils:ResizeFadedFrame(fadedFrame, parameters)
 
     local totalWidth = p.contentWidth + p.leftSize + p.rightSize
     local totalHeight = p.contentHeight + p.topSize + p.bottomSize
-    
+
     fadedFrame.main:SetSize(p.contentWidth, p.contentHeight)
     fadedFrame.content:SetAllPoints(fadedFrame.main)
     fadedFrame.bg:SetAllPoints(fadedFrame.main)

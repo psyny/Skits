@@ -10,6 +10,7 @@ Skits_Style_Utils.enum_styles = {
     WARCRAFT = "warcraft",
     TALES = "tales",
     NOTIFICATION = "notification",
+    DEPARTURE = "departure",
 }
 
 
