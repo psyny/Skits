@@ -65,6 +65,7 @@ Skits_Options.defaults = {
         style_warcraft_speech_frame_size                       = 450,  
         style_warcraft_speaker_face_enabled                    = true,
         style_warcraft_speaker_face_size                       = 100,    
+        style_warcraft_speaker_face_animated                   = true,
         style_warcraft_speaker_name_enabled                    = true,   
         
         -- Style Tales
@@ -498,14 +499,22 @@ Skits_Options.options = {
                             arg = "style_warcraft_speaker_face_size",
                             order = 6,
                             width = optionWidth,
-                        },                                                                      
+                        },    
+                        style_warcraft_speaker_face_animated = {
+                            type = "toggle",
+                            name = L["Skits.options.style_warcraft_speaker_face_animated.title"],
+                            desc = L["Skits.options.style_warcraft_speaker_face_animated.desc"],
+                            arg = "style_warcraft_speaker_face_animated",
+                            order = 7,
+                            width = optionWidth,
+                        },                                                                                           
                         style_warcraft_speech_screen_max = {
                             type = "range",
                             name = L["Skits.options.style_warcraft_speech_screen_max.title"],
                             desc = L["Skits.options.style_warcraft_speech_screen_max.desc"],
                             min = 0, max = 8, step = 1,
                             arg = "style_warcraft_speech_screen_max",
-                            order = 7,
+                            order = 8,
                             width = optionWidth,
                         },
                         style_warcraft_speech_screen_combat_max = {
@@ -514,7 +523,7 @@ Skits_Options.options = {
                             desc = L["Skits.options.style_warcraft_speech_screen_combat_max.desc"],
                             min = 0, max = 8, step = 1,
                             arg = "style_warcraft_speech_screen_combat_max",
-                            order = 8,
+                            order = 9,
                             width = optionWidth,
                         },
                         style_warcraft_speech_screen_group_instance_max = {
@@ -523,7 +532,7 @@ Skits_Options.options = {
                             desc = L["Skits.options.style_warcraft_speech_screen_group_instance_max.desc"],
                             min = 0, max = 8, step = 1,
                             arg = "style_warcraft_speech_screen_group_instance_max",
-                            order = 9,
+                            order = 10,
                             width = optionWidth,
                         },
                         style_warcraft_speech_screen_solo_instance_max = {
@@ -532,7 +541,7 @@ Skits_Options.options = {
                             desc = L["Skits.options.style_warcraft_speech_screen_solo_instance_max.desc"],
                             min = 0, max = 8, step = 1,
                             arg = "style_warcraft_speech_screen_solo_instance_max",
-                            order = 10,
+                            order = 11,
                             width = optionWidth,
                         },                   
                         style_warcraft_speech_position_bottom_distance = {
@@ -541,7 +550,7 @@ Skits_Options.options = {
                             desc = L["Skits.options.style_warcraft_speech_position_bottom_distance.desc"],
                             min = 0, max = 1000, step = 50,
                             arg = "style_warcraft_speech_position_bottom_distance",
-                            order = 11,
+                            order = 12,
                             width = optionWidth,
                         },      
                         style_warcraft_speech_frame_size = {
@@ -550,7 +559,7 @@ Skits_Options.options = {
                             desc = L["Skits.options.style_warcraft_speech_frame_size.desc"],
                             min = 150, max = 1000, step = 50,
                             arg = "style_warcraft_speech_frame_size",
-                            order = 12,
+                            order = 13,
                             width = optionWidth,
                         },                                                                                           
                     },

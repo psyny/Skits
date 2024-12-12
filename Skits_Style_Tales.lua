@@ -318,7 +318,7 @@ function Skits_Style_Tales:ResetLayouts()
     for i = 1, numberOfSlots do
         slot = self.speakerSlots[i]
         slot.modelFrame:SetSize(modelFrameSize, modelFrameSize)
-   end    
+    end    
 
     -- Slot Positions
     local slotPosY = textAreaHeight + 30 - (modelFrameSize * 0.40)
@@ -1048,13 +1048,20 @@ end
 
 function Skits_Style_Tales:HideSkit()
     if self.mainFrame:IsShown() then
-        self.mainFrame:Hide()
+        self.mainFrame:Hide()        
     end
 end
 
 function Skits_Style_Tales:ShowSkit()
     if not self.mainFrame:IsShown() then
         self.mainFrame:Show()
+
+        for i = 1, numberOfSlots do
+            slot = self.speakerSlots[i]
+            if slot and slot.loaderData then
+                Skits_UI_Utils:LoadReAppeared(slot.loaderData)
+            end
+        end    
     end
 end
 

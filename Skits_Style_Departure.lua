@@ -967,6 +967,13 @@ end
 function Skits_Style_Departure:ShowSkit()
     if not self.mainFrame:IsShown() then
         self.mainFrame:Show()
+
+        for i = 1, numberOfSlots do
+            slot = self.speakerSlots[i]
+            if slot and slot.loaderData then
+                Skits_UI_Utils:LoadReAppeared(slot.loaderData)
+            end
+        end           
     end
 end
 

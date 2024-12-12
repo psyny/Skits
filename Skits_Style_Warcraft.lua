@@ -105,11 +105,11 @@ function Skits_Style_Warcraft:CreateSpeakFrame(creatureData, textData, displayOp
         modelFrame = modelFrame,
         callback = nil,
     }    
-    Skits_UI_Utils:LoadModel(creatureData, displayOptions, loadOptions)
+    local modelLoader = Skits_UI_Utils:LoadModel(creatureData, displayOptions, loadOptions)
 
     modelFrame:Show()    
 
-    return textFrame, textLabel, speakerNameFrame, modelFrame, borderFrame
+    return textFrame, textLabel, speakerNameFrame, modelFrame, borderFrame, modelLoader
 end
 
 function Skits_Style_Warcraft:UpdateText(text, textFrame, textLabel, showSpeakerName)
@@ -260,6 +260,7 @@ function Skits_Style_Warcraft:SetLoopingAnimation(modelFrame, animationIDs)
         current = 1,
     }
     local animationNum = animationData.ids[animationData.current]
+    modelFrame:SetPaused(false)
     modelFrame:SetAnimation(animationNum)
 
     -- Lock the animation ID in the script by capturing it in a closure    
@@ -343,14 +344,23 @@ function Skits_Style_Warcraft:NewSpeak(creatureData, textData)
     local rotation = Skits_UI_Utils:GetRadAngle(randomAngle)
     local portraitZoom = 0.9
     local scale = 1.0
-    local animations = Skits_UI_Utils:GetAnimationIdsFromText(textData.text, true)
+    local animations = {0}
+    local pauseAfter = 0
     local fallbackId = Skits_Style_Utils.fallbackId
-    local fallbackLight = Skits_Style_Utils.lightPresets.hidden        
-    local displayOptions =  Skits_UI_Utils:BuildDisplayOptions(portraitZoom, rotation, scale, animations, nil, nil, fallbackId, fallbackLight) 
+    local fallbackLight = Skits_Style_Utils.lightPresets.hidden    
+    
+    if options.style_warcraft_speaker_face_animated then
+        pauseAfter = nil
+    end
 
-    local textFrame, textLabel, speakerNameFrame, modelFrame, borderFrame = Skits_Style_Warcraft:CreateSpeakFrame(creatureData, textData, displayOptions, modelFrameSize, Skits_Style_Warcraft.mainFrame, self.speakerOrder, textAreaWidth, font, fontSize, showSpeakerName)
-    modelFrame:SetPosition(0, 0, -0.05)    
-    self:SetLoopingAnimation(modelFrame, animations)
+    local displayOptions =  Skits_UI_Utils:BuildDisplayOptions(portraitZoom, rotation, scale, animations, nil, pauseAfter, fallbackId, fallbackLight) 
+
+    local textFrame, textLabel, speakerNameFrame, modelFrame, borderFrame, modelLoader = Skits_Style_Warcraft:CreateSpeakFrame(creatureData, textData, displayOptions, modelFrameSize, Skits_Style_Warcraft.mainFrame, self.speakerOrder, textAreaWidth, font, fontSize, showSpeakerName)
+
+    if options.style_warcraft_speaker_face_animated then
+        animations = Skits_UI_Utils:GetAnimationIdsFromText(textData.text, true)
+        self:SetLoopingAnimation(modelFrame, animations)
+    end
 
     -- Move existing frames up by the height of the new textFrame plus the gap
     if lastMsgData then
@@ -375,6 +385,7 @@ function Skits_Style_Warcraft:NewSpeak(creatureData, textData)
         timestamp = currentTime,
         duration = adjustedDuration,
         timerHandle = nil,
+        modelLoader = modelLoader,
     }
     lastMsgData = msgData
 
@@ -408,6 +419,12 @@ end
 function Skits_Style_Warcraft:ShowSkit()
     if not self.mainFrame:IsShown() then
         self.mainFrame:Show()
+
+        for i, msgData in ipairs(self.activeMessages) do
+            if msgData and msgData.modelLoader then
+                Skits_UI_Utils:LoadReAppeared(msgData.modelLoader)
+            end
+        end        
     end
 end
 

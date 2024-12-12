@@ -238,14 +238,52 @@ local function LoadModelApplyLoadOptions(loaderData, setAnimations)
             local animationId = displayOptions.animations[math.random(#displayOptions.animations)]
             modelFrame:SetAnimation(animationId)
         end
-
-        if displayOptions.pauseAfter then
-            local thisModelFrame = modelFrame
-            C_Timer.NewTimer(displayOptions.pauseAfter, function()                
-                thisModelFrame:SetPaused(true) 
-            end)   
-        end   
+        
+        if displayOptions.pauseAfter then          
+            if displayOptions.pauseAfter <= 0 then     
+                modelFrame.pauseOn = GetTime()           
+                modelFrame:SetPaused(true) 
+            else
+                modelFrame.pauseOn = GetTime() + displayOptions.pauseAfter
+                local thisModelFrame = modelFrame
+                modelFrame.pauseHandler = C_Timer.NewTimer(displayOptions.pauseAfter, function()
+                    thisModelFrame:SetPaused(true) 
+                end) 
+            end
+        end
     end 
+end
+
+function Skits_UI_Utils:LoadReAppeared(loaderData)
+    local displayOptions = loaderData.displayOptions
+    local modelFrame = loaderData.loadOptions.modelFrame
+
+    if not displayOptions then
+        return
+    end    
+
+    if not modelFrame then
+        return
+    end
+
+    if modelFrame.pauseOn then
+        local timeNow = GetTime()
+        if modelFrame.pauseOn <= timeNow then
+            modelFrame:SetPaused(true) 
+        else
+            local diff = modelFrame.pauseOn - timeNow
+            local thisModelFrame = modelFrame
+
+            if modelFrame.pauseHandler then
+                modelFrame.pauseHandler:Cancel()
+            end
+            modelFrame.pauseHandler = C_Timer.NewTimer(diff, function()
+                thisModelFrame:SetPaused(true) 
+            end) 
+        end
+    else
+        modelFrame:SetPaused(false) 
+    end
 end
 
 function Skits_UI_Utils:LoadModelStopTimer(loaderData)
@@ -348,6 +386,7 @@ function Skits_UI_Utils:LoadModel(creatureData, displayOptions, loadOptions)
     } 
 
     loadOptions.modelFrame:ClearModel()
+    loadOptions.modelFrame.pauseOn = nil
 
     Skits_UI_Utils:LoadModelAux(loaderData)
     return loaderData

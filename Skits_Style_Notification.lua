@@ -248,7 +248,7 @@ function Skits_Style_Notification:msgExpire(msgData)
         msgData.expireHandler:Cancel() 
     end
 
-    msgData.speakFrame.main:Hide()
+    Skits_UI_Utils:RemoveFrame(msgData.speakFrame.main) 
 end
 
 function Skits_Style_Notification:msgAdd(msgData)
@@ -367,6 +367,13 @@ end
 function Skits_Style_Notification:ShowSkit()
     if not self.mainFrame:IsShown() then
         self.mainFrame:Show()
+        for _, msgData in ipairs(self.messages) do
+            local speakFrame = msgData.speakFrame
+            if speakFrame then
+                Skits_UI_Utils:LoadReAppeared(speakFrame.portraitLoaderData)
+                Skits_UI_Utils:LoadReAppeared(speakFrame.portraitBgLoaderData)
+            end
+        end
     end
 end
 
