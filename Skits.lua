@@ -386,7 +386,7 @@ function Skits:StoreInMemory(creatureData, text, color)
         removeds = self.msgMemoryQueue:RemoveFirstX(overlimit)   
         for _, dataIdx in ipairs(removeds) do
             if dataIdx then
-                SkitsDB.conversationLog.message[dataIdx] = nil
+                SkitsDB.conversationLog.messages[dataIdx] = nil
             end
         end        
     end
