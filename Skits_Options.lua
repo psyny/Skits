@@ -30,6 +30,7 @@ Skits_Options.defaults = {
         event_msg_monster_whisper    = true,
         event_msg_monster_say        = true,
         event_msg_monster_party      = true,
+        event_npc_interact           = false,        
 
         -- Player Events
         event_msg_say                     = false,
@@ -247,6 +248,14 @@ Skits_Options.options = {
                     order = 4,
                     width = optionWidth,
                 },
+                event_npc_interact = {
+                    type = "toggle",
+                    name = L["Skits.options.event_npc_interact.title"],
+                    desc = L["Skits.options.event_npc_interact.desc"],
+                    arg = "event_npc_interact",
+                    order = 5,
+                    width = optionWidth,
+                },                
             
                 -- Player Events
                 event_msg_say = {
@@ -254,7 +263,7 @@ Skits_Options.options = {
                     name = L["Skits.options.event_msg_say.title"],
                     desc = L["Skits.options.event_msg_say.desc"],
                     arg = "event_msg_say",
-                    order = 5,
+                    order = 6,
                     width = optionWidth,
                 },
                 event_msg_yell = {
@@ -262,7 +271,7 @@ Skits_Options.options = {
                     name = L["Skits.options.event_msg_yell.title"],
                     desc = L["Skits.options.event_msg_yell.desc"],
                     arg = "event_msg_yell",
-                    order = 6,
+                    order = 7,
                     width = optionWidth,
                 },
                 event_msg_whisper = {
@@ -270,7 +279,7 @@ Skits_Options.options = {
                     name = L["Skits.options.event_msg_whisper.title"],
                     desc = L["Skits.options.event_msg_whisper.desc"],
                     arg = "event_msg_whisper",
-                    order = 7,
+                    order = 8,
                     width = optionWidth,
                 },
                 event_msg_party = {
@@ -278,7 +287,7 @@ Skits_Options.options = {
                     name = L["Skits.options.event_msg_party.title"],
                     desc = L["Skits.options.event_msg_party.desc"],
                     arg = "event_msg_party",
-                    order = 8,
+                    order = 9,
                     width = optionWidth,
                 },
                 event_msg_party_leader = {
@@ -286,7 +295,7 @@ Skits_Options.options = {
                     name = L["Skits.options.event_msg_party_leader.title"],
                     desc = L["Skits.options.event_msg_party_leader.desc"],
                     arg = "event_msg_party_leader",
-                    order = 9,
+                    order = 10,
                     width = optionWidth,
                 },
                 event_msg_raid = {
@@ -294,7 +303,7 @@ Skits_Options.options = {
                     name = L["Skits.options.event_msg_raid.title"],
                     desc = L["Skits.options.event_msg_raid.desc"],
                     arg = "event_msg_raid",
-                    order = 10,
+                    order = 11,
                     width = optionWidth,
                 },
                 event_msg_raid_leader = {
@@ -302,7 +311,7 @@ Skits_Options.options = {
                     name = L["Skits.options.event_msg_raid_leader.title"],
                     desc = L["Skits.options.event_msg_raid_leader.desc"],
                     arg = "event_msg_raid_leader",
-                    order = 11,
+                    order = 12,
                     width = optionWidth,
                 },
                 event_msg_instance_chat = {
@@ -310,7 +319,7 @@ Skits_Options.options = {
                     name = L["Skits.options.event_msg_instance_chat.title"],
                     desc = L["Skits.options.event_msg_instance_chat.desc"],
                     arg = "event_msg_instance_chat",
-                    order = 12,
+                    order = 13,
                     width = optionWidth,
                 },
                 event_msg_instance_chat_leader = {
@@ -318,7 +327,7 @@ Skits_Options.options = {
                     name = L["Skits.options.event_msg_instance_chat_leader.title"],
                     desc = L["Skits.options.event_msg_instance_chat_leader.desc"],
                     arg = "event_msg_instance_chat_leader",
-                    order = 13,
+                    order = 14,
                     width = optionWidth,
                 },
                 event_msg_channel = {
@@ -326,7 +335,7 @@ Skits_Options.options = {
                     name = L["Skits.options.event_msg_channel.title"],
                     desc = L["Skits.options.event_msg_channel.desc"],
                     arg = "event_msg_channel",
-                    order = 14,
+                    order = 15,
                     width = optionWidth,
                 },
                 event_msg_guild = {
@@ -334,7 +343,7 @@ Skits_Options.options = {
                     name = L["Skits.options.event_msg_guild.title"],
                     desc = L["Skits.options.event_msg_guild.desc"],
                     arg = "event_msg_guild",
-                    order = 15,
+                    order = 16,
                     width = optionWidth,
                 },
                 event_msg_officer = {
@@ -342,7 +351,7 @@ Skits_Options.options = {
                     name = L["Skits.options.event_msg_officer.title"],
                     desc = L["Skits.options.event_msg_officer.desc"],
                     arg = "event_msg_officer",
-                    order = 16,
+                    order = 17,
                     width = optionWidth,
                 },
             }

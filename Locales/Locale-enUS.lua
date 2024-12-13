@@ -41,6 +41,8 @@ L["Skits.options.event_msg_monster_say.title"] = "NPC Say"
 L["Skits.options.event_msg_monster_say.desc"] = "Toggle to display NPC say messages on screen."
 L["Skits.options.event_msg_monster_party.title"] = "NPC Party"
 L["Skits.options.event_msg_monster_party.desc"] = "Toggle to display NPC party messages on screen."
+L["Skits.options.event_npc_interact.title"] = "NPC Intract"
+L["Skits.options.event_npc_interact.desc"] = "Toggle to display NPC messages when interactng with an NPC throu a quest frame."
 
 -- Player Events
 L["Skits.options.event_msg_say.title"] = "Player Say"

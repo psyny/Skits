@@ -26,6 +26,7 @@ Skits.lastSpeaker = ""
 Skits.lastSpeakerColor = 0
 Skits.speakerColorMapQueue = Skits_Deque:New()
 Skits.speakerColorMapQueueLimit = 30
+Skits.speakerDurationEnd = GetTime()
 
 -- Memory table for last 1000 speaks
 Skits.msgMemoryLimit = 1000
@@ -33,6 +34,10 @@ Skits.msgMemoryQueue = nil
 
 -- TempDisable
 Skits.skitsActive = true
+
+-- Queued Speaks
+Skits.queuedSpeaks = {}
+Skits.queuedSpeaksNextId = 1
 
 
 ---------------------------------------------------------
@@ -243,6 +248,14 @@ frame:RegisterEvent("CHAT_MSG_CHANNEL")
 frame:RegisterEvent("CHAT_MSG_GUILD")
 frame:RegisterEvent("CHAT_MSG_OFFICER")
 
+-- Quest Frames 
+frame:RegisterEvent("QUEST_GREETING")
+frame:RegisterEvent("QUEST_DETAIL")
+frame:RegisterEvent("GOSSIP_SHOW")
+frame:RegisterEvent("QUEST_COMPLETE")
+frame:RegisterEvent("GOSSIP_CLOSED")
+frame:RegisterEvent("QUEST_FINISHED")
+
 -- Update
 frame:RegisterEvent("NAME_PLATE_UNIT_ADDED")
 frame:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
@@ -272,10 +285,22 @@ frame:SetScript("OnEvent", function(self, event, ...)
         Skits:HandleRosterChange(...)     
     elseif event == "TALKINGHEAD_REQUESTED" then
         Skits:HandleTalkingHead(...)  
+    elseif event == "QUEST_GREETING" then
+        Skits:HandleQuestGreeting(...)             
+    elseif event == "QUEST_DETAIL" then
+        Skits:HandleQuestDetail(...)       
+    elseif event == "GOSSIP_SHOW" then
+        Skits:HandleGossipShow(...)     
+    elseif event == "QUEST_COMPLETE" then
+        Skits:HandleQuestComplete(...)           
+    elseif event == "GOSSIP_CLOSED" then
+        Skits:HandleQuestClosed(...)  
+    elseif event == "QUEST_FINISHED" then
+        Skits:HandleQuestClosed(...)                              
     elseif event == "PLAYER_STARTED_MOVING" then
         Skits:HandlePlayerMoving(...)    
     elseif event == "PLAYER_LOGOUT" or event == "PLAYER_LEAVING_WORLD" then
-        Skits:HandleLogout(event, ...)                
+        Skits:HandleLogout(event, ...)                        
     elseif event == "PLAYER_REGEN_DISABLED" or event == "PLAYER_REGEN_ENABLED" or event == "ZONE_CHANGED_NEW_AREA" or event == "PLAYER_ENTERING_WORLD" then
         Skits:HandleSituationChangeEvent(event, ...)            
     elseif event == "CHAT_MSG_MONSTER_SAY" or event == "CHAT_MSG_MONSTER_YELL" or event == "CHAT_MSG_MONSTER_WHISPER" or event == "CHAT_MSG_MONSTER_PARTY" then
@@ -367,6 +392,122 @@ function Skits:StoreInMemory(creatureData, text, color)
     end
 end
 
+-- Quest Frames
+function Skits:ClearQueuedSpeaks()
+    for _, handler in pairs(self.queuedSpeaks) do
+        if handler then
+            handler:Cancel()
+        end
+    end
+    self.queuedSpeaks = {}
+end
+
+function Skits:HandleQuestFrame(creatureData, text)
+    self:ClearQueuedSpeaks()
+
+    local phrases = Skits_Utils:TextIntoPhrases(text)
+
+    local timeToEndCurrentMessage = self.speakerDurationEnd - GetTime()
+    if timeToEndCurrentMessage < 0 then
+        timeToEndCurrentMessage = 0
+    end
+
+    local accDuration = math.max(timeToEndCurrentMessage, 1)
+    for _, phrase in ipairs(phrases) do
+        local id = self.queuedSpeaksNextId
+        self.queuedSpeaksNextId = self.queuedSpeaksNextId + 1
+
+        local handler = C_Timer.NewTimer(accDuration, function()        
+            Skits:ChatEvent(creatureData, phrase)
+            self.queuedSpeaks[id] = nil
+        end)
+        self.queuedSpeaks[id] = handler
+
+        accDuration = accDuration + math.max(Skits_Utils:MessageDuration(phrase) - 0.1, 1)
+    end
+end
+
+function Skits:HandleQuestGreeting()
+    local options = Skits_Options.db
+    if not options.event_npc_interact then
+        return 
+    end    
+
+    local npcCreatureData = Skits:BuildCreatureDataOfToken("npc")
+    if not npcCreatureData then
+        return
+    end
+
+    local questText = GetGreetingText()
+    if not questText then
+        return
+    end       
+    
+    self:HandleQuestFrame(npcCreatureData, questText)
+end
+
+function Skits:HandleQuestDetail()
+    local options = Skits_Options.db
+    if not options.event_npc_interact then
+        return 
+    end    
+
+    local npcCreatureData = Skits:BuildCreatureDataOfToken("npc")
+    if not npcCreatureData then
+        return
+    end
+
+    local questTitle = GetTitleText()
+
+    local questText = GetQuestText()
+    if not questText then
+        return
+    end       
+    
+    self:HandleQuestFrame(npcCreatureData, questText)
+end
+
+function Skits:HandleQuestComplete()
+    local options = Skits_Options.db
+    if not options.event_npc_interact then
+        return 
+    end    
+
+    local npcCreatureData = Skits:BuildCreatureDataOfToken("npc")
+    if not npcCreatureData then
+        return
+    end
+
+    local questText = GetRewardText()
+    if not questText then
+        return
+    end       
+    
+    self:HandleQuestFrame(npcCreatureData, questText)
+end
+
+function Skits:HandleGossipShow()
+    local options = Skits_Options.db
+    if not options.event_npc_interact then
+        return
+    end
+
+    local npcCreatureData = Skits:BuildCreatureDataOfToken("npc")
+    if not npcCreatureData then
+        return
+    end
+
+    local gossipText = C_GossipInfo.GetText()
+    if not gossipText then
+        return
+    end    
+
+    self:HandleQuestFrame(npcCreatureData, gossipText)
+end
+
+function Skits:HandleQuestClosed()
+    self:ClearQueuedSpeaks()
+end
 
 -- Main handler for chat events
 function Skits:HandleNpcChatEvent(event, msg, sender, languageName, channelName, target, flags, unknown, channelNumber, channelName2, unknown2, counter, guid)
@@ -384,6 +525,7 @@ function Skits:HandleNpcChatEvent(event, msg, sender, languageName, channelName,
     creatureData.isPlayer = false
     creatureData.name = sender
 
+    self:ClearQueuedSpeaks()
     self:ChatEvent(creatureData, msg)
 end
 
@@ -424,6 +566,7 @@ function Skits:HandlePlayerChatEvent(event, msg, sender, languageName, channelNa
         end
     end
 
+    self:ClearQueuedSpeaks()
     self:ChatEvent(creatureData, msg)
 end
 
@@ -434,19 +577,19 @@ function Skits:ChatEvent(creatureData, text)
     -- Calculate display duration with minimum of 1 second
     local userCharactersPerSecondOption = Skits_Options.db.speech_speed
     local displayDuration = Skits_Utils:MessageDuration(text)
+    self.speakerDurationEnd = GetTime() + displayDuration
 
 	-- Store speak information in memory
 	self:StoreInMemory(creatureData, text, {r=r, g=g, b=b})
 
     -- Display text and 3D model
-    if Skits.skitsActive then
+    if self.skitsActive then
         Skits_UI:DisplaySkits(creatureData, text, r, g, b)
     end
 
     -- Refresh log page
     Skits_Log_UI:RefreshPage()
-
-    Skits.lastSpeaker = creatureData.name
+    self.lastSpeaker = creatureData.name
 end
 
 function Skits:BuildCreatureDataOfToken(unittoken)

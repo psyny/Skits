@@ -41,6 +41,8 @@ L["Skits.options.event_msg_monster_say.title"] = "Fala de NPC"
 L["Skits.options.event_msg_monster_say.desc"] = "Alternar para exibir falas de NPC na tela."
 L["Skits.options.event_msg_monster_party.title"] = "Grupo de NPC"
 L["Skits.options.event_msg_monster_party.desc"] = "Alternar para exibir mensagens de grupo de NPC na tela."
+L["Skits.options.event_npc_interact.title"] = "Interação com NPC"
+L["Skits.options.event_npc_interact.desc"] = "Alternar para exibier mensagens de um NPC quando interagind numa janela de quest."
 
 -- Player Events
 L["Skits.options.event_msg_say.title"] = "Fala do Jogador"
