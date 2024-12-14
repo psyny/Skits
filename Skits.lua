@@ -26,7 +26,9 @@ Skits.lastSpeaker = ""
 Skits.lastSpeakerColor = 0
 Skits.speakerColorMapQueue = Skits_Deque:New()
 Skits.speakerColorMapQueueLimit = 30
-Skits.speakerDurationEnd = GetTime()
+Skits.displayDurationEnd = GetTime()
+Skits.holdSpeakUntil = GetTime()
+Skits.speakerLastInteracting = nil
 
 -- Memory table for last 1000 speaks
 Skits.msgMemoryLimit = 1000
@@ -402,28 +404,47 @@ function Skits:ClearQueuedSpeaks()
     self.queuedSpeaks = {}
 end
 
+local function QueueNewSpeak(creatureData, duration, text)
+    local id = Skits.queuedSpeaksNextId
+    Skits.queuedSpeaksNextId = Skits.queuedSpeaksNextId + 1
+
+    local handler = C_Timer.NewTimer(duration, function()        
+        Skits:ChatEvent(creatureData, text, false)
+        Skits.queuedSpeaks[id] = nil
+    end)
+    Skits.queuedSpeaks[id] = handler
+end
+
+
 function Skits:HandleQuestFrame(creatureData, text)
     self:ClearQueuedSpeaks()
+    Skits.speakerLastInteracting = creatureData
 
     local phrases = Skits_Utils:TextIntoPhrases(text)
 
-    local timeToEndCurrentMessage = self.speakerDurationEnd - GetTime()
+    local timeToEndCurrentMessage = self.holdSpeakUntil - GetTime()
     if timeToEndCurrentMessage < 0 then
         timeToEndCurrentMessage = 0
     end
 
-    local accDuration = math.max(timeToEndCurrentMessage, 1)
+    local accDuration = math.max(timeToEndCurrentMessage, 0.2)
+    local currSpeakText = ""
     for _, phrase in ipairs(phrases) do
-        local id = self.queuedSpeaksNextId
-        self.queuedSpeaksNextId = self.queuedSpeaksNextId + 1
+        -- Concatenating will blow size?
+        -- If yes, send the current text as
+        if #currSpeakText + #phrase > 200 then
+            QueueNewSpeak(creatureData, accDuration, currSpeakText)
+            accDuration = accDuration + math.max(Skits_Utils:MessageDuration(currSpeakText) - 0.1, 1)
+            currSpeakText = ""
+        end
 
-        local handler = C_Timer.NewTimer(accDuration, function()        
-            Skits:ChatEvent(creatureData, phrase)
-            self.queuedSpeaks[id] = nil
-        end)
-        self.queuedSpeaks[id] = handler
+        -- Concatenate
+        currSpeakText = currSpeakText .. phrase .. " "
+    end
 
-        accDuration = accDuration + math.max(Skits_Utils:MessageDuration(phrase) - 0.1, 1)
+    -- Resitual text
+    if #currSpeakText > 1 then
+        QueueNewSpeak(creatureData, accDuration, currSpeakText)
     end
 end
 
@@ -507,6 +528,19 @@ end
 
 function Skits:HandleQuestClosed()
     self:ClearQueuedSpeaks()
+
+    if self.speakerLastInteracting then
+        local creatureData = self.speakerLastInteracting
+        self.speakerLastInteracting = nil
+    
+        if self.lastSpeaker == creatureData.name then
+            if self.holdSpeakUntil <= GetTime() then
+                -- No priority on current message
+                -- Cancel Speaker
+                Skits_Style:CancelSpeaker(creatureData)                
+            end
+        end
+    end 
 end
 
 -- Main handler for chat events
@@ -526,7 +560,7 @@ function Skits:HandleNpcChatEvent(event, msg, sender, languageName, channelName,
     creatureData.name = sender
 
     self:ClearQueuedSpeaks()
-    self:ChatEvent(creatureData, msg)
+    self:ChatEvent(creatureData, msg, true)
 end
 
 function Skits:HandlePlayerChatEvent(event, msg, sender, languageName, channelName, target, flags, unknown, channelNumber, channelName2, unknown2, counter, guid)
@@ -567,20 +601,26 @@ function Skits:HandlePlayerChatEvent(event, msg, sender, languageName, channelNa
     end
 
     self:ClearQueuedSpeaks()
-    self:ChatEvent(creatureData, msg)
+    self:ChatEvent(creatureData, msg, true)
 end
 
-function Skits:ChatEvent(creatureData, text)
+function Skits:ChatEvent(creatureData, text, priority)
     local options = Skits_Options.db
     local r, g, b = self:GetColorForSpeaker(creatureData.name)	
 	
     -- Calculate display duration with minimum of 1 second
     local userCharactersPerSecondOption = Skits_Options.db.speech_speed
     local displayDuration = Skits_Utils:MessageDuration(text)
-    self.speakerDurationEnd = GetTime() + displayDuration
+
+    if priority then
+        self.holdSpeakUntil = GetTime() + displayDuration
+    else
+        self.holdSpeakUntil = GetTime()
+    end
+    self.displayDurationEnd = GetTime() + displayDuration
 
 	-- Store speak information in memory
-	self:StoreInMemory(creatureData, text, {r=r, g=g, b=b})
+    self:StoreInMemory(creatureData, text, {r=r, g=g, b=b})
 
     -- Display text and 3D model
     if self.skitsActive then

@@ -31,3 +31,7 @@ end
 function Skits_Style_Hidden:IsActive()
     return false
 end
+
+function Skits_Style_Hidden:CancelSpeaker(creatureData)
+    return
+end

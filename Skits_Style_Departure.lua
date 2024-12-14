@@ -51,7 +51,7 @@ Skits_Style_Departure.textRightFrameBgBorder = Skits_UI_Utils:CreateFadedFrame(f
 
 -- Create Speaker Slots
 Skits_Style_Departure.speakerSlots = {}
-local tempOnLeft = true
+local tempOnLeft = false
 for i = 1, numberOfSlots do
     local speakerSlot = {
         idx = i,
@@ -102,6 +102,54 @@ Skits_Style_Departure.controls = {
     skitExpire = GetTime(),
     skitExpireHandler = nil,
 }
+
+-- Layout Functions --------------------------------
+local function LayoutUpdateBackgrounds()
+    local options = Skits_Options.db
+
+    -- Update Message Frames
+    local mainSlotLeft = Skits_Style_Departure.speakerPositions.left[1].slot
+    local mainSlotRight = Skits_Style_Departure.speakerPositions.right[1].slot
+
+    -- Flags
+    local hasLeft = mainSlotLeft and mainSlotLeft.creatureData
+    local hasRight = mainSlotRight and mainSlotRight.creatureData
+
+    -- Checks
+    if hasLeft and hasRight then
+        Skits_Style_Departure.textLeftFrame:Show()
+        Skits_Style_Departure.textLeftFrameBgBorder.bg:Show()        
+        Skits_Style_Departure.textRightFrame:Show()
+        Skits_Style_Departure.textRightFrameBgBorder.bg:Show()
+        
+        Skits_Style_Departure.modelLeftBgFrame:Show()
+        Skits_Style_Departure.modelLeftBgFrameTexture:Show()
+        Skits_Style_Departure.modelRightBgFrame:Show()
+        Skits_Style_Departure.modelRightBgFrameTexture:Show()
+
+    elseif hasLeft then
+        Skits_Style_Departure.textLeftFrame:Show()
+        Skits_Style_Departure.textLeftFrameBgBorder.bg:Show()        
+        Skits_Style_Departure.textRightFrame:Hide()
+        Skits_Style_Departure.textRightFrameBgBorder.bg:Hide()
+        
+        Skits_Style_Departure.modelLeftBgFrame:Show()
+        Skits_Style_Departure.modelLeftBgFrameTexture:Show()
+        Skits_Style_Departure.modelRightBgFrame:Hide()
+        Skits_Style_Departure.modelRightBgFrameTexture:Hide()
+
+    elseif hasRight then
+        Skits_Style_Departure.textLeftFrame:Hide()
+        Skits_Style_Departure.textLeftFrameBgBorder.bg:Hide()        
+        Skits_Style_Departure.textRightFrame:Show()
+        Skits_Style_Departure.textRightFrameBgBorder.bg:Show()
+        
+        Skits_Style_Departure.modelLeftBgFrame:Hide()
+        Skits_Style_Departure.modelLeftBgFrameTexture:Hide()
+        Skits_Style_Departure.modelRightBgFrame:Show()
+        Skits_Style_Departure.modelRightBgFrameTexture:Show()         
+    end
+end
 
 function Skits_Style_Departure:ResetLayouts()
     local options = Skits_Options.db
@@ -288,19 +336,36 @@ local function SlotClearData(slot)
     end
 end
 
-local function SlotExpireMsg(slot)
-    -- For now, do nothing
+local function SlotExpireMsg(slot, hideMessage)
+    if hideMessage then
+        local speakerTextEle = nil
+        local messageTextEle = nil    
+        if slot.position.onLeft then
+            speakerTextEle = Skits_Style_Departure.textLeftSpeakerText
+            messageTextEle = Skits_Style_Departure.textLeftMessageText
+        else
+            speakerTextEle = Skits_Style_Departure.textRightSpeakerText
+            messageTextEle = Skits_Style_Departure.textRightMessageText
+        end
+
+        speakerTextEle:SetText("")
+        messageTextEle:SetText("")
+    end
+
+    -- Stop Timer
     if slot.msgExpireHandler then
         slot.msgExpireHandler:Cancel()
     end
     slot.msgExpireHandler = nil
 end
 
-local function SlotExpireSlot(slot)
+local function SlotExpireSlot(slot, hideMessage)
     slot.modelFrame:Hide()
 
-    SlotExpireMsg(slot)
+    SlotExpireMsg(slot, hideMessage)
     SlotClearData(slot)
+
+    LayoutUpdateBackgrounds()
 end
 
 local function SlotFindOldest()
@@ -318,7 +383,7 @@ local function SlotFindOldest()
     return Skits_Style_Departure.speakerSlots[oldestIdx]
 end
 
-local function SlotFindOneToUse()
+local function SlotFindOneToUse(onLeft)
     -- Use a Free Slot
     for i = 1, numberOfSlots do
         local slot = Skits_Style_Departure.speakerSlots[i]
@@ -362,7 +427,7 @@ local function SlotToBack(slot)
     local options = Skits_Options.db
     if options.style_departure_previous_speaker_lingertime <= 0 then
         slot.modelFrame:SetFrameLevel(40)
-        SlotExpireSlot(slot)
+        SlotExpireSlot(slot, false)
     end
 
     -- Set Light to the Back Version
@@ -385,7 +450,7 @@ local function SlotToBack(slot)
     end
     local tslot = slot
     slot.slotExpireHandler = C_Timer.NewTimer(options.style_departure_previous_speaker_lingertime, function()        
-        SlotExpireSlot(tslot)
+        SlotExpireSlot(tslot, false)
     end)   
 
     -- Set Level
@@ -586,12 +651,13 @@ local function PositionGoto(slot, position, instant)
 
     -- Expire new position slot
     if position.slot then
-        SlotExpireSlot(position.slot)
+        SlotExpireSlot(position.slot, false)
     end
 
     -- Set given slot on new pos
     slot.position = position
     position.slot = slot
+    slot.onLeft = position.onLeft
 
     -- Set to position
     PositionSetSlotToPosition(slot, position, instant)
@@ -668,7 +734,7 @@ local function MsgAdd(creatureData, textData, slot, duration)
     end
     local lslot = slot
     slot.msgExpireHandler = C_Timer.NewTimer(diff, function()        
-        SlotExpireMsg(lslot)
+        SlotExpireMsg(lslot, false)
     end)    
 
     -- Update Skit Expire
@@ -786,49 +852,6 @@ local function ModelAdd(creatureData, textData, slot, duration)
     slot.loaderData = loaderData
 end
 
--- Layout update functions
-local function LayoutUpdateBackgrounds()
-    local options = Skits_Options.db
-
-    -- Update Message Frames
-    local mainSlotLeft = Skits_Style_Departure.speakerPositions.left[1].slot
-    local mainSlotRight = Skits_Style_Departure.speakerPositions.right[1].slot
-
-    if mainSlotLeft and mainSlotRight then
-        Skits_Style_Departure.textLeftFrame:Show()
-        Skits_Style_Departure.textLeftFrameBgBorder.bg:Show()        
-        Skits_Style_Departure.textRightFrame:Show()
-        Skits_Style_Departure.textRightFrameBgBorder.bg:Show()
-        
-        Skits_Style_Departure.modelLeftBgFrame:Show()
-        Skits_Style_Departure.modelLeftBgFrameTexture:Show()
-        Skits_Style_Departure.modelRightBgFrame:Show()
-        Skits_Style_Departure.modelRightBgFrameTexture:Show()
-
-    elseif mainSlotLeft then
-        Skits_Style_Departure.textLeftFrame:Show()
-        Skits_Style_Departure.textLeftFrameBgBorder.bg:Show()        
-        Skits_Style_Departure.textRightFrame:Hide()
-        Skits_Style_Departure.textRightFrameBgBorder.bg:Hide()
-        
-        Skits_Style_Departure.modelLeftBgFrame:Show()
-        Skits_Style_Departure.modelLeftBgFrameTexture:Show()
-        Skits_Style_Departure.modelRightBgFrame:Hide()
-        Skits_Style_Departure.modelRightBgFrameTexture:Hide()
-
-    elseif mainSlotRight then
-        Skits_Style_Departure.textLeftFrame:Hide()
-        Skits_Style_Departure.textLeftFrameBgBorder.bg:Hide()        
-        Skits_Style_Departure.textRightFrame:Show()
-        Skits_Style_Departure.textRightFrameBgBorder.bg:Show()
-        
-        Skits_Style_Departure.modelLeftBgFrame:Hide()
-        Skits_Style_Departure.modelLeftBgFrameTexture:Hide()
-        Skits_Style_Departure.modelRightBgFrame:Show()
-        Skits_Style_Departure.modelRightBgFrameTexture:Show()         
-    end
-end
-
 -- EXTERNAL: Speak --------------------------------------------------------------------------------------------------------------
 function Skits_Style_Departure:NewSpeak(creatureData, textData)
     if needsLayoutReset then
@@ -878,10 +901,14 @@ function Skits_Style_Departure:NewSpeak(creatureData, textData)
         ModelAdd(creatureData, textData, slot, duration)     
     else
         -- Find a slot to use
-        slot = SlotFindOneToUse()
+        local findOnLeft = false
+        if self.lastSpeak.slotGeneral then
+            findOnLeft = not self.lastSpeak.slotGeneral.onLeft
+        end
+        slot = SlotFindOneToUse(findOnLeft)
 
         -- Expire current slot
-        SlotExpireSlot(slot)
+        SlotExpireSlot(slot, false)
 
         -- Set Current Slot Creature Data
         slot.modelLight = hourLight
@@ -988,4 +1015,26 @@ function Skits_Style_Departure:IsActive()
         isActive = true
     end
     return isActive
+end
+
+function Skits_Style_Departure:CancelSpeaker(creatureData)
+    local slot = SlotFindSpeaker(creatureData.name)
+
+    if slot then
+        local mainSlotLeft = self.speakerPositions.left[1].slot
+        local mainSlotRight = self.speakerPositions.right[1].slot
+
+        if (mainSlotLeft and mainSlotLeft.idx == slot.idx) or (mainSlotRight and mainSlotRight.idx == slot.idx) then
+            SlotExpireSlot(slot, true)
+
+            -- No more speakers left
+            if (not mainSlotLeft or not mainSlotLeft.creatureData) and (not mainSlotRight or not mainSlotRight.creatureData) then
+                -- Close Skit
+                if self.controls.skitExpireHandler then
+                    self.controls.skitExpireHandler:Cancel()
+                end
+                self:CloseSkit()
+            end            
+        end
+    end
 end

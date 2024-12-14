@@ -385,3 +385,7 @@ end
 function Skits_Style_Notification:IsActive()
     return true
 end
+
+function Skits_Style_Notification:CancelSpeaker(creatureData)
+    return
+end

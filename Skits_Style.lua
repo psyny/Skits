@@ -59,6 +59,12 @@ function Skits_Style:NewSpeak(creatureData, textData)
     end
 end
 
+function Skits_Style:CancelSpeaker(creatureData)
+    for _, style in pairs(self.ativeStyles) do
+        style:CancelSpeaker(creatureData)
+    end
+end
+
 function Skits_Style:StyleToDisplay()
     local options = Skits_Options.db
 

@@ -462,3 +462,7 @@ function Skits_Style_Warcraft:IsActive()
     end
     return isActive
 end
+
+function Skits_Style_Warcraft:CancelSpeaker(creatureData)
+    return
+end
