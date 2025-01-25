@@ -733,3 +733,32 @@ function Skits_UI_Utils:CreateFadedFrame(parameters)
 
     return fadedFrame
 end
+
+function Skits_UI_Utils:ModelFrameSetTargetSize(modelframe, w, h)
+    modelframe.targetSize = {
+        w = w,
+        h = h,
+    }
+
+    return modelframe
+end
+
+function Skits_UI_Utils:ModelFrameSetVisible(modelframe, visible)
+    local targetSize = modelframe.targetSize
+
+    if not targetSize then 
+        if visible then
+            modelframe:Show()
+        else
+            modelframe:Hide()
+        end
+    else
+        if visible then
+            modelframe:SetSize(targetSize.w, targetSize.h)
+        else
+            modelframe:SetSize(0.01, 0.01)
+        end
+    end
+
+    return modelframe
+end

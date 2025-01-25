@@ -21,7 +21,30 @@ Skits_Style_Notification.remainingDuration = 0
 
 local needsLayoutReset = true
 
+local isVisible = true
+
 -- AUX FUNCTIONS --------------------------------------------------------------------------------------------------------------
+local function setSpeakVisibility(speakFrame)
+    if speakFrame then
+        Skits_UI_Utils:ModelFrameSetVisible(speakFrame.portrait, isVisible)
+        Skits_UI_Utils:ModelFrameSetVisible(speakFrame.portraitBg, isVisible)
+
+        if isVisible then
+            speakFrame.content:Show()
+            speakFrame.bg.bg:Show()
+            if speakFrame.portraitLoaderData then
+                Skits_UI_Utils:LoadReAppeared(speakFrame.portraitLoaderData)
+            end
+            if speakFrame.portraitBgLoaderData then
+                Skits_UI_Utils:LoadReAppeared(speakFrame.portraitBgLoaderData)     
+            end                   
+        else
+            speakFrame.content:Hide()
+            speakFrame.bg.bg:Hide()
+        end
+    end
+end
+
 function Skits_Style_Notification:ResetLayouts()
     local options = Skits_Options.db
 
@@ -95,13 +118,16 @@ function Skits_Style_Notification:CreateSpeakFrame(creatureData, text, textColor
     -- Portrait frame
     local portraitYoffset = 5
     speakFrame.portrait = CreateFrame("PlayerModel", nil, speakFrame.main)
-    speakFrame.portrait:SetSize(parameters.portraitSize, parameters.portraitSize)    
+    Skits_UI_Utils:ModelFrameSetTargetSize(speakFrame.portrait, parameters.portraitSize, parameters.portraitSize)
+    Skits_UI_Utils:ModelFrameSetVisible(speakFrame.portrait, isVisible) 
     speakFrame.portrait:SetPoint(ancorRef1, speakFrame.main, ancorRef2, 0, portraitYoffset)    
 
     -- Portrait bg frame
     local portraitBgOffsetY = math.max(parameters.portraitSize * 0.05, 3)
     speakFrame.portraitBg = CreateFrame("PlayerModel", nil, speakFrame.main)
-    speakFrame.portraitBg:SetSize(parameters.portraitSize, parameters.portraitSize)
+    print("Is visible " .. (isVisible and "T" or "F"))
+    Skits_UI_Utils:ModelFrameSetTargetSize(speakFrame.portraitBg, parameters.portraitSize, parameters.portraitSize)
+    Skits_UI_Utils:ModelFrameSetVisible(speakFrame.portraitBg, isVisible)
     speakFrame.portraitBg:SetPoint("BOTTOMLEFT", speakFrame.portrait, "BOTTOMLEFT", 0, portraitBgOffsetY)    
 
     -- Content Frame: Frame contents
@@ -268,6 +294,7 @@ function Skits_Style_Notification:msgAdd(msgData)
 
     -- Show current message
     msgData.speakFrame.main:Show()
+    setSpeakVisibility(msgData.speakFrame)
 
     -- Add it to the frame
     table.insert(self.messages, msgData)
@@ -320,6 +347,45 @@ function Skits_Style_Notification:msgCreate(creatureData, textData, duration)
     self:msgAdd(msgData)
 end
 
+-- Skit General Visibility Control --------------------------------------------------------
+local function HideSkit(forceHide)
+    if isVisible == true then
+        if forceHide == false then
+            return
+        end
+    else
+        return
+    end
+    isVisible = false
+
+    -- Hide all messages
+    for _, msgData in ipairs(Skits_Style_Notification.messages) do
+        local speakFrame = msgData.speakFrame
+        setSpeakVisibility(speakFrame)
+    end   
+
+    return
+end
+
+local function ShowSkit(forceShow)
+    if isVisible == false then
+        if forceShow == false then
+            return
+        end
+    else
+        return
+    end
+    isVisible = true
+
+    -- Show all messages
+    for _, msgData in ipairs(Skits_Style_Notification.messages) do
+        local speakFrame = msgData.speakFrame
+        setSpeakVisibility(speakFrame)
+    end    
+
+    return
+end
+
 -- EXTERNAL: Speak --------------------------------------------------------------------------------------------------------------
 function Skits_Style_Notification:NewSpeak(creatureData, textData)
     if needsLayoutReset then
@@ -348,6 +414,8 @@ function Skits_Style_Notification:NewSpeak(creatureData, textData)
 
     -- Create Message
     self:msgCreate(creatureData, textData, adjustedDuration)
+
+    ShowSkit(false)
 end
 
 function Skits_Style_Notification:ResetLayout()
@@ -359,22 +427,11 @@ function Skits_Style_Notification:CloseSkit()
 end
 
 function Skits_Style_Notification:HideSkit()
-    if self.mainFrame:IsShown() then
-        self.mainFrame:Hide()
-    end
+    HideSkit(true)
 end
 
 function Skits_Style_Notification:ShowSkit()
-    if not self.mainFrame:IsShown() then
-        self.mainFrame:Show()
-        for _, msgData in ipairs(self.messages) do
-            local speakFrame = msgData.speakFrame
-            if speakFrame then
-                Skits_UI_Utils:LoadReAppeared(speakFrame.portraitLoaderData)
-                Skits_UI_Utils:LoadReAppeared(speakFrame.portraitBgLoaderData)
-            end
-        end
-    end
+    ShowSkit(true)
 end
 
 function Skits_Style_Notification:ShouldDisplay()

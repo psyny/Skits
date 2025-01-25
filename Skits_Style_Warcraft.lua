@@ -19,6 +19,27 @@ Skits_Style_Warcraft.mainFrame:SetAllPoints(UIParent)
 Skits_Style_Warcraft.mainFrame:EnableMouse(false)
 Skits_Style_Warcraft.mainFrame:EnableMouseWheel(false)
 
+local isVisible = true
+
+-- AUX FUNCTIONS --------------------------------------------------------------------------------------------------------------
+local function setSpeakVisibility(msgData)
+    if msgData then
+        Skits_UI_Utils:ModelFrameSetVisible(msgData.modelFrame, isVisible)
+
+        if isVisible then
+            msgData.textFrame:Show()
+            msgData.borderFrame:Show()
+            msgData.speakerNameFrame:Show()
+            if msgData.modelLoader then
+                Skits_UI_Utils:LoadReAppeared(msgData.modelLoader)            
+            end
+        else
+            msgData.textFrame:Hide()
+            msgData.borderFrame:Hide()
+            msgData.speakerNameFrame:Hide()
+        end
+    end
+end
 
 function Skits_Style_Warcraft:CreateSpeakFrame(creatureData, textData, displayOptions, frameSize, parentFrame, altSpeakerSide, textAreaWidth, font, fontSize, showSpeakerName)
     local options = Skits_Options.db
@@ -107,7 +128,8 @@ function Skits_Style_Warcraft:CreateSpeakFrame(creatureData, textData, displayOp
     }    
     local modelLoader = Skits_UI_Utils:LoadModel(creatureData, displayOptions, loadOptions)
 
-    modelFrame:Show()    
+    Skits_UI_Utils:ModelFrameSetTargetSize(modelFrame, frameSize * 0.75, frameSize)    
+    Skits_UI_Utils:ModelFrameSetVisible(modelFrame, true) 
 
     return textFrame, textLabel, speakerNameFrame, modelFrame, borderFrame, modelLoader
 end
@@ -276,6 +298,43 @@ function Skits_Style_Warcraft:SetLoopingAnimation(modelFrame, animationIDs)
     end)
 end
 
+-- Skit General Visibility Control --------------------------------------------------------
+local function HideSkit(forceHide)
+    if isVisible == true then
+        if forceHide == false then
+            return
+        end
+    else
+        return
+    end
+    isVisible = false
+
+    -- Hide all messages
+    for _, msgData in ipairs(Skits_Style_Warcraft.activeMessages) do
+        setSpeakVisibility(msgData)
+    end   
+
+    return
+end
+
+local function ShowSkit(forceShow)
+    if isVisible == false then
+        if forceShow == false then
+            return
+        end
+    else
+        return
+    end
+    isVisible = true
+
+    -- Show all messages
+    for _, msgData in ipairs(Skits_Style_Warcraft.activeMessages) do
+        setSpeakVisibility(msgData)
+    end  
+
+    return
+end
+
 -- EXTERNAL: Speak --------------------------------------------------------------------------------------------------------------
 function Skits_Style_Warcraft:NewSpeak(creatureData, textData)
     local options = Skits_Options.db
@@ -356,7 +415,7 @@ function Skits_Style_Warcraft:NewSpeak(creatureData, textData)
     local displayOptions =  Skits_UI_Utils:BuildDisplayOptions(portraitZoom, rotation, scale, animations, nil, pauseAfter, fallbackId, fallbackLight) 
 
     local textFrame, textLabel, speakerNameFrame, modelFrame, borderFrame, modelLoader = Skits_Style_Warcraft:CreateSpeakFrame(creatureData, textData, displayOptions, modelFrameSize, Skits_Style_Warcraft.mainFrame, self.speakerOrder, textAreaWidth, font, fontSize, showSpeakerName)
-
+  
     if options.style_warcraft_speaker_face_animated then
         animations = Skits_UI_Utils:GetAnimationIdsFromText(textData.text, true)
         self:SetLoopingAnimation(modelFrame, animations)
@@ -388,6 +447,7 @@ function Skits_Style_Warcraft:NewSpeak(creatureData, textData)
         modelLoader = modelLoader,
     }
     lastMsgData = msgData
+    setSpeakVisibility(msgData)
 
     -- Set timer to fade
     self:SetMessageTimer(msgData)    
@@ -397,6 +457,8 @@ function Skits_Style_Warcraft:NewSpeak(creatureData, textData)
 
     -- Trim messages
     self:TrimMessages()
+
+    ShowSkit(false)
 end
 
 function Skits_Style_Warcraft:ResetLayout()
@@ -411,21 +473,11 @@ function Skits_Style_Warcraft:CloseSkit()
 end
 
 function Skits_Style_Warcraft:HideSkit()
-    if self.mainFrame:IsShown() then
-        self.mainFrame:Hide()
-    end
+    HideSkit(true)
 end
 
 function Skits_Style_Warcraft:ShowSkit()
-    if not self.mainFrame:IsShown() then
-        self.mainFrame:Show()
-
-        for i, msgData in ipairs(self.activeMessages) do
-            if msgData and msgData.modelLoader then
-                Skits_UI_Utils:LoadReAppeared(msgData.modelLoader)
-            end
-        end        
-    end
+    ShowSkit(true)
 end
 
 function Skits_Style_Warcraft:ShouldDisplay()

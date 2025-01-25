@@ -11,6 +11,8 @@ local textAreaHeight = 70
 
 local needsLayoutReset = true
 
+local isVisible = true
+
 -- MainFrames
 Skits_Style_Tales.mainFrame = CreateFrame("Frame", "SkitsStyleTales", UIParent)
 
@@ -107,7 +109,7 @@ for i = 1, numberOfSlots do
     local modelFrame = CreateFrame("PlayerModel", nil, Skits_Style_Tales.mainFrame)
     speakerSlot.modelFrame = modelFrame
     speakerSlot.modelFrame.slot = speakerSlot
-    speakerSlot.modelFrame:Show()
+    Skits_UI_Utils:ModelFrameSetVisible(speakerSlot.modelFrame, isVisible)
     table.insert(Skits_Style_Tales.speakerSlots, speakerSlot)
 end
 
@@ -317,7 +319,8 @@ function Skits_Style_Tales:ResetLayouts()
     -- Slots Model Frames updates
     for i = 1, numberOfSlots do
         slot = self.speakerSlots[i]
-        slot.modelFrame:SetSize(modelFrameSize, modelFrameSize)
+        Skits_UI_Utils:ModelFrameSetTargetSize(slot.modelFrame, modelFrameSize, modelFrameSize)
+        Skits_UI_Utils:ModelFrameSetVisible(slot.modelFrame, isVisible)
     end    
 
     -- Slot Positions
@@ -413,7 +416,7 @@ local function SlotExpireMsg(slot, hideMessage)
 end
 
 local function SlotExpireSlot(slot, hideMessage)
-    slot.modelFrame:Hide()
+    Skits_UI_Utils:ModelFrameSetVisible(slot.modelFrame, false)
 
     SlotExpireMsg(slot, hideMessage)
     SlotClearData(slot)
@@ -524,7 +527,7 @@ local function SlotToFront(slot)
 
     -- Set Level    
     slot.modelFrame:SetFrameLevel(60)
-    slot.modelFrame:Show()
+    Skits_UI_Utils:ModelFrameSetVisible(slot.modelFrame, isVisible)
 end
 
 -- POSITION FUNCTIONS --------------------------------------------------------------------------------------------------------------
@@ -627,7 +630,7 @@ local function PositionSetSlotToPosition(slot, toPosition, instant)
     local duration = 0.25
 
     -- Reasons to be instant (besides given parameter)
-    if not Skits_Style_Tales.mainFrame:IsShown() then
+    if not isVisible then
         instant = true
     elseif duration <= 0 then
         instant = true
@@ -680,7 +683,7 @@ end
 
 local function PositionGoto(slot, position, instant)
     -- Reasons to be instant (besides given parameter)
-    if not Skits_Style_Tales.mainFrame:IsShown() then
+    if not isVisible then
         instant = true
     elseif not slot.position then
         instant = true
@@ -709,7 +712,7 @@ end
 
 local function PositionSwap(slot1, slot2, instant)
     -- Reasons to be instant (besides given parameter)
-    if not Skits_Style_Tales.mainFrame:IsShown() then
+    if not isVisible then
         instant = true
     elseif not slot.position then
         instant = true
@@ -853,7 +856,7 @@ local function ModelAdd(creatureData, textData, slot, duration)
     }
     
     local loaderData = Skits_UI_Utils:LoadModel(creatureData, displayOptions, loadOptions)
-    slot.modelFrame:Show()
+    Skits_UI_Utils:ModelFrameSetVisible(slot.modelFrame, isVisible)
     slot.loaderData = loaderData
 end
 
@@ -865,13 +868,39 @@ local function LayoutUpdateBackgrounds()
     local mainSlotLeft = Skits_Style_Tales.speakerPositions.left[1].slot
     local mainSlotRight = Skits_Style_Tales.speakerPositions.right[1].slot
 
-    if options.style_tales_always_fullscreen or (mainSlotLeft and mainSlotRight) then
-        Skits_Style_Tales.textFullFrameBg:Show()
-        Skits_Style_Tales.textFullFrameBgBorder.main:Show()
-        Skits_Style_Tales.textFullFrameBgTexture:Show()
+    if not isVisible then
+        Skits_Style_Tales.textFullFrameBg:Hide()
+        Skits_Style_Tales.textFullFrameBgBorder.main:Hide()
+        Skits_Style_Tales.textFullFrameBgTexture:Hide()
+        Skits_Style_Tales.textLeftFrame:Hide()
         Skits_Style_Tales.textLeftFrameBg:Hide()
         Skits_Style_Tales.textLeftFrameBgBorder.main:Hide()
         Skits_Style_Tales.textLeftFrameBgTexture:Hide()
+        Skits_Style_Tales.textRightFrame:Hide()
+        Skits_Style_Tales.textRightFrameBg:Hide()
+        Skits_Style_Tales.textRightFrameBgBorder.main:Hide()   
+        Skits_Style_Tales.textRightFrameBgTexture:Hide()
+        
+        Skits_Style_Tales.modelFullBgFrame:Hide()
+        Skits_Style_Tales.modelFullBgFrameTexture:Hide()
+        Skits_Style_Tales.modelLeftBgFrame:Hide()
+        Skits_Style_Tales.modelLeftBgBorderFrame:Hide()
+        Skits_Style_Tales.modelLeftBgFrameTexture:Hide()
+        Skits_Style_Tales.modelLeftBgBorderFrameTexture:Hide()
+        Skits_Style_Tales.modelRightBgFrame:Hide()
+        Skits_Style_Tales.modelRightBgBorderFrame:Hide()
+        Skits_Style_Tales.modelRightBgFrameTexture:Hide()
+        Skits_Style_Tales.modelRightBgBorderFrameTexture:Hide()
+
+    elseif options.style_tales_always_fullscreen or (mainSlotLeft and mainSlotRight) then
+        Skits_Style_Tales.textFullFrameBg:Show()
+        Skits_Style_Tales.textFullFrameBgBorder.main:Show()
+        Skits_Style_Tales.textFullFrameBgTexture:Show()
+        Skits_Style_Tales.textLeftFrame:Show()
+        Skits_Style_Tales.textLeftFrameBg:Hide()
+        Skits_Style_Tales.textLeftFrameBgBorder.main:Hide()
+        Skits_Style_Tales.textLeftFrameBgTexture:Hide()
+        Skits_Style_Tales.textRightFrame:Show()
         Skits_Style_Tales.textRightFrameBg:Hide()
         Skits_Style_Tales.textRightFrameBgBorder.main:Hide()     
         Skits_Style_Tales.textRightFrameBgTexture:Hide()
@@ -891,9 +920,11 @@ local function LayoutUpdateBackgrounds()
         Skits_Style_Tales.textFullFrameBg:Hide()
         Skits_Style_Tales.textFullFrameBgBorder.main:Hide()
         Skits_Style_Tales.textFullFrameBgTexture:Hide()
+        Skits_Style_Tales.textLeftFrame:Show()
         Skits_Style_Tales.textLeftFrameBg:Show()
         Skits_Style_Tales.textLeftFrameBgBorder.main:Show()
         Skits_Style_Tales.textLeftFrameBgTexture:Show()
+        Skits_Style_Tales.textRightFrame:Hide()
         Skits_Style_Tales.textRightFrameBg:Hide()
         Skits_Style_Tales.textRightFrameBgBorder.main:Hide()   
         Skits_Style_Tales.textRightFrameBgTexture:Hide()
@@ -913,9 +944,11 @@ local function LayoutUpdateBackgrounds()
         Skits_Style_Tales.textFullFrameBg:Hide()
         Skits_Style_Tales.textFullFrameBgBorder.main:Hide()
         Skits_Style_Tales.textFullFrameBgTexture:Hide()
+        Skits_Style_Tales.textLeftFrame:Hide()
         Skits_Style_Tales.textLeftFrameBg:Hide()
         Skits_Style_Tales.textLeftFrameBgBorder.main:Hide()
         Skits_Style_Tales.textLeftFrameBgTexture:Hide()
+        Skits_Style_Tales.textRightFrame:Show()
         Skits_Style_Tales.textRightFrameBg:Show()
         Skits_Style_Tales.textRightFrameBgBorder.main:Show()   
         Skits_Style_Tales.textRightFrameBgTexture:Show()
@@ -932,6 +965,64 @@ local function LayoutUpdateBackgrounds()
         Skits_Style_Tales.modelRightBgBorderFrameTexture:Show()           
     end
 end
+
+-- Skit General Visibility Control --------------------------------------------------------
+local function HideSkit(forceHide)
+    if isVisible == true then
+        if forceHide == false then
+            return
+        end
+    else
+        return
+    end
+    isVisible = false
+
+    -- Hide all frames
+    LayoutUpdateBackgrounds()
+
+    -- Hide model
+    -- Why set to size 0 instead of hidding? WOW Api has a memory leak when changing model of hidden model frames.
+    for i = 1, numberOfSlots do
+        slot = Skits_Style_Tales.speakerSlots[i]
+        Skits_UI_Utils:ModelFrameSetVisible(slot.modelFrame, isVisible)
+    end 
+
+    return
+end
+
+local function ShowSkit(forceShow)
+    if isVisible == false then
+        if forceShow == false then
+            return
+        end
+    else
+        return
+    end
+    isVisible = true
+
+    local options = Skits_Options.db
+    local optionsModelSize = options.style_tales_model_size
+    local modelFrameSize = optionsModelSize
+
+    -- Show all frames
+    LayoutUpdateBackgrounds()
+
+    -- Show model slots
+    for i = 1, numberOfSlots do
+        slot = Skits_Style_Tales.speakerSlots[i]
+        if slot then
+            Skits_UI_Utils:ModelFrameSetVisible(slot.modelFrame, isVisible)
+
+            if slot.loaderData then                                
+                Skits_UI_Utils:LoadReAppeared(slot.loaderData)
+            end            
+        end
+
+    end   
+
+    return
+end
+
 
 -- EXTERNAL: Speak --------------------------------------------------------------------------------------------------------------
 function Skits_Style_Tales:NewSpeak(creatureData, textData)
@@ -1025,6 +1116,8 @@ function Skits_Style_Tales:NewSpeak(creatureData, textData)
 
     -- Update Controls
     SlotSetCurrentSpeaker(slot, creatureData)
+
+    ShowSkit(false)
 end
 
 function Skits_Style_Tales:ResetLayout()
@@ -1036,7 +1129,7 @@ function Skits_Style_Tales:CloseSkit()
     -- Reset Slots
     for i = 1, numberOfSlots do
         local speakerSlot = self.speakerSlots[i]
-        speakerSlot.modelFrame:Hide()
+        Skits_UI_Utils:ModelFrameSetVisible(speakerSlot.modelFrame, false)
         SlotClearData(speakerSlot)
     end
 
@@ -1067,22 +1160,11 @@ function Skits_Style_Tales:CloseSkit()
 end
 
 function Skits_Style_Tales:HideSkit()
-    if self.mainFrame:IsShown() then
-        self.mainFrame:Hide()        
-    end
+    HideSkit(true)
 end
 
 function Skits_Style_Tales:ShowSkit()
-    if not self.mainFrame:IsShown() then
-        self.mainFrame:Show()
-
-        for i = 1, numberOfSlots do
-            slot = self.speakerSlots[i]
-            if slot and slot.loaderData then
-                Skits_UI_Utils:LoadReAppeared(slot.loaderData)
-            end
-        end    
-    end
+    ShowSkit(true)
 end
 
 function Skits_Style_Tales:ShouldDisplay()

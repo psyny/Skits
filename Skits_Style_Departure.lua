@@ -7,6 +7,8 @@ local numberOfSlots = 2
 local needsLayoutReset = true
 local textAreaHeight = 100
 
+local isVisible = true
+
 -- MainFrames
 Skits_Style_Departure.mainFrame = CreateFrame("Frame", "SkitsStyleDeparture", UIParent)
 
@@ -74,7 +76,7 @@ for i = 1, numberOfSlots do
     local modelFrame = CreateFrame("PlayerModel", nil, Skits_Style_Departure.mainFrame)
     speakerSlot.modelFrame = modelFrame
     speakerSlot.modelFrame.slot = speakerSlot
-    speakerSlot.modelFrame:Show()
+    Skits_UI_Utils:ModelFrameSetVisible(speakerSlot.modelFrame, isVisible)
     table.insert(Skits_Style_Departure.speakerSlots, speakerSlot)
 end
 
@@ -116,7 +118,16 @@ local function LayoutUpdateBackgrounds()
     local hasRight = mainSlotRight and mainSlotRight.creatureData
 
     -- Checks
-    if hasLeft and hasRight then
+    if not isVisible then
+        Skits_Style_Departure.modelLeftBgFrame:Hide()
+        Skits_Style_Departure.textLeftFrameBgBorder.bg:Hide()
+        Skits_Style_Departure.textLeftFrame:Hide()
+    
+        Skits_Style_Departure.modelRightBgFrame:Hide()
+        Skits_Style_Departure.textRightFrameBgBorder.bg:Hide()
+        Skits_Style_Departure.textRightFrame:Hide()
+
+    elseif hasLeft and hasRight then
         Skits_Style_Departure.textLeftFrame:Show()
         Skits_Style_Departure.textLeftFrameBgBorder.bg:Show()        
         Skits_Style_Departure.textRightFrame:Show()
@@ -270,9 +281,9 @@ function Skits_Style_Departure:ResetLayouts()
     -- Slots Model Frames updates
     for i = 1, numberOfSlots do
         slot = self.speakerSlots[i]
-        slot.modelFrame:SetSize(modelFrameSize, modelFrameSize)
-        --slot.modelFrame:SetSize(0, 0)
-   end    
+        Skits_UI_Utils:ModelFrameSetTargetSize(slot.modelFrame, modelFrameSize, modelFrameSize)
+        Skits_UI_Utils:ModelFrameSetVisible(slot.modelFrame, isVisible)
+    end    
 
     -- Slot Positions
     local slotPosY = -(modelFrameSize * 0.35)
@@ -361,7 +372,7 @@ local function SlotExpireMsg(slot, hideMessage)
 end
 
 local function SlotExpireSlot(slot, hideMessage)
-    slot.modelFrame:Hide()
+    Skits_UI_Utils:ModelFrameSetVisible(slot.modelFrame, false)
 
     SlotExpireMsg(slot, hideMessage)
     SlotClearData(slot)
@@ -474,7 +485,7 @@ local function SlotToFront(slot)
 
     -- Set Level    
     slot.modelFrame:SetFrameLevel(60)
-    slot.modelFrame:Show()
+    Skits_UI_Utils:ModelFrameSetVisible(slot.modelFrame, isVisible)  -- xxx  
 end
 
 -- POSITION FUNCTIONS --------------------------------------------------------------------------------------------------------------
@@ -581,7 +592,7 @@ local function PositionSetSlotToPosition(slot, toPosition, instant)
     local duration = 0.25
 
     -- Reasons to be instant (besides given parameter)
-    if not Skits_Style_Departure.mainFrame:IsShown() then
+    if not isVisible then
         instant = true
     elseif duration <= 0 then
         instant = true
@@ -638,7 +649,7 @@ end
 
 local function PositionGoto(slot, position, instant)
     -- Reasons to be instant (besides given parameter)
-    if not Skits_Style_Departure.mainFrame:IsShown() then
+    if not isVisible then
         instant = true
     elseif not slot.position then
         instant = true
@@ -667,7 +678,7 @@ end
 
 local function PositionSwap(slot1, slot2, instant)
     -- Reasons to be instant (besides given parameter)
-    if not Skits_Style_Departure.mainFrame:IsShown() then
+    if not isVisible then
         instant = true
     elseif not slot.position then
         instant = true
@@ -849,8 +860,61 @@ local function ModelAdd(creatureData, textData, slot, duration)
     }
     
     local loaderData = Skits_UI_Utils:LoadModel(creatureData, displayOptions, loadOptions)
-    slot.modelFrame:Show()
+    Skits_UI_Utils:ModelFrameSetVisible(slot.modelFrame, true) -- xxx
     slot.loaderData = loaderData
+end
+
+-- Skit General Visibility Control --------------------------------------------------------
+local function HideSkit(forceHide)
+    if isVisible == true then
+        if forceHide == false then
+            return
+        end
+    else
+        return
+    end
+    isVisible = false
+
+    -- Hide all frames
+    LayoutUpdateBackgrounds()
+
+    -- Hide model
+    -- Why set to size 0 instead of hidding? WOW Api has a memory leak when changing model of hidden model frames.
+    for i = 1, numberOfSlots do
+        slot = Skits_Style_Departure.speakerSlots[i]
+        Skits_UI_Utils:ModelFrameSetVisible(slot.modelFrame, isVisible)
+    end 
+
+    return
+end
+
+local function ShowSkit(forceShow)
+    if isVisible == false then
+        if forceShow == false then
+            return
+        end
+    else
+        return
+    end
+    isVisible = true
+
+    -- Show all frames
+    LayoutUpdateBackgrounds()
+
+    -- Show model slots
+    for i = 1, numberOfSlots do
+        slot = Skits_Style_Departure.speakerSlots[i]
+        if slot then
+            Skits_UI_Utils:ModelFrameSetVisible(slot.modelFrame, isVisible)
+
+            if slot.loaderData then                                
+                Skits_UI_Utils:LoadReAppeared(slot.loaderData)
+            end            
+        end
+
+    end   
+
+    return
 end
 
 -- EXTERNAL: Speak --------------------------------------------------------------------------------------------------------------
@@ -945,6 +1009,8 @@ function Skits_Style_Departure:NewSpeak(creatureData, textData)
 
     -- Update Controls
     SlotSetCurrentSpeaker(slot, creatureData)
+
+    ShowSkit(false)
 end
 
 function Skits_Style_Departure:ResetLayout()
@@ -956,7 +1022,7 @@ function Skits_Style_Departure:CloseSkit()
     -- Reset Slots
     for i = 1, numberOfSlots do
         local speakerSlot = self.speakerSlots[i]
-        speakerSlot.modelFrame:Hide()
+        Skits_UI_Utils:ModelFrameSetVisible(speakerSlot.modelFrame, false)
         SlotClearData(speakerSlot)
     end
 
@@ -987,22 +1053,11 @@ function Skits_Style_Departure:CloseSkit()
 end
 
 function Skits_Style_Departure:HideSkit()
-    if self.mainFrame:IsShown() then
-        self.mainFrame:Hide()
-    end
+    HideSkit(true)
 end
 
 function Skits_Style_Departure:ShowSkit()
-    if not self.mainFrame:IsShown() then
-        self.mainFrame:Show()
-
-        for i = 1, numberOfSlots do
-            slot = self.speakerSlots[i]
-            if slot and slot.loaderData then
-                Skits_UI_Utils:LoadReAppeared(slot.loaderData)
-            end
-        end           
-    end
+    ShowSkit(true)
 end
 
 function Skits_Style_Departure:ShouldDisplay()
