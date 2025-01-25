@@ -330,7 +330,7 @@ function Skits_Style_Notification:NewSpeak(creatureData, textData)
     local options = Skits_Options.db
 
     -- Duration
-    local duration = Skits_Utils:MessageDuration(textData.text)
+    local duration = textData.duration
 
     -- Calculate adjusted duration
     local currentTime = GetTime()

@@ -941,7 +941,7 @@ function Skits_Style_Tales:NewSpeak(creatureData, textData)
     end
 
     -- Duration
-    local duration = Skits_Utils:MessageDuration(textData.text)
+    local duration = textData.duration
 
     -- Model Light for current hour
     local hourLight = Skits_Style_Utils:GetHourLight()

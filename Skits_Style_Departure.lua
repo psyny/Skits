@@ -271,6 +271,7 @@ function Skits_Style_Departure:ResetLayouts()
     for i = 1, numberOfSlots do
         slot = self.speakerSlots[i]
         slot.modelFrame:SetSize(modelFrameSize, modelFrameSize)
+        --slot.modelFrame:SetSize(0, 0)
    end    
 
     -- Slot Positions
@@ -860,7 +861,7 @@ function Skits_Style_Departure:NewSpeak(creatureData, textData)
     end
 
     -- Duration
-    local duration = Skits_Utils:MessageDuration(textData.text)
+    local duration = textData.duration
 
     -- Model Light for current hour
     local hourLight = Skits_Style_Utils:GetHourLight()

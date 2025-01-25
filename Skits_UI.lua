@@ -3,21 +3,19 @@ Skits_UI = {}
 Skits_UI.speakerData = {}
 
 -- Function to display 3D model with accompanying text
-function Skits_UI:DisplaySkits(creatureData, text, r, g, b)
+function Skits_UI:DisplaySkits(creatureData, textData, r, g, b)
     local options = Skits_Options.db
     local speaker = creatureData.name
 
     -- Get adjusted duration
-    local duration = Skits_Utils:MessageDuration(text)
+    local duration = Skits_Utils:MessageDuration(textData.text) / (textData.speed or 1)
 
     -- Compile text data
-    local textData = {
-        text = text,
-        duration = duration,
-        r = r,
-        g = g,
-        b = b,
-    }
+    textData.duration = duration
+    textData.r = r
+    textData.g = g
+    textData.b = b
+    textData.speed = textData.speed or 1
 
     -- Create Skits
     Skits_Style:NewSpeak(creatureData, textData)

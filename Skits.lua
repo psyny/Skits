@@ -29,6 +29,8 @@ Skits.speakerColorMapQueueLimit = 30
 Skits.displayDurationEnd = GetTime()
 Skits.holdSpeakUntil = GetTime()
 Skits.speakerLastInteracting = nil
+Skits.speakerInteractRepeats = {}
+Skits.speakerInteractRepeatsQueue = Skits_Deque:New()
 
 -- Memory table for last 1000 speaks
 Skits.msgMemoryLimit = 1000
@@ -41,6 +43,12 @@ Skits.skitsActive = true
 Skits.queuedSpeaks = {}
 Skits.queuedSpeaksNextId = 1
 
+local avoidSoftGroupTokenAdd = {
+    ["mou"] = true,
+    ["tar"] = true,
+    ["nam"] = true,
+    ["npc"] = true,
+}
 
 ---------------------------------------------------------
 -- Addon events
@@ -404,12 +412,12 @@ function Skits:ClearQueuedSpeaks()
     self.queuedSpeaks = {}
 end
 
-local function QueueNewSpeak(creatureData, duration, text)
+local function QueueNewSpeak(creatureData, duration, textData)
     local id = Skits.queuedSpeaksNextId
     Skits.queuedSpeaksNextId = Skits.queuedSpeaksNextId + 1
 
     local handler = C_Timer.NewTimer(duration, function()        
-        Skits:ChatEvent(creatureData, text, false)
+        Skits:ChatEvent(creatureData, textData, false)
         Skits.queuedSpeaks[id] = nil
     end)
     Skits.queuedSpeaks[id] = handler
@@ -417,6 +425,29 @@ end
 
 
 function Skits:HandleQuestFrame(creatureData, text)
+    -- Check if speak was seen recently
+    local speakId = creatureData.name .. #text .. text:sub(1, 10)
+    local alreadySaw = self.speakerInteractRepeats[speakId]
+    if alreadySaw then
+        return
+    end
+
+    -- Register as seen
+    self.speakerInteractRepeats[speakId] = 1
+    self.speakerInteractRepeatsQueue:AddToHead(speakId)
+
+    -- Trim speak ids
+    local overlimit = self.speakerInteractRepeatsQueue.size - 1000
+    if overlimit > 0 then
+        removeds = self.speakerInteractRepeatsQueue:RemoveFirstX(overlimit)   
+        for _, removedSpeakId in ipairs(removeds) do
+            if removedSpeakId then
+                self.speakerInteractRepeats[removedSpeakId] = nil
+            end
+        end        
+    end    
+
+    -- Queue Speak
     self:ClearQueuedSpeaks()
     Skits.speakerLastInteracting = creatureData
 
@@ -427,14 +458,28 @@ function Skits:HandleQuestFrame(creatureData, text)
         timeToEndCurrentMessage = 0
     end
 
+    local frameTextSpeed = 2.0
+
     local accDuration = math.max(timeToEndCurrentMessage, 0.2)
     local currSpeakText = ""
     for _, phrase in ipairs(phrases) do
         -- Concatenating will blow size?
         -- If yes, send the current text as
         if #currSpeakText + #phrase > 200 then
-            QueueNewSpeak(creatureData, accDuration, currSpeakText)
-            accDuration = accDuration + math.max(Skits_Utils:MessageDuration(currSpeakText) - 0.1, 1)
+            local textPart = currSpeakText
+            if textPart:sub(-1) == "." then
+                textPart = textPart .. ".."
+            else
+                textPart = textPart .. "..."
+            end
+            local textData = {
+                text = textPart,
+                speed = frameTextSpeed,
+            }
+
+            QueueNewSpeak(creatureData, accDuration, textData)
+            local thisSpeakDuration = math.max((Skits_Utils:MessageDuration(currSpeakText) / frameTextSpeed) - 0.1, 1)
+            accDuration = accDuration + thisSpeakDuration
             currSpeakText = ""
         end
 
@@ -442,9 +487,14 @@ function Skits:HandleQuestFrame(creatureData, text)
         currSpeakText = currSpeakText .. phrase .. " "
     end
 
-    -- Resitual text
+    -- Final text
     if #currSpeakText > 1 then
-        QueueNewSpeak(creatureData, accDuration, currSpeakText)
+        local textData = {
+            text = currSpeakText,
+            speed = frameTextSpeed,
+        }
+
+        QueueNewSpeak(creatureData, accDuration, textData)
     end
 end
 
@@ -559,8 +609,13 @@ function Skits:HandleNpcChatEvent(event, msg, sender, languageName, channelName,
     creatureData.isPlayer = false
     creatureData.name = sender
 
+    local textData = {
+        text = msg,
+        speed= 1.0,
+    }
+
     self:ClearQueuedSpeaks()
-    self:ChatEvent(creatureData, msg, true)
+    self:ChatEvent(creatureData, textData, true)
 end
 
 function Skits:HandlePlayerChatEvent(event, msg, sender, languageName, channelName, target, flags, unknown, channelNumber, channelName2, unknown2, counter, guid)
@@ -600,17 +655,22 @@ function Skits:HandlePlayerChatEvent(event, msg, sender, languageName, channelNa
         end
     end
 
+    local textData = {
+        text = msg,
+        speed = 1.0,
+    }
+
     self:ClearQueuedSpeaks()
-    self:ChatEvent(creatureData, msg, true)
+    self:ChatEvent(creatureData, textData, true)
 end
 
-function Skits:ChatEvent(creatureData, text, priority)
+function Skits:ChatEvent(creatureData, textData, priority)
     local options = Skits_Options.db
     local r, g, b = self:GetColorForSpeaker(creatureData.name)	
 	
     -- Calculate display duration with minimum of 1 second
     local userCharactersPerSecondOption = Skits_Options.db.speech_speed
-    local displayDuration = Skits_Utils:MessageDuration(text)
+    local displayDuration = Skits_Utils:MessageDuration(textData.text) / (textData.speed or 1)
 
     if priority then
         self.holdSpeakUntil = GetTime() + displayDuration
@@ -620,11 +680,11 @@ function Skits:ChatEvent(creatureData, text, priority)
     self.displayDurationEnd = GetTime() + displayDuration
 
 	-- Store speak information in memory
-    self:StoreInMemory(creatureData, text, {r=r, g=g, b=b})
+    self:StoreInMemory(creatureData, textData.text, {r=r, g=g, b=b})
 
     -- Display text and 3D model
     if self.skitsActive then
-        Skits_UI:DisplaySkits(creatureData, text, r, g, b)
+        Skits_UI:DisplaySkits(creatureData, textData, r, g, b)
     end
 
     -- Refresh log page
@@ -638,7 +698,16 @@ function Skits:BuildCreatureDataOfToken(unittoken)
     -- Check if the target is an NPC
     if UnitExists(unittoken) then
         local creatureName, creatureServer = UnitName(unittoken)
-        if not UnitIsPlayer(unittoken) then     
+        if not UnitIsPlayer(unittoken) then
+            -- Avoid adding NPCs in soft group: usually, this functionb would get the npc id of the npc that other players see, not the actual npc fillowing the player.
+            -- Eg: Thrall in shadowlands intro maw region will return 167287 when following the player, this will avoid it.
+            local isInGroup = UnitCanCooperate("player", unittoken)
+            if isInGroup then
+                if avoidSoftGroupTokenAdd[string.sub(unittoken, 1, 3)] then
+                    return nil
+                end
+            end
+        
             -- Get GUID and creatureID
             local guid = UnitGUID(unittoken)
             if guid then
