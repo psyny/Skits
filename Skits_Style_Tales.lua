@@ -210,6 +210,29 @@ function Skits_Style_Tales:ResetLayouts()
     local fadedFrameParameters = nil
     local speakerNameHeight = 0
 
+    -- Click Behavior (WIP)
+    if options.style_tales_click_left ~= "PASS" or options.style_tales_click_right ~= "PASS" then
+        self.textFullFrame:EnableMouse(true)
+        self.textLeftFrame:EnableMouse(true)
+        self.textRightFrame:EnableMouse(true)
+    else
+        self.textFullFrame:EnableMouse(false)
+        self.textLeftFrame:EnableMouse(false)
+        self.textRightFrame:EnableMouse(false)
+    end
+    
+    local function OnClick(self, button)
+        if button == "LeftButton" then
+            Skits_Style:MouseClickAction(options.style_tales_click_left, self.name)
+        elseif button == "RightButton" then
+            Skits_Style:MouseClickAction(options.style_tales_click_right, self.name)
+        end
+    end
+
+    self.textFullFrame:SetScript("OnMouseDown", OnClick)    
+    self.textLeftFrame:SetScript("OnMouseDown", OnClick)        
+    self.textRightFrame:SetScript("OnMouseDown", OnClick)  
+
     -- Full Frame
     self.textFullFrame:SetSize(GetScreenWidth(), textAreaHeight)
     self.textFullFrame:SetPoint("BOTTOMLEFT", 0, 0)

@@ -91,6 +91,10 @@ L["Skits.options.style_any_speech_font_name.title"] = "Fonte do Discurso"
 L["Skits.options.style_any_speech_font_name.desc"] = "Selecione a fonte usada para o texto do discurso."
 L["Skits.options.style_any_strata.title"] = "Camada do Estilo"
 L["Skits.options.style_any_strata.desc"] = "Camada de exibição do quadro para este estilo de Skit."
+L["Skits.options.style_any_click_left.title"] = "Clique esquerdo"
+L["Skits.options.style_any_click_left.desc"] = "Ação ao clicar na área de texto do skit com o botão esquerdo."
+L["Skits.options.style_any_click_right.title"] = "Clique direito"
+L["Skits.options.style_any_click_right.desc"] = "Ação ao clicar na área de texto do skit com o botão direito."
 
 -- Style Warcraft
 L["Skits.options.style_warcraft_speech_screen_max.title"] = "Número Máximo de Discursos"

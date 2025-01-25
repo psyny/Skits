@@ -201,10 +201,30 @@ function Skits_Style_Departure:ResetLayouts()
     self.modelRightBgFrameTexture:SetHorizTile(false)
     self.modelRightBgFrameTexture:SetVertTile(false)
 
-    -- Text Frame Adjustments --------------------------------------------------
+    -- Text Frame --------------------------------------------------
     local textWidth = (GetScreenWidth() * 0.25)
     local fadedFrameParameters = nil
     local speakerNameHeight = 0
+
+    -- Click Behavior
+    if options.style_departure_click_left ~= "PASS" or options.style_departure_click_right ~= "PASS" then
+        self.textLeftFrame:EnableMouse(true)
+        self.textRightFrame:EnableMouse(true)
+    else
+        self.textLeftFrame:EnableMouse(false)
+        self.textRightFrame:EnableMouse(false)
+    end
+    
+    local function OnClick(self, button)
+        if button == "LeftButton" then
+            Skits_Style:MouseClickAction(options.style_departure_click_left, self.name)
+        elseif button == "RightButton" then
+            Skits_Style:MouseClickAction(options.style_departure_click_right, self.name)
+        end
+    end
+
+    self.textLeftFrame:SetScript("OnMouseDown", OnClick)    
+    self.textRightFrame:SetScript("OnMouseDown", OnClick)    
 
     -- Left Frame
     self.textLeftFrame:SetSize(textWidth, textAreaHeight)
@@ -219,6 +239,7 @@ function Skits_Style_Departure:ResetLayouts()
         topSize = 2,
         bottomSize = 2,
     }  
+
     Skits_UI_Utils:ResizeFadedFrame(self.textLeftFrameBgBorder, fadedFrameParameters)
     self.textLeftFrameBgBorder.main:SetPoint("BOTTOMLEFT", Skits_Style_Departure.textLeftFrame, "BOTTOMLEFT", 0, 0)   
     

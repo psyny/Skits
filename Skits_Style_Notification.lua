@@ -125,7 +125,6 @@ function Skits_Style_Notification:CreateSpeakFrame(creatureData, text, textColor
     -- Portrait bg frame
     local portraitBgOffsetY = math.max(parameters.portraitSize * 0.05, 3)
     speakFrame.portraitBg = CreateFrame("PlayerModel", nil, speakFrame.main)
-    print("Is visible " .. (isVisible and "T" or "F"))
     Skits_UI_Utils:ModelFrameSetTargetSize(speakFrame.portraitBg, parameters.portraitSize, parameters.portraitSize)
     Skits_UI_Utils:ModelFrameSetVisible(speakFrame.portraitBg, isVisible)
     speakFrame.portraitBg:SetPoint("BOTTOMLEFT", speakFrame.portrait, "BOTTOMLEFT", 0, portraitBgOffsetY)    
@@ -311,6 +310,8 @@ function Skits_Style_Notification:msgAdd(msgData)
 end
 
 function Skits_Style_Notification:msgCreate(creatureData, textData, duration)
+    local options = Skits_Options.db
+
     -- Create Speak Frame
     local parameters = {
         parent = self.mainFrame,
@@ -321,6 +322,21 @@ function Skits_Style_Notification:msgCreate(creatureData, textData, duration)
         fontSize = self.fontSize,
     }
     local speakFrame = self:CreateSpeakFrame(creatureData, textData.text, textData, parameters)
+
+    -- Click Behavior
+    if options.style_notification_click_left ~= "PASS" or options.style_notification_click_right ~= "PASS" then
+        speakFrame.content:EnableMouse(true)
+    end
+    
+    local function OnClick(self, button)
+        if button == "LeftButton" then
+            Skits_Style:MouseClickAction(options.style_notification_click_left, self.name)
+        elseif button == "RightButton" then
+            Skits_Style:MouseClickAction(options.style_notification_click_right, self.name)
+        end
+    end
+
+    speakFrame.content:SetScript("OnMouseDown", OnClick)     
 
     -- Message create
     local anchor = "BOTTOMLEFT"

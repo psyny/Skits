@@ -188,18 +188,34 @@ function Skits_Style:SituationMoveExitExploration(onlyIfActive)
         return
     end
 
+    self:ChangeToCombatWithDelayedExit(onlyIfActive, options.move_exit_exploration_for)
+end
+
+function Skits_Style:ChangeToCombatWithDelayedExit(onlyIfActive, delayExitTimer)
+    local options = Skits_Options.db
+
     -- Set for inCombat (the effects are the same as we only have Combat and Exploration)
     self.inCombat = true
     self:ShowSituationSkit(onlyIfActive)
 
-    -- Start a timer to recheck combat status
-    if self.inCombatDelayedHandler then
-        self.inCombatDelayedHandler:Cancel()
+    if delayExitTimer > 0 then
+        -- Start a timer to recheck combat status
+        if self.inCombatDelayedHandler then
+            self.inCombatDelayedHandler:Cancel()
+        end
+        local tOnlyIfActive = onlyIfActive
+        self.inCombatDelayedHandler = C_Timer.NewTimer(options.move_exit_exploration_for, function()        
+            self:DelayedCombatExit(tOnlyIfActive)
+        end) 
     end
-    local tOnlyIfActive = onlyIfActive
-    self.inCombatDelayedHandler = C_Timer.NewTimer(options.move_exit_exploration_for, function()        
-        self:DelayedCombatExit(tOnlyIfActive)
-    end) 
+end
+
+function Skits_Style:MouseClickAction(clickAction, skitStyle)
+    if clickAction == "CLOSE" then
+        Skits_Style:ShowSkitStyle(Skits_Style_Utils.enum_styles.HIDDEN, true)
+    elseif clickAction == "GOTOCOMBAT" then
+        Skits_Style:ChangeToCombatWithDelayedExit(true, 5)
+    end
 end
 
 function Skits_Style:SituationAreaChanged(onlyIfActive)

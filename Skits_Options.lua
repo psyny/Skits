@@ -48,7 +48,7 @@ Skits_Options.defaults = {
 
         -- Style General
         style_general_styleonsituation_immersive         = "tales",
-        style_general_styleonsituation_explore           = "tales",
+        style_general_styleonsituation_explore           = "departure",
         style_general_styleonsituation_combat            = "notification",
         style_general_styleonsituation_instance_solo     = "undefined",
         style_general_styleonsituation_instance_group    = "undefined",
@@ -56,6 +56,8 @@ Skits_Options.defaults = {
 
         -- Style Warcraft
         style_warcraft_strata                                  = "TOOLTIP",
+        style_warcraft_click_left                              = "BLOCK",
+        style_warcraft_click_right                             = "CLOSE",        
         style_warcraft_speech_font_size                        = 12,
         style_warcraft_speech_font_name                        = "Friz Quadrata TT",        
         style_warcraft_speech_position_bottom_distance         = 200,
@@ -67,20 +69,24 @@ Skits_Options.defaults = {
         style_warcraft_speaker_face_enabled                    = true,
         style_warcraft_speaker_face_size                       = 100,    
         style_warcraft_speaker_face_animated                   = true,
-        style_warcraft_speaker_name_enabled                    = true,   
-        
+        style_warcraft_speaker_name_enabled                    = true,  
+
         -- Style Tales
         style_tales_strata                           = "TOOLTIP",
+        style_tales_click_left                       = "GOTOCOMBAT",
+        style_tales_click_right                      = "CLOSE",           
         style_tales_speech_font_size                 = 12,
         style_tales_speech_font_name                 = "Friz Quadrata TT",        
         style_tales_model_size                       = 500, 
         style_tales_model_poser                      = true,   
         style_tales_speaker_name_enabled             = true,        
         style_tales_previous_speaker_lingertime      = 30,  
-        style_tales_always_fullscreen                = true,
+        style_tales_always_fullscreen                = true,     
 
         -- Style Notification
         style_notification_strata                   = "TOOLTIP",
+        style_notification_click_left               = "BLOCK",
+        style_notification_click_right              = "CLOSE",          
         style_notification_speech_font_size         = 12,
         style_notification_speech_font_name         = "Friz Quadrata TT",        
         style_notification_portrait_size            = 50, 
@@ -92,6 +98,8 @@ Skits_Options.defaults = {
 
         -- Style Departure
         style_departure_strata                           = "TOOLTIP",
+        style_departure_click_left                       = "GOTOCOMBAT",
+        style_departure_click_right                      = "CLOSE",          
         style_departure_speech_font_size                 = 12,
         style_departure_speech_font_name                 = "Friz Quadrata TT",        
         style_departure_model_size                       = 500, 
@@ -124,6 +132,15 @@ local function GetStrataOptions()
         ["FULLSCREEN"] = "Fullscreen",
         ["FULLSCREEN_DIALOG"] = "Fullscreen Dialog",
         ["TOOLTIP"] = "Tooltip",
+    }
+end
+
+local function GetClickOptions()
+    return {
+        ["PASS"] = "Pass click to UI below",
+        ["BLOCK"] = "Block click",
+        ["CLOSE"] = "Close skit",
+        ["GOTOCOMBAT"] = "Switch to Combat Style skit",
     }
 end
 
@@ -442,7 +459,7 @@ Skits_Options.options = {
                 },
                 tab_style_warcraft = {
                     type = "group",
-                    name = "Warfcraft",
+                    name = "Warcraft",
                     order = 2,
                     get = function(info) return Skits_Options.db[info.arg] end,
                     set = function(info, v)
@@ -462,14 +479,36 @@ Skits_Options.options = {
                             arg = "style_warcraft_strata",
                             order = 1,
                             width = optionWidth,
-                        },                         
+                        },  
+                        style_warcraft_click_left = {
+                            type = "select",
+                            name = L["Skits.options.style_any_click_left.title"],
+                            desc = L["Skits.options.style_any_click_left.desc"],
+                            values = function()
+                                return GetClickOptions()
+                            end,
+                            arg = "style_warcraft_click_left",
+                            order = 2,
+                            width = optionWidth,
+                        },  
+                        style_warcraft_click_right = {
+                            type = "select",
+                            name = L["Skits.options.style_any_click_right.title"],
+                            desc = L["Skits.options.style_any_click_right.desc"],
+                            values = function()
+                                return GetClickOptions()
+                            end,
+                            arg = "style_warcraft_click_right",
+                            order = 3,
+                            width = optionWidth,
+                        },                                                                          
                         style_warcraft_speech_font_size = {
                             type = "range",
                             name = L["Skits.options.style_any_speech_font_size.title"],
                             desc = L["Skits.options.style_any_speech_font_size.desc"],
                             min = 4, max = 30, step = 1,
                             arg = "style_warcraft_speech_font_size",
-                            order = 2,
+                            order = 4,
                             width = optionWidth,
                         },
                         style_warcraft_speech_font_name = {
@@ -481,7 +520,7 @@ Skits_Options.options = {
                             end,
                             dialogControl = "LSM30_Font",
                             arg = "style_warcraft_speech_font_name",
-                            order = 3,
+                            order = 5,
                             width = optionWidth,
                         },   
                         style_warcraft_speaker_name_enabled = {
@@ -489,7 +528,7 @@ Skits_Options.options = {
                             name = L["Skits.options.style_warcraft_speaker_name_enabled.title"],
                             desc = L["Skits.options.style_warcraft_speaker_name_enabled.desc"],
                             arg = "style_warcraft_speaker_name_enabled",
-                            order = 4,
+                            order = 6,
                             width = optionWidth,
                         },   
                         style_warcraft_speaker_face_enabled = {
@@ -497,7 +536,7 @@ Skits_Options.options = {
                             name = L["Skits.options.style_warcraft_speaker_face_enabled.title"],
                             desc = L["Skits.options.style_warcraft_speaker_face_enabled.desc"],
                             arg = "style_warcraft_speaker_face_enabled",
-                            order = 5,
+                            order = 7,
                             width = optionWidth,
                         },
                         style_warcraft_speaker_face_size = {
@@ -506,7 +545,7 @@ Skits_Options.options = {
                             desc = L["Skits.options.style_warcraft_speaker_face_size.desc"],
                             min = 20, max = 200, step = 10,
                             arg = "style_warcraft_speaker_face_size",
-                            order = 6,
+                            order = 8,
                             width = optionWidth,
                         },    
                         style_warcraft_speaker_face_animated = {
@@ -514,7 +553,7 @@ Skits_Options.options = {
                             name = L["Skits.options.style_warcraft_speaker_face_animated.title"],
                             desc = L["Skits.options.style_warcraft_speaker_face_animated.desc"],
                             arg = "style_warcraft_speaker_face_animated",
-                            order = 7,
+                            order = 9,
                             width = optionWidth,
                         },                                                                                           
                         style_warcraft_speech_screen_max = {
@@ -523,7 +562,7 @@ Skits_Options.options = {
                             desc = L["Skits.options.style_warcraft_speech_screen_max.desc"],
                             min = 0, max = 8, step = 1,
                             arg = "style_warcraft_speech_screen_max",
-                            order = 8,
+                            order = 10,
                             width = optionWidth,
                         },
                         style_warcraft_speech_screen_combat_max = {
@@ -532,7 +571,7 @@ Skits_Options.options = {
                             desc = L["Skits.options.style_warcraft_speech_screen_combat_max.desc"],
                             min = 0, max = 8, step = 1,
                             arg = "style_warcraft_speech_screen_combat_max",
-                            order = 9,
+                            order = 11,
                             width = optionWidth,
                         },
                         style_warcraft_speech_screen_group_instance_max = {
@@ -541,7 +580,7 @@ Skits_Options.options = {
                             desc = L["Skits.options.style_warcraft_speech_screen_group_instance_max.desc"],
                             min = 0, max = 8, step = 1,
                             arg = "style_warcraft_speech_screen_group_instance_max",
-                            order = 10,
+                            order = 12,
                             width = optionWidth,
                         },
                         style_warcraft_speech_screen_solo_instance_max = {
@@ -550,7 +589,7 @@ Skits_Options.options = {
                             desc = L["Skits.options.style_warcraft_speech_screen_solo_instance_max.desc"],
                             min = 0, max = 8, step = 1,
                             arg = "style_warcraft_speech_screen_solo_instance_max",
-                            order = 11,
+                            order = 13,
                             width = optionWidth,
                         },                   
                         style_warcraft_speech_position_bottom_distance = {
@@ -559,7 +598,7 @@ Skits_Options.options = {
                             desc = L["Skits.options.style_warcraft_speech_position_bottom_distance.desc"],
                             min = 0, max = 1000, step = 50,
                             arg = "style_warcraft_speech_position_bottom_distance",
-                            order = 12,
+                            order = 14,
                             width = optionWidth,
                         },      
                         style_warcraft_speech_frame_size = {
@@ -568,7 +607,7 @@ Skits_Options.options = {
                             desc = L["Skits.options.style_warcraft_speech_frame_size.desc"],
                             min = 150, max = 1000, step = 50,
                             arg = "style_warcraft_speech_frame_size",
-                            order = 13,
+                            order = 15,
                             width = optionWidth,
                         },                                                                                           
                     },
@@ -596,12 +635,34 @@ Skits_Options.options = {
                             order = 1,
                             width = optionWidth,
                         },  
+                        style_tales_click_left = {
+                            type = "select",
+                            name = L["Skits.options.style_any_click_left.title"],
+                            desc = L["Skits.options.style_any_click_left.desc"],
+                            values = function()
+                                return GetClickOptions()
+                            end,
+                            arg = "style_tales_click_left",
+                            order = 2,
+                            width = optionWidth,
+                        },  
+                        style_tales_click_right = {
+                            type = "select",
+                            name = L["Skits.options.style_any_click_right.title"],
+                            desc = L["Skits.options.style_any_click_right.desc"],
+                            values = function()
+                                return GetClickOptions()
+                            end,
+                            arg = "style_tales_click_right",
+                            order = 3,
+                            width = optionWidth,
+                        },                          
                         style_tales_always_fullscreen = {
                             type = "toggle",
                             name = L["Skits.options.style_tales_always_fullscreen.title"],
                             desc = L["Skits.options.style_tales_always_fullscreen.desc"],
                             arg = "style_tales_always_fullscreen",
-                            order = 2,
+                            order = 4,
                             width = optionWidth,
                         },                                                   
                         style_tales_speech_font_size = {
@@ -610,7 +671,7 @@ Skits_Options.options = {
                             desc = L["Skits.options.style_any_speech_font_size.desc"],
                             min = 4, max = 30, step = 1,
                             arg = "style_tales_speech_font_size",
-                            order = 3,
+                            order = 5,
                             width = optionWidth,
                         },
                         style_tales_speech_font_name = {
@@ -622,7 +683,7 @@ Skits_Options.options = {
                             end,
                             dialogControl = "LSM30_Font",
                             arg = "style_tales_speech_font_name",
-                            order = 4,
+                            order = 6,
                             width = optionWidth,
                         },                       
                         style_tales_speaker_name_enabled = {
@@ -630,7 +691,7 @@ Skits_Options.options = {
                             name = L["Skits.options.style_tales_speaker_name_enabled.title"],
                             desc = L["Skits.options.style_tales_speaker_name_enabled.desc"],
                             arg = "style_tales_speaker_name_enabled",
-                            order = 5,
+                            order = 7,
                             width = optionWidth,
                         },   
                         style_tales_model_size = {
@@ -639,7 +700,7 @@ Skits_Options.options = {
                             desc = L["Skits.options.style_tales_model_size.desc"],
                             min = 50, max = 800, step = 50,
                             arg = "style_tales_model_size",
-                            order = 6,
+                            order = 8,
                             width = optionWidth,
                         },   
                         style_tales_model_poser = {
@@ -647,7 +708,7 @@ Skits_Options.options = {
                             name = L["Skits.options.style_tales_model_poser.title"],
                             desc = L["Skits.options.style_tales_model_poser.desc"],
                             arg = "style_tales_model_poser",
-                            order = 6,
+                            order = 9,
                             width = optionWidth,
                         },                              
                         style_tales_previous_speaker_lingertime = {
@@ -656,7 +717,7 @@ Skits_Options.options = {
                             desc = L["Skits.options.style_tales_previous_speaker_lingertime.desc"],
                             min = 0, max = 60, step = 1,
                             arg = "style_tales_previous_speaker_lingertime",
-                            order = 8,
+                            order = 10,
                             width = optionWidth,
                         },                                                                                                                                   
                     },
@@ -683,14 +744,36 @@ Skits_Options.options = {
                             arg = "style_notification_strata",
                             order = 1,
                             width = optionWidth,
-                        },                            
+                        },   
+                        style_notification_click_left = {
+                            type = "select",
+                            name = L["Skits.options.style_any_click_left.title"],
+                            desc = L["Skits.options.style_any_click_left.desc"],
+                            values = function()
+                                return GetClickOptions()
+                            end,
+                            arg = "style_notification_click_left",
+                            order = 2,
+                            width = optionWidth,
+                        },  
+                        style_notification_click_right = {
+                            type = "select",
+                            name = L["Skits.options.style_any_click_right.title"],
+                            desc = L["Skits.options.style_any_click_right.desc"],
+                            values = function()
+                                return GetClickOptions()
+                            end,
+                            arg = "style_notification_click_right",
+                            order = 3,
+                            width = optionWidth,
+                        },                                                     
                         style_notification_speech_font_size = {
                             type = "range",
                             name = L["Skits.options.style_any_speech_font_size.title"],
                             desc = L["Skits.options.style_any_speech_font_size.desc"],
                             min = 4, max = 30, step = 1,
                             arg = "style_notification_speech_font_size",
-                            order = 2,
+                            order = 4,
                             width = optionWidth,
                         },
                         style_notification_speech_font_name = {
@@ -702,7 +785,7 @@ Skits_Options.options = {
                             end,
                             dialogControl = "LSM30_Font",
                             arg = "style_notification_speech_font_name",
-                            order = 3,
+                            order = 5,
                             width = optionWidth,
                         },   
                         style_notification_onRight = {
@@ -710,7 +793,7 @@ Skits_Options.options = {
                             name = L["Skits.options.style_notification_onRight.title"],
                             desc = L["Skits.options.style_notification_onRight.desc"],
                             arg = "style_notification_onRight",
-                            order = 4,
+                            order = 6,
                             width = optionWidth,
                         },   
                         style_notification_portrait_size = {
@@ -719,7 +802,7 @@ Skits_Options.options = {
                             desc = L["Skits.options.style_notification_portrait_size.desc"],
                             min = 5, max = 200, step = 5,
                             arg = "style_notification_portrait_size",
-                            order = 5,
+                            order = 7,
                             width = optionWidth,
                         },    
                         style_notification_max_messages = {
@@ -728,7 +811,7 @@ Skits_Options.options = {
                             desc = L["Skits.options.style_notification_max_messages.desc"],
                             min = 1, max = 10, step = 1,
                             arg = "style_notification_max_messages",
-                            order = 6,
+                            order = 8,
                             width = optionWidth,
                         },   
                         style_notification_textarea_size = {
@@ -737,7 +820,7 @@ Skits_Options.options = {
                             desc = L["Skits.options.style_notification_textarea_size.desc"],
                             min = 50, max = 500, step = 50,
                             arg = "style_notification_textarea_size",
-                            order = 7,
+                            order = 9,
                             width = optionWidth,
                         },          
                         style_notification_dist_side = {
@@ -746,7 +829,7 @@ Skits_Options.options = {
                             desc = L["Skits.options.style_notification_dist_side.desc"],
                             min = 0, max = 500, step = 5,
                             arg = "style_notification_dist_side",
-                            order = 8,
+                            order = 10,
                             width = optionWidth,
                         },     
                         style_notification_top_side = {
@@ -755,7 +838,7 @@ Skits_Options.options = {
                             desc = L["Skits.options.style_notification_top_side.desc"],
                             min = 0, max = 1000, step = 10,
                             arg = "style_notification_top_side",
-                            order = 9,
+                            order = 11,
                             width = optionWidth,
                         },                                                                                                                                                                        
                     },
@@ -782,14 +865,36 @@ Skits_Options.options = {
                             arg = "style_departure_strata",
                             order = 1,
                             width = optionWidth,
-                        },                                                     
+                        },   
+                        style_departure_click_left = {
+                            type = "select",
+                            name = L["Skits.options.style_any_click_left.title"],
+                            desc = L["Skits.options.style_any_click_left.desc"],
+                            values = function()
+                                return GetClickOptions()
+                            end,
+                            arg = "style_departure_click_left",
+                            order = 2,
+                            width = optionWidth,
+                        },  
+                        style_departure_click_right = {
+                            type = "select",
+                            name = L["Skits.options.style_any_click_right.title"],
+                            desc = L["Skits.options.style_any_click_right.desc"],
+                            values = function()
+                                return GetClickOptions()
+                            end,
+                            arg = "style_departure_click_right",
+                            order = 3,
+                            width = optionWidth,
+                        },                                               
                         style_departure_speech_font_size = {
                             type = "range",
                             name = L["Skits.options.style_any_speech_font_size.title"],
                             desc = L["Skits.options.style_any_speech_font_size.desc"],
                             min = 4, max = 30, step = 1,
                             arg = "style_departure_speech_font_size",
-                            order = 2,
+                            order = 4,
                             width = optionWidth,
                         },
                         style_departure_speech_font_name = {
@@ -801,7 +906,7 @@ Skits_Options.options = {
                             end,
                             dialogControl = "LSM30_Font",
                             arg = "style_departure_speech_font_name",
-                            order = 3,
+                            order = 5,
                             width = optionWidth,
                         },                         
                         style_departure_model_size = {
@@ -810,7 +915,7 @@ Skits_Options.options = {
                             desc = L["Skits.options.style_departure_model_size.desc"],
                             min = 50, max = 800, step = 50,
                             arg = "style_departure_model_size",
-                            order = 4,
+                            order = 6,
                             width = optionWidth,
                         },   
                         style_departure_model_poser = {
@@ -818,7 +923,7 @@ Skits_Options.options = {
                             name = L["Skits.options.style_departure_model_poser.title"],
                             desc = L["Skits.options.style_departure_model_poser.desc"],
                             arg = "style_departure_model_poser",
-                            order = 5,
+                            order = 7,
                             width = optionWidth,
                         },                              
                         style_departure_previous_speaker_lingertime = {
@@ -827,7 +932,7 @@ Skits_Options.options = {
                             desc = L["Skits.options.style_departure_previous_speaker_lingertime.desc"],
                             min = 0, max = 60, step = 1,
                             arg = "style_departure_previous_speaker_lingertime",
-                            order = 6,
+                            order = 8,
                             width = optionWidth,
                         },                                                                                                                                   
                     },

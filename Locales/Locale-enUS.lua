@@ -91,6 +91,10 @@ L["Skits.options.style_any_speech_font_name.title"] = "Speech Font"
 L["Skits.options.style_any_speech_font_name.desc"] = "Select the font used for speech text."
 L["Skits.options.style_any_strata.title"] = "Style Strata"
 L["Skits.options.style_any_strata.desc"] = "Frame strata for this skit style."
+L["Skits.options.style_any_click_left.title"] = "Action on left mouse click"
+L["Skits.options.style_any_click_left.desc"] =  "Action taken when clicking the skit text area with left mouse button."
+L["Skits.options.style_any_click_right.title"] = "Action on right mouse click"
+L["Skits.options.style_any_click_right.desc"] =  "Action taken when clicking the skit text area with right mouse button."
 
 -- Style Warcraft
 L["Skits.options.style_warcraft_speech_screen_max.title"] = "Max number of Speeches"

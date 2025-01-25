@@ -449,6 +449,21 @@ function Skits_Style_Warcraft:NewSpeak(creatureData, textData)
     lastMsgData = msgData
     setSpeakVisibility(msgData)
 
+    -- Click Behavior
+    if options.style_warcraft_click_left ~= "PASS" or options.style_warcraft_click_right ~= "PASS" then
+        textFrame:EnableMouse(true)
+    end
+    
+    local function OnClick(self, button)
+        if button == "LeftButton" then
+            Skits_Style:MouseClickAction(options.style_warcraft_click_left, self.name)
+        elseif button == "RightButton" then
+            Skits_Style:MouseClickAction(options.style_warcraft_click_right, self.name)
+        end
+    end
+
+    textFrame:SetScript("OnMouseDown", OnClick)        
+
     -- Set timer to fade
     self:SetMessageTimer(msgData)    
 
