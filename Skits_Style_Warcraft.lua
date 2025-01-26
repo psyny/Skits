@@ -38,6 +38,23 @@ local function setSpeakVisibility(msgData)
             msgData.borderFrame:Hide()
             msgData.speakerNameFrame:Hide()
         end
+
+        -- Click Behavior
+        if isVisible and (options.style_warcraft_click_left ~= "PASS" or options.style_warcraft_click_right ~= "PASS") then
+            msgData.textFrame:EnableMouse(true)
+
+            local function OnClick(Skits_Style_Warcraft, button)
+                if button == "LeftButton" then
+                    Skits_Style:MouseClickAction(options.style_warcraft_click_left, Skits_Style_Warcraft.name)
+                elseif button == "RightButton" then
+                    Skits_Style:MouseClickAction(options.style_warcraft_click_right, Skits_Style_Warcraft.name)
+                end
+            end
+    
+            msgData.textFrame:SetScript("OnMouseDown", OnClick)    
+        else
+            msgData.textFrame:EnableMouse(false)
+        end
     end
 end
 
@@ -448,21 +465,6 @@ function Skits_Style_Warcraft:NewSpeak(creatureData, textData)
     }
     lastMsgData = msgData
     setSpeakVisibility(msgData)
-
-    -- Click Behavior
-    if options.style_warcraft_click_left ~= "PASS" or options.style_warcraft_click_right ~= "PASS" then
-        textFrame:EnableMouse(true)
-    end
-    
-    local function OnClick(self, button)
-        if button == "LeftButton" then
-            Skits_Style:MouseClickAction(options.style_warcraft_click_left, self.name)
-        elseif button == "RightButton" then
-            Skits_Style:MouseClickAction(options.style_warcraft_click_right, self.name)
-        end
-    end
-
-    textFrame:SetScript("OnMouseDown", OnClick)        
 
     -- Set timer to fade
     self:SetMessageTimer(msgData)    

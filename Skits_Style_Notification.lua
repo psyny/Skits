@@ -54,6 +54,8 @@ local function defineDatasetDb()
 end
 
 local function setSpeakVisibility(speakFrame)
+    local options = Skits_Options.db
+
     if speakFrame then
         Skits_UI_Utils:ModelFrameSetVisible(speakFrame.portrait, isVisible)
         Skits_UI_Utils:ModelFrameSetVisible(speakFrame.portraitBg, isVisible)
@@ -71,6 +73,23 @@ local function setSpeakVisibility(speakFrame)
             speakFrame.content:Hide()
             speakFrame.bg.bg:Hide()
         end
+
+        -- Click Behavior
+        if isVisible and (options.style_notification_click_left ~= "PASS" or options.style_notification_click_right ~= "PASS") then
+            speakFrame.content:EnableMouse(true)
+
+            local function OnClick(Skits_Style_Notification, button)
+                if button == "LeftButton" then
+                    Skits_Style:MouseClickAction(options.style_notification_click_left, Skits_Style_Notification.name)
+                elseif button == "RightButton" then
+                    Skits_Style:MouseClickAction(options.style_notification_click_right, Skits_Style_Notification.name)
+                end
+            end
+    
+            speakFrame.content:SetScript("OnMouseDown", OnClick)   
+        else
+            speakFrame.content:EnableMouse(false)
+        end        
     end
 end
 
@@ -360,8 +379,6 @@ function Skits_Style_Notification:msgAdd(msgData)
 end
 
 function Skits_Style_Notification:msgCreate(creatureData, textData, duration)
-    local options = Skits_Options.db
-
     -- Create Speak Frame
     local parameters = {
         parent = self.mainFrame,
@@ -372,21 +389,6 @@ function Skits_Style_Notification:msgCreate(creatureData, textData, duration)
         fontSize = self.fontSize,
     }
     local speakFrame = self:CreateSpeakFrame(creatureData, textData.text, textData, parameters)
-
-    -- Click Behavior
-    if options.style_notification_click_left ~= "PASS" or options.style_notification_click_right ~= "PASS" then
-        speakFrame.content:EnableMouse(true)
-    end
-    
-    local function OnClick(self, button)
-        if button == "LeftButton" then
-            Skits_Style:MouseClickAction(options.style_notification_click_left, self.name)
-        elseif button == "RightButton" then
-            Skits_Style:MouseClickAction(options.style_notification_click_right, self.name)
-        end
-    end
-
-    speakFrame.content:SetScript("OnMouseDown", OnClick)     
 
     -- Message create
     local anchor = "BOTTOMLEFT"

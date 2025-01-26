@@ -160,6 +160,26 @@ local function LayoutUpdateBackgrounds()
         Skits_Style_Departure.modelRightBgFrame:Show()
         Skits_Style_Departure.modelRightBgFrameTexture:Show()         
     end
+
+    -- Click Behavior
+    if isVisible and (options.style_departure_click_left ~= "PASS" or options.style_departure_click_right ~= "PASS") then
+        Skits_Style_Departure.textLeftFrame:EnableMouse(true)
+        Skits_Style_Departure.textRightFrame:EnableMouse(true)
+
+        local function OnClick(Skits_Style_Departure, button)
+            if button == "LeftButton" then
+                Skits_Style:MouseClickAction(options.style_departure_click_left, Skits_Style_Departure.name)
+            elseif button == "RightButton" then
+                Skits_Style:MouseClickAction(options.style_departure_click_right, Skits_Style_Departure.name)
+            end
+        end
+    
+        Skits_Style_Departure.textLeftFrame:SetScript("OnMouseDown", OnClick)    
+        Skits_Style_Departure.textRightFrame:SetScript("OnMouseDown", OnClick)          
+    else
+        Skits_Style_Departure.textLeftFrame:EnableMouse(false)
+        Skits_Style_Departure.textRightFrame:EnableMouse(false)
+    end    
 end
 
 function Skits_Style_Departure:ResetLayouts()
@@ -204,27 +224,7 @@ function Skits_Style_Departure:ResetLayouts()
     -- Text Frame --------------------------------------------------
     local textWidth = (GetScreenWidth() * 0.25)
     local fadedFrameParameters = nil
-    local speakerNameHeight = 0
-
-    -- Click Behavior
-    if options.style_departure_click_left ~= "PASS" or options.style_departure_click_right ~= "PASS" then
-        self.textLeftFrame:EnableMouse(true)
-        self.textRightFrame:EnableMouse(true)
-    else
-        self.textLeftFrame:EnableMouse(false)
-        self.textRightFrame:EnableMouse(false)
-    end
-    
-    local function OnClick(self, button)
-        if button == "LeftButton" then
-            Skits_Style:MouseClickAction(options.style_departure_click_left, self.name)
-        elseif button == "RightButton" then
-            Skits_Style:MouseClickAction(options.style_departure_click_right, self.name)
-        end
-    end
-
-    self.textLeftFrame:SetScript("OnMouseDown", OnClick)    
-    self.textRightFrame:SetScript("OnMouseDown", OnClick)    
+    local speakerNameHeight = 0   
 
     -- Left Frame
     self.textLeftFrame:SetSize(textWidth, textAreaHeight)
