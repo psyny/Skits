@@ -8,7 +8,7 @@ Step into a more immersive World of Warcraft experience with Skits, an addon des
 - **Immersive Skit Format:** Chat messages are displayed as dynamic, skit-style dialogues, complete with character portraits and a smooth sequence of talking heads.
 - **Storybook Log:** Revisit past conversations with a storybook-like interface. Use /skitslog to relive your favorite skits anytime!
 - **Roleplayer-Friendly:** Works with player messages, making it perfect for roleplaying scenarios. Add an extra layer of immersion to your stories and interactions.
-- **Fully Customizable:** Tailor the experience to your liking. Decide which chat messages become skits, toggle talking heads or speaker portraits, and configure when skits appear—whether during combat, in dungeons, or other specific situations.
+- **Customizable:** Tailor the experience to your liking. Decide which chat messages become skits, toggle talking heads or speaker portraits, and configure when skits appear—whether during combat, in dungeons, or other specific situations.
 
 ## Recommendations
 
