@@ -46,6 +46,7 @@ So on Skits the player portrait can be shown as the current player model. But on
 
 - Limitations listed above.
 - Portraits of NPCs in some areas sometimes displays a different model. This needs to be solved in a case by case basis.
+- In rare ocasions, this addon causes a stuttering. It manifestas as a 1 to 3 seconds freeze when an NPC talks. As far as I know, this happens when having multipe skit styles selected to different situations in options. If this is happening to you, please report the skit styles you are using. The workaround is having only one skit style in use, it can be defined for different situations, but should be only one.
 
 ## Roadmap
 
