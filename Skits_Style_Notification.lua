@@ -313,7 +313,7 @@ function Skits_Style_Notification:msgMoveUp(msgData, ammount)
     local instant = false
 
     -- Reasons to be instant (besides given parameter)
-    if not self.mainFrame:IsShown() then
+    if not isVisible then
         instant = true
     end
 
