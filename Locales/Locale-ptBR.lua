@@ -131,6 +131,8 @@ L["Skits.options.style_tales_always_fullscreen.title"] = "Sempre em Tela Cheia"
 L["Skits.options.style_tales_always_fullscreen.desc"] = "Sempre mostrar o Skit em tela cheia, ignorando o lado do personagem na tela."
 
 -- Style Notification
+L["Skits.options.style_notification_inherited.title"] = "Herdado"
+L["Skits.options.style_notification_inherited.desc"] = "Herdar opções de instâncias menores. Se verdadeiro, as opções abaixo serão ignoradas, e as opções de uma instância menor serão usadas."
 L["Skits.options.style_notification_portrait_size.title"] = "Tamanho do Retrato"
 L["Skits.options.style_notification_portrait_size.desc"] = "Definir o tamanho do retrato exibido nas notificações."
 L["Skits.options.style_notification_onRight.title"] = "Mensagem à Direita"

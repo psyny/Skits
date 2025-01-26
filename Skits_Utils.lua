@@ -6,11 +6,14 @@ function Skits_Utils:IsInCombat()
 end
 
 function Skits_Utils:IsInInstance()
-    local inInstance, instanceType = IsInInstance()
+    local name, instanceType, difficultyID, difficultyName, maxPlayers, dynamicDifficulty, isDynamic, instanceID, instanceGroupSize, LfgDungeonID = GetInstanceInfo()
+
+    local inInstance = instanceType ~= "none"
+
     local playerCount = 1
 
     if inInstance and (instanceType == "party" or instanceType == "raid" or instanceType == "scenario") then
-        playerCount = 0
+        playerCount = 1
         -- Check each group member to see if they are a player
         for i = 1, GetNumGroupMembers() do
             local unit = (IsInRaid() and "raid" .. i) or "party" .. i
@@ -19,17 +22,17 @@ function Skits_Utils:IsInInstance()
             end
         end
     end
-    return inInstance, instanceType, playerCount
+    return inInstance, instanceType, playerCount, maxPlayers
 end
 
 function Skits_Utils:IsInInstanceSolo()
-    local inInstance, instanceType, playerCount = Skits_Utils:IsInInstance()
+    local inInstance, instanceType, playerCount, maxPlayers = Skits_Utils:IsInInstance()
 
     return inInstance and playerCount <= 1
 end
 
 function Skits_Utils:IsInInstanceGroup()
-    local inInstance, instanceType, playerCount = Skits_Utils:IsInInstance()
+    local inInstance, instanceType, playerCount, maxPlayers = Skits_Utils:IsInInstance()
 
     return inInstance and playerCount > 1
 end

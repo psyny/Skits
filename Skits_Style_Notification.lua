@@ -14,6 +14,7 @@ Skits_Style_Notification.sideDist = 50
 Skits_Style_Notification.topDist = 50
 Skits_Style_Notification.maxMessages = 3
 Skits_Style_Notification.messageGap = 10
+Skits_Style_Notification.speechDurationMax = 10
 
 Skits_Style_Notification.messages = {}
 Skits_Style_Notification.lastMsgTimestamp = GetTime()
@@ -23,7 +24,35 @@ local needsLayoutReset = true
 
 local isVisible = true
 
+local datasetname = "solo"
+
 -- AUX FUNCTIONS --------------------------------------------------------------------------------------------------------------
+local function defineDatasetDb()
+    local inInstance, instanceType, playerCount, maxPlayers = Skits_Style:GetInstanceInformation()
+
+    local newdatasetname = "solo"
+    if inInstance then
+        if instanceType == "party" then
+            newdatasetname = "small"
+        else
+            if maxPlayers <= 10 then
+                newdatasetname = "small"
+            elseif maxPlayers <= 20 then
+                newdatasetname = "medium"
+            else    
+                newdatasetname = "large"
+            end
+        end
+    end
+
+    if newdatasetname == datasetname then
+        return false, datasetname
+    else
+        datasetname = newdatasetname
+        return true, datasetname
+    end
+end
+
 local function setSpeakVisibility(speakFrame)
     if speakFrame then
         Skits_UI_Utils:ModelFrameSetVisible(speakFrame.portrait, isVisible)
@@ -45,25 +74,46 @@ local function setSpeakVisibility(speakFrame)
     end
 end
 
-function Skits_Style_Notification:ResetLayouts()
+local instanceStyleFallback = {
+    large = "medium",
+    medium = "small",
+    small = "solo",
+    solo = "solo",
+}
+
+function Skits_Style_Notification:ResetLayouts()    
     local options = Skits_Options.db
 
+    -- Options db
+    local instanceStyleName = datasetname
+    local instanceOptions = options.style_notification_instanceoptions[instanceStyleName]
+
+    local inherited = instanceOptions.inherited
+    while inherited == true and instanceStyleName ~= "solo" do
+        instanceStyleName = instanceStyleFallback[instanceStyleName]
+        if not instanceStyleName then
+            break
+        end
+
+        instanceOptions = options.style_notification_instanceoptions[instanceStyleName]
+        inherited = instanceOptions.inherited
+    end
+
     -- Options Update
-    self.font = LibStub("LibSharedMedia-3.0"):Fetch("font", options.style_notification_speech_font_name)    
-    self.fontSize = options.style_notification_speech_font_size
-    self.isOnRight = options.style_notification_onRight
-    self.portraitSize = options.style_notification_portrait_size
-    self.textAreaWidth = options.style_notification_textarea_size
-    self.maxMessages = options.style_notification_max_messages
-    self.sideDist = options.style_notification_dist_side
-    self.topDist = options.style_notification_top_side
+    self.font = LibStub("LibSharedMedia-3.0"):Fetch("font", instanceOptions.style_notification_speech_font_name)    
+    self.fontSize = instanceOptions.speech_font_size
+    self.isOnRight = instanceOptions.onRight
+    self.portraitSize = instanceOptions.portrait_size
+    self.textAreaWidth = instanceOptions.textarea_size
+    self.maxMessages = instanceOptions.max_messages
+    self.sideDist = instanceOptions.dist_side
+    self.topDist = instanceOptions.top_side
     self.messageGap = 10
 
     local xfactor = 1
     if self.isOnRight then
         xfactor = -1
     end
-
 
     local frameWidth = GetScreenWidth() * 0.5
     local frameHeight = self.topDist
@@ -410,6 +460,12 @@ function Skits_Style_Notification:NewSpeak(creatureData, textData)
     end
 
     local options = Skits_Options.db
+
+    -- Calculate position
+    local datasetchanged, _ = defineDatasetDb()
+    if datasetchanged then
+        self:ResetLayouts()
+    end
 
     -- Duration
     local duration = textData.duration

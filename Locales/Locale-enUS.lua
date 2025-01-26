@@ -131,6 +131,8 @@ L["Skits.options.style_tales_always_fullscreen.title"] = "Always Fullscreen"
 L["Skits.options.style_tales_always_fullscreen.desc"] = "Always show the skit fullscreen, ignoring the side of the speaking character on the screen."
 
 -- Style Notification
+L["Skits.options.style_notification_inherited.title"] = "Inherited"
+L["Skits.options.style_notification_inherited.desc"] = "Inherit options from smaller instance size. If true, the options below will be ignore, and the options for a smaller instance size will be used."
 L["Skits.options.style_notification_portrait_size.title"] = "Portrait Size"
 L["Skits.options.style_notification_portrait_size.desc"] = "Set the size of the portrait displayed in notifications."
 L["Skits.options.style_notification_onRight.title"] = "Message on Right"

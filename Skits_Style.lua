@@ -7,6 +7,8 @@ Skits_Style.inImmersive = false
 Skits_Style.inCombat = false
 Skits_Style.inCombatDelayedHandler = nil
 
+local inInstance, instanceType, playerCount, maxPlayers = Skits_Utils:IsInInstance()
+
 local styleIdToFunc = {
     [Skits_Style_Utils.enum_styles.HIDDEN] = Skits_Style_Hidden,
     [Skits_Style_Utils.enum_styles.UNDEFINED] = Skits_Style_Hidden,
@@ -128,8 +130,18 @@ function Skits_Style:ShowSkitStyle(styleToShow, onlyIfActive)
 end
 
 function Skits_Style:ShowSituationSkit(onlyIfActive)  
+    local lInInstance, lInstanceType, lPlayerCount, lMaxPlayers = Skits_Utils:IsInInstance()
+    inInstance = lInInstance
+    instanceType = lInstanceType
+    playerCount = lPlayerCount
+    maxPlayers = lMaxPlayers
+
     local styleToShow = Skits_Style:StyleToDisplay()
     Skits_Style:ShowSkitStyle(styleToShow, onlyIfActive)
+end
+
+function Skits_Style:GetInstanceInformation()
+    return inInstance, instanceType, playerCount, maxPlayers
 end
 
 function Skits_Style:SituationEnterCombat(onlyIfActive)

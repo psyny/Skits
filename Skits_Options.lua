@@ -87,14 +87,52 @@ Skits_Options.defaults = {
         style_notification_strata                   = "TOOLTIP",
         style_notification_click_left               = "BLOCK",
         style_notification_click_right              = "CLOSE",          
-        style_notification_speech_font_size         = 12,
-        style_notification_speech_font_name         = "Friz Quadrata TT",        
-        style_notification_portrait_size            = 50, 
-        style_notification_onRight                  = false,
-        style_notification_max_messages             = 3,        
-        style_notification_textarea_size            = 300,
-        style_notification_dist_side                = 30,
-        style_notification_top_side                 = 300,
+        style_notification_instanceoptions          = {
+            solo    = {
+                inherited                = false,
+                speech_font_size         = 12,
+                speech_font_name         = "Friz Quadrata TT",        
+                portrait_size            = 50, 
+                onRight                  = false,
+                max_messages             = 3,        
+                textarea_size            = 300,
+                dist_side                = 30,
+                top_side                 = 300,
+            },
+            small    = {
+                inherited                = false,
+                speech_font_size         = 12,
+                speech_font_name         = "Friz Quadrata TT",        
+                portrait_size            = 50, 
+                onRight                  = false,
+                max_messages             = 2,        
+                textarea_size            = 300,
+                dist_side                = 300,
+                top_side                 = 300,
+            },
+            medium    = {
+                inherited                = true,
+                speech_font_size         = 12,
+                speech_font_name         = "Friz Quadrata TT",        
+                portrait_size            = 50, 
+                onRight                  = false,
+                max_messages             = 2,        
+                textarea_size            = 300,
+                dist_side                = 300,
+                top_side                 = 300,
+            },   
+            large    = {
+                inherited                = true,
+                speech_font_size         = 12,
+                speech_font_name         = "Friz Quadrata TT",        
+                portrait_size            = 50, 
+                onRight                  = false,
+                max_messages             = 2,        
+                textarea_size            = 300,
+                dist_side                = 300,
+                top_side                 = 300,
+            },                     
+        },
 
         -- Style Departure
         style_departure_strata                           = "TOOLTIP",
@@ -144,12 +182,100 @@ local function GetClickOptions()
     }
 end
 
+
 ---------------------------------------------------------
--- Our options table
 local L = LibStub("AceLocale-3.0"):GetLocale("Skits", false)
 local LSM = LibStub("LibSharedMedia-3.0")
 local optionWidth = 2.0
 
+local function GetNotificationInstanceOptions()
+    return {
+        style_notification_inherited = {
+            type = "toggle",
+            name = L["Skits.options.style_notification_inherited.title"],
+            desc = L["Skits.options.style_notification_inherited.desc"],
+            arg = "inherited",
+            order = 3,
+            width = optionWidth,
+        },        
+        style_notification_speech_font_size = {
+            type = "range",
+            name = L["Skits.options.style_any_speech_font_size.title"],
+            desc = L["Skits.options.style_any_speech_font_size.desc"],
+            min = 4, max = 30, step = 1,
+            arg = "speech_font_size",
+            order = 4,
+            width = optionWidth,
+        },
+        style_notification_speech_font_name = {
+            type = "select",
+            name = L["Skits.options.style_any_speech_font_name.title"],
+            desc = L["Skits.options.style_any_speech_font_name.desc"],
+            values = function()
+                return LSM:HashTable("font")
+            end,
+            dialogControl = "LSM30_Font",
+            arg = "speech_font_name",
+            order = 5,
+            width = optionWidth,
+        },   
+        style_notification_onRight = {
+            type = "toggle",
+            name = L["Skits.options.style_notification_onRight.title"],
+            desc = L["Skits.options.style_notification_onRight.desc"],
+            arg = "onRight",
+            order = 6,
+            width = optionWidth,
+        },   
+        style_notification_portrait_size = {
+            type = "range",
+            name = L["Skits.options.style_notification_portrait_size.title"],
+            desc = L["Skits.options.style_notification_portrait_size.desc"],
+            min = 5, max = 200, step = 5,
+            arg = "portrait_size",
+            order = 7,
+            width = optionWidth,
+        },    
+        style_notification_max_messages = {
+            type = "range",
+            name = L["Skits.options.style_notification_max_messages.title"],
+            desc = L["Skits.options.style_notification_max_messages.desc"],
+            min = 1, max = 10, step = 1,
+            arg = "max_messages",
+            order = 8,
+            width = optionWidth,
+        },   
+        style_notification_textarea_size = {
+            type = "range",
+            name = L["Skits.options.style_notification_textarea_size.title"],
+            desc = L["Skits.options.style_notification_textarea_size.desc"],
+            min = 50, max = 500, step = 50,
+            arg = "textarea_size",
+            order = 9,
+            width = optionWidth,
+        },          
+        style_notification_dist_side = {
+            type = "range",
+            name = L["Skits.options.style_notification_dist_side.title"],
+            desc = L["Skits.options.style_notification_dist_side.desc"],
+            min = 0, max = 500, step = 5,
+            arg = "dist_side",
+            order = 10,
+            width = optionWidth,
+        },     
+        style_notification_top_side = {
+            type = "range",
+            name = L["Skits.options.style_notification_top_side.title"],
+            desc = L["Skits.options.style_notification_top_side.desc"],
+            min = 0, max = 1000, step = 10,
+            arg = "top_side",
+            order = 11,
+            width = optionWidth,
+        },  
+    }  
+end
+
+-- Our options table
 Skits_Options.options = {
 	type = "group",
 	name = L["Skits.options.Skits.title"],
@@ -725,122 +851,125 @@ Skits_Options.options = {
                 tab_style_notification = {
                     type = "group",
                     name = "Notification",
+                    childGroups = "tab",
                     order = 4,
-                    get = function(info) return Skits_Options.db[info.arg] end,
-                    set = function(info, v)
-                        local arg = info.arg
-                        Skits_Options.db[arg] = v
-                        Skits:GeneralParameterChanges()
-                    end,
                     disabled = false,
                     args = {
-                        style_notification_strata = {
-                            type = "select",
-                            name = L["Skits.options.style_any_strata.title"],
-                            desc = L["Skits.options.style_any_strata.desc"],
-                            values = function()
-                                return GetStrataOptions()
-                            end,
-                            arg = "style_notification_strata",
+                        tab_style_notification_general = {
+                            type = "group",
+                            name = "General",
                             order = 1,
-                            width = optionWidth,
-                        },   
-                        style_notification_click_left = {
-                            type = "select",
-                            name = L["Skits.options.style_any_click_left.title"],
-                            desc = L["Skits.options.style_any_click_left.desc"],
-                            values = function()
-                                return GetClickOptions()
+                            get = function(info) return Skits_Options.db[info.arg] end,
+                            set = function(info, v)
+                                local arg = info.arg
+                                Skits_Options.db[arg] = v
+                                Skits:GeneralParameterChanges()
                             end,
-                            arg = "style_notification_click_left",
-                            order = 2,
-                            width = optionWidth,
-                        },  
-                        style_notification_click_right = {
-                            type = "select",
-                            name = L["Skits.options.style_any_click_right.title"],
-                            desc = L["Skits.options.style_any_click_right.desc"],
-                            values = function()
-                                return GetClickOptions()
-                            end,
-                            arg = "style_notification_click_right",
-                            order = 3,
-                            width = optionWidth,
-                        },                                                     
-                        style_notification_speech_font_size = {
-                            type = "range",
-                            name = L["Skits.options.style_any_speech_font_size.title"],
-                            desc = L["Skits.options.style_any_speech_font_size.desc"],
-                            min = 4, max = 30, step = 1,
-                            arg = "style_notification_speech_font_size",
-                            order = 4,
-                            width = optionWidth,
+                            disabled = false,
+                            args = {
+                                style_notification_strata = {
+                                    type = "select",
+                                    name = L["Skits.options.style_any_strata.title"],
+                                    desc = L["Skits.options.style_any_strata.desc"],
+                                    values = function()
+                                        return GetStrataOptions()
+                                    end,
+                                    arg = "style_notification_strata",
+                                    order = 1,
+                                    width = optionWidth,
+                                },   
+                                style_notification_click_left = {
+                                    type = "select",
+                                    name = L["Skits.options.style_any_click_left.title"],
+                                    desc = L["Skits.options.style_any_click_left.desc"],
+                                    values = function()
+                                        return GetClickOptions()
+                                    end,
+                                    arg = "style_notification_click_left",
+                                    order = 2,
+                                    width = optionWidth,
+                                },  
+                                style_notification_click_right = {
+                                    type = "select",
+                                    name = L["Skits.options.style_any_click_right.title"],
+                                    desc = L["Skits.options.style_any_click_right.desc"],
+                                    values = function()
+                                        return GetClickOptions()
+                                    end,
+                                    arg = "style_notification_click_right",
+                                    order = 3,
+                                    width = optionWidth,
+                                },    
+                            },
                         },
-                        style_notification_speech_font_name = {
-                            type = "select",
-                            name = L["Skits.options.style_any_speech_font_name.title"],
-                            desc = L["Skits.options.style_any_speech_font_name.desc"],
-                            values = function()
-                                return LSM:HashTable("font")
-                            end,
-                            dialogControl = "LSM30_Font",
-                            arg = "style_notification_speech_font_name",
-                            order = 5,
-                            width = optionWidth,
-                        },   
-                        style_notification_onRight = {
-                            type = "toggle",
-                            name = L["Skits.options.style_notification_onRight.title"],
-                            desc = L["Skits.options.style_notification_onRight.desc"],
-                            arg = "style_notification_onRight",
-                            order = 6,
-                            width = optionWidth,
-                        },   
-                        style_notification_portrait_size = {
-                            type = "range",
-                            name = L["Skits.options.style_notification_portrait_size.title"],
-                            desc = L["Skits.options.style_notification_portrait_size.desc"],
-                            min = 5, max = 200, step = 5,
-                            arg = "style_notification_portrait_size",
-                            order = 7,
-                            width = optionWidth,
-                        },    
-                        style_notification_max_messages = {
-                            type = "range",
-                            name = L["Skits.options.style_notification_max_messages.title"],
-                            desc = L["Skits.options.style_notification_max_messages.desc"],
-                            min = 1, max = 10, step = 1,
-                            arg = "style_notification_max_messages",
-                            order = 8,
-                            width = optionWidth,
-                        },   
-                        style_notification_textarea_size = {
-                            type = "range",
-                            name = L["Skits.options.style_notification_textarea_size.title"],
-                            desc = L["Skits.options.style_notification_textarea_size.desc"],
-                            min = 50, max = 500, step = 50,
-                            arg = "style_notification_textarea_size",
-                            order = 9,
-                            width = optionWidth,
-                        },          
-                        style_notification_dist_side = {
-                            type = "range",
-                            name = L["Skits.options.style_notification_dist_side.title"],
-                            desc = L["Skits.options.style_notification_dist_side.desc"],
-                            min = 0, max = 500, step = 5,
-                            arg = "style_notification_dist_side",
-                            order = 10,
-                            width = optionWidth,
-                        },     
-                        style_notification_top_side = {
-                            type = "range",
-                            name = L["Skits.options.style_notification_top_side.title"],
-                            desc = L["Skits.options.style_notification_top_side.desc"],
-                            min = 0, max = 1000, step = 10,
-                            arg = "style_notification_top_side",
-                            order = 11,
-                            width = optionWidth,
-                        },                                                                                                                                                                        
+                        style_notification_instance_options = {
+                            type = "group",
+                            name = "By Instance Size",
+                            childGroups = "tab",           
+                            order = 2,
+                            args = {
+                                style_notification_instance_option_solo = {
+                                    type = "group",
+                                    name = "Solo",
+                                    order = 1,
+                                    get = function(info) 
+                                        return Skits_Options.db["style_notification_instanceoptions"]["solo"][info.arg] 
+                                    end,
+                                    set = function(info, v)
+                                        local arg = info.arg
+                                        Skits_Options.db["style_notification_instanceoptions"]["solo"][arg]  = v
+                                        Skits:GeneralParameterChanges()
+                                    end,
+                                    disabled = false,
+                                    args = GetNotificationInstanceOptions(),
+                                },
+                                style_notification_instance_option_small = {
+                                    type = "group",
+                                    name = "Small",
+                                    order = 2,
+                                    get = function(info) 
+                                        return Skits_Options.db["style_notification_instanceoptions"]["small"][info.arg] 
+                                    end,
+                                    set = function(info, v)
+                                        local arg = info.arg
+                                        Skits_Options.db["style_notification_instanceoptions"]["small"][arg]  = v
+                                        Skits:GeneralParameterChanges()
+                                    end,
+                                    disabled = false,
+                                    args = GetNotificationInstanceOptions(),
+                                },      
+                                style_notification_instance_option_medium = {
+                                    type = "group",
+                                    name = "Medium",
+                                    order = 3,
+                                    get = function(info) 
+                                        return Skits_Options.db["style_notification_instanceoptions"]["medium"][info.arg] 
+                                    end,
+                                    set = function(info, v)
+                                        local arg = info.arg
+                                        Skits_Options.db["style_notification_instanceoptions"]["medium"][arg]  = v
+                                        Skits:GeneralParameterChanges()
+                                    end,
+                                    disabled = false,
+                                    args = GetNotificationInstanceOptions(),
+                                },    
+                                style_notification_instance_option_large = {
+                                    type = "group",
+                                    name = "Large",
+                                    order = 4,
+                                    get = function(info) 
+                                        return Skits_Options.db["style_notification_instanceoptions"]["large"][info.arg] 
+                                    end,
+                                    set = function(info, v)
+                                        local arg = info.arg
+                                        Skits_Options.db["style_notification_instanceoptions"]["large"][arg]  = v
+                                        Skits:GeneralParameterChanges()
+                                    end,
+                                    disabled = false,
+                                    args = GetNotificationInstanceOptions(),
+                                },                                                                                               
+                            },
+                        },                                                                                                                                                                                                                    
                     },
                 },   
                 tab_style_departure = {

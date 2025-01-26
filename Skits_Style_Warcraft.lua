@@ -260,7 +260,7 @@ function Skits_Style_Warcraft:TrimMessages()
         maxMessages = math.min(maxMessages, options.style_warcraft_speech_screen_combat_max)
     end
 
-    local inInstance, instanceType, playerCount = Skits_Utils:IsInInstance()
+    local inInstance, instanceType, playerCount, maxPlayers = Skits_Utils:IsInInstance()
     if inInstance then
         if playerCount <= 1 then
             maxMessages = math.min(maxMessages, options.style_warcraft_speech_screen_solo_instance_max)
