@@ -506,7 +506,7 @@ local function SlotToFront(slot)
 
     -- Set Level    
     slot.modelFrame:SetFrameLevel(60)
-    Skits_UI_Utils:ModelFrameSetVisible(slot.modelFrame, isVisible)  -- xxx  
+    Skits_UI_Utils:ModelFrameSetVisible(slot.modelFrame, isVisible)
 end
 
 -- POSITION FUNCTIONS --------------------------------------------------------------------------------------------------------------
@@ -881,7 +881,7 @@ local function ModelAdd(creatureData, textData, slot, duration)
     }
     
     local loaderData = Skits_UI_Utils:LoadModel(creatureData, displayOptions, loadOptions)
-    Skits_UI_Utils:ModelFrameSetVisible(slot.modelFrame, true) -- xxx
+    Skits_UI_Utils:ModelFrameSetVisible(slot.modelFrame, isVisible)
     slot.loaderData = loaderData
 end
 
