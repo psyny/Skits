@@ -911,6 +911,7 @@ Skits_Options.options = {
                                 style_notification_instance_option_solo = {
                                     type = "group",
                                     name = "Solo",
+                                    desc = "= 1 player",
                                     order = 1,
                                     get = function(info) 
                                         return Skits_Options.db["style_notification_instanceoptions"]["solo"][info.arg] 
@@ -926,6 +927,7 @@ Skits_Options.options = {
                                 style_notification_instance_option_small = {
                                     type = "group",
                                     name = "Small",
+                                    desc = "2~10 players",
                                     order = 2,
                                     get = function(info) 
                                         return Skits_Options.db["style_notification_instanceoptions"]["small"][info.arg] 
@@ -941,6 +943,7 @@ Skits_Options.options = {
                                 style_notification_instance_option_medium = {
                                     type = "group",
                                     name = "Medium",
+                                    desc = "11~20 players",
                                     order = 3,
                                     get = function(info) 
                                         return Skits_Options.db["style_notification_instanceoptions"]["medium"][info.arg] 
@@ -956,6 +959,7 @@ Skits_Options.options = {
                                 style_notification_instance_option_large = {
                                     type = "group",
                                     name = "Large",
+                                    desc = "21~50 players",
                                     order = 4,
                                     get = function(info) 
                                         return Skits_Options.db["style_notification_instanceoptions"]["large"][info.arg] 
