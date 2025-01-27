@@ -50,6 +50,16 @@ local avoidSoftGroupTokenAdd = {
     ["npc"] = true,
 }
 
+-- Gossip Memory
+Skits.gossip = {
+    options = {
+        priority1finish = GetTime(),
+        count = 0,
+        byIndex = {},
+        byOptionId = {},
+    },
+}
+
 ---------------------------------------------------------
 -- Addon events
 
@@ -403,30 +413,50 @@ function Skits:StoreInMemory(creatureData, text, color)
 end
 
 -- Quest Frames
-function Skits:ClearQueuedSpeaks()
-    for _, handler in pairs(self.queuedSpeaks) do
-        if handler then
-            handler:Cancel()
+function Skits:ClearQueuedSpeaks(maxPriority)
+    local clearedSpeakIds = {}
+
+    for speakId, speakData in pairs(self.queuedSpeaks) do
+
+        if speakData.priority <= maxPriority  then
+            speakData.handler:Cancel()
+            table.insert(clearedSpeakIds, speakId)
         end
     end
-    self.queuedSpeaks = {}
+
+    for _, speakId in ipairs(clearedSpeakIds) do
+        self.queuedSpeaks[speakId] = nil
+    end
 end
 
-local function QueueNewSpeak(creatureData, duration, textData)
+local function QueueNewSpeak(creatureData, delay, textData, priority)
+    -- xxx
     local id = Skits.queuedSpeaksNextId
     Skits.queuedSpeaksNextId = Skits.queuedSpeaksNextId + 1
 
-    local handler = C_Timer.NewTimer(duration, function()        
+    local p1finishRemaining = Skits.gossip.options.priority1finish - GetTime()
+    local baseDelay = math.max(0, p1finishRemaining)
+
+    if priority == 1 then
+        Skits.gossip.options.priority1finish = GetTime() + (textData.duration or 0)
+    end    
+    delay = delay + baseDelay
+
+    local handler = C_Timer.NewTimer(delay, function()        
         Skits:ChatEvent(creatureData, textData, false)
         Skits.queuedSpeaks[id] = nil
     end)
-    Skits.queuedSpeaks[id] = handler
+    Skits.queuedSpeaks[id] = {
+        handler = handler,
+        priority = priority,
+    }
 end
 
 
-function Skits:HandleQuestFrame(creatureData, text)
+function Skits:HandleQuestFrame(creatureData, text, priority)
     -- Check if speak was seen recently
     local speakId = creatureData.name .. #text .. text:sub(1, 10)
+
     local alreadySaw = self.speakerInteractRepeats[speakId]
     if alreadySaw then
         return
@@ -448,7 +478,7 @@ function Skits:HandleQuestFrame(creatureData, text)
     end    
 
     -- Queue Speak
-    self:ClearQueuedSpeaks()
+    self:ClearQueuedSpeaks(1)
     Skits.speakerLastInteracting = creatureData
 
     local phrases = Skits_Utils:TextIntoPhrases(text)
@@ -458,7 +488,7 @@ function Skits:HandleQuestFrame(creatureData, text)
         timeToEndCurrentMessage = 0
     end
 
-    local frameTextSpeed = 2.0
+    local frameTextSpeed = 2.0 / (priority + 1)
 
     local accDuration = math.max(timeToEndCurrentMessage, 0.2)
     local currSpeakText = ""
@@ -472,13 +502,16 @@ function Skits:HandleQuestFrame(creatureData, text)
             else
                 textPart = textPart .. "..."
             end
+
+            local thisSpeakDuration = math.max((Skits_Utils:MessageDuration(currSpeakText) / frameTextSpeed) - 0.1, 1)
             local textData = {
                 text = textPart,
                 speed = frameTextSpeed,
+                duration = thisSpeakDuration,
             }
 
-            QueueNewSpeak(creatureData, accDuration, textData)
-            local thisSpeakDuration = math.max((Skits_Utils:MessageDuration(currSpeakText) / frameTextSpeed) - 0.1, 1)
+            QueueNewSpeak(creatureData, accDuration, textData, priority)
+           
             accDuration = accDuration + thisSpeakDuration
             currSpeakText = ""
         end
@@ -492,9 +525,10 @@ function Skits:HandleQuestFrame(creatureData, text)
         local textData = {
             text = currSpeakText,
             speed = frameTextSpeed,
+            duration = math.max((Skits_Utils:MessageDuration(currSpeakText) / frameTextSpeed) - 0.1, 1),
         }
 
-        QueueNewSpeak(creatureData, accDuration, textData)
+        QueueNewSpeak(creatureData, accDuration, textData, priority)
     end
 end
 
@@ -514,7 +548,7 @@ function Skits:HandleQuestGreeting()
         return
     end       
     
-    self:HandleQuestFrame(npcCreatureData, questText)
+    self:HandleQuestFrame(npcCreatureData, questText, 0)
 end
 
 function Skits:HandleQuestDetail()
@@ -535,7 +569,7 @@ function Skits:HandleQuestDetail()
         return
     end       
     
-    self:HandleQuestFrame(npcCreatureData, questText)
+    self:HandleQuestFrame(npcCreatureData, questText, 0)
 end
 
 function Skits:HandleQuestComplete()
@@ -554,14 +588,95 @@ function Skits:HandleQuestComplete()
         return
     end       
     
-    self:HandleQuestFrame(npcCreatureData, questText)
+    self:HandleQuestFrame(npcCreatureData, questText, 0)
 end
 
+
+local function PlayerGossipAnswer(answerText) 
+    -- Update if player is the current    
+    local unittoken = "player"
+    local playerName = Skits_Utils:GetUnitTokenFullName(unittoken)
+    local tempCreatureData = {}
+    if unittoken then
+        Skits:SetCreatureDataOfToken(unittoken)
+        tempCreatureData = Skits:BuildCreatureDataOfToken(unittoken)
+    end
+
+    -- Retrieve or set creature ID based on player name
+    local creatureData, _ = Skits_ID_Store:GetCreatureDataByName(playerName, true)
+
+    if not creatureData then
+        creatureData = {}
+    end
+
+    if unittoken then
+        creatureData.unitToken = unittoken
+    end
+
+    creatureData.isPlayer = true
+    creatureData.name = playerName
+
+    -- Merge with our temp creature data
+    if tempCreatureData then
+        for k, v in pairs(tempCreatureData) do
+            if not creatureData[k] then
+                creatureData[k] = v
+            end
+        end
+    end
+
+    answerText = answerText:gsub("<.-?>", "")
+    Skits:HandleQuestFrame(creatureData, answerText, 1)
+end
+
+hooksecurefunc('SelectGossipOption', function(index, text, confirm)
+    local optionText = Skits.gossip.options.byIndex[index]
+    optionText = Skits.gossip.options.byOptionId[index]
+    if not optionText then
+        return
+    end
+
+    PlayerGossipAnswer(optionText) 
+end)   
+
+hooksecurefunc(C_GossipInfo, "SelectOption", function(optionID)
+    local optionText = Skits.gossip.options.byOptionId[optionID]
+    if not optionText then
+        return
+    end
+
+    PlayerGossipAnswer(optionText) 
+end)
+
+hooksecurefunc(C_GossipInfo, "SelectOptionByIndex", function(index, optionText)
+    local optionText = Skits.gossip.options.byIndex[index]
+    if not optionText then
+        return
+    end
+
+    PlayerGossipAnswer(optionText) 
+end)
+
 function Skits:HandleGossipShow()
+    Skits.gossip.options.count = 0
+    Skits.gossip.options.byIndex = {}
+    Skits.gossip.options.byOptionId = {}
+
     local options = Skits_Options.db
     if not options.event_npc_interact then
         return
     end
+
+    local goptions = C_GossipInfo.GetOptions()
+    if goptions then
+        for i, goption in ipairs(goptions) do
+            if goption.gossipOptionID then
+                Skits.gossip.options.byOptionId[goption.gossipOptionID] = goption.name
+                Skits.gossip.options.byIndex[i-1] = goption.name
+                Skits.gossip.options.count = Skits.gossip.options.count + 1
+            end
+        end
+    end    
 
     local npcCreatureData = Skits:BuildCreatureDataOfToken("npc")
     if not npcCreatureData then
@@ -573,11 +688,11 @@ function Skits:HandleGossipShow()
         return
     end    
 
-    self:HandleQuestFrame(npcCreatureData, gossipText)
+    self:HandleQuestFrame(npcCreatureData, gossipText, 0)
 end
 
 function Skits:HandleQuestClosed()
-    self:ClearQueuedSpeaks()
+    self:ClearQueuedSpeaks(1)
 
     if self.speakerLastInteracting then
         local creatureData = self.speakerLastInteracting
@@ -614,7 +729,7 @@ function Skits:HandleNpcChatEvent(event, msg, sender, languageName, channelName,
         speed= 1.0,
     }
 
-    self:ClearQueuedSpeaks()
+    self:ClearQueuedSpeaks(1)
     self:ChatEvent(creatureData, textData, true)
 end
 
@@ -660,7 +775,7 @@ function Skits:HandlePlayerChatEvent(event, msg, sender, languageName, channelNa
         speed = 1.0,
     }
 
-    self:ClearQueuedSpeaks()
+    self:ClearQueuedSpeaks(1)
     self:ChatEvent(creatureData, textData, true)
 end
 

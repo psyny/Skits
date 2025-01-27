@@ -15,6 +15,7 @@ Skits_Options.defaults = {
 	profile = {
         enabled                             = true,
         block_talking_head                  = true,
+        event_npc_interact                  = false,             
         combat_easy_in                      = false,
         combat_easy_out                     = true,
         combat_exit_delay                   = 3,
@@ -30,7 +31,6 @@ Skits_Options.defaults = {
         event_msg_monster_whisper    = true,
         event_msg_monster_say        = true,
         event_msg_monster_party      = true,
-        event_npc_interact           = false,        
 
         -- Player Events
         event_msg_say                     = false,
@@ -309,13 +309,21 @@ Skits_Options.options = {
                     arg = "block_talking_head",
                     order = 2,
                     width = optionWidth,
-                },      
+                },   
+                event_npc_interact = {
+                    type = "toggle",
+                    name = L["Skits.options.event_npc_interact.title"],
+                    desc = L["Skits.options.event_npc_interact.desc"],
+                    arg = "event_npc_interact",
+                    order = 3,
+                    width = optionWidth,
+                },                     
                 combat_easy_in = {
                     type = "toggle",
                     name = L["Skits.options.combat_easy_in.title"],
                     desc = L["Skits.options.combat_easy_in.desc"],
                     arg = "combat_easy_in",
-                    order = 3,
+                    order = 4,
                     width = optionWidth,
                 },      
                 combat_easy_out = {
@@ -323,7 +331,7 @@ Skits_Options.options = {
                     name = L["Skits.options.combat_easy_out.title"],
                     desc = L["Skits.options.combat_easy_out.desc"],
                     arg = "combat_easy_out",
-                    order = 4,
+                    order = 5,
                     width = optionWidth,
                 },   
                 combat_exit_delay = {
@@ -332,7 +340,7 @@ Skits_Options.options = {
                     desc = L["Skits.options.combat_exit_delay.desc"],
                     min = 0, max = 60, step = 1,
                     arg = "combat_exit_delay",
-                    order = 5,
+                    order = 6,
                     width = optionWidth,  
                 },    
                 move_exit_exploration_for = {
@@ -341,7 +349,7 @@ Skits_Options.options = {
                     desc = L["Skits.options.move_exit_exploration_for.desc"],
                     min = 0, max = 60, step = 1,
                     arg = "move_exit_exploration_for",
-                    order = 6,
+                    order = 7,
                     width = optionWidth,  
                 },                                                                     
             },
@@ -390,15 +398,7 @@ Skits_Options.options = {
                     arg = "event_msg_monster_party",
                     order = 4,
                     width = optionWidth,
-                },
-                event_npc_interact = {
-                    type = "toggle",
-                    name = L["Skits.options.event_npc_interact.title"],
-                    desc = L["Skits.options.event_npc_interact.desc"],
-                    arg = "event_npc_interact",
-                    order = 5,
-                    width = optionWidth,
-                },                
+                },              
             
                 -- Player Events
                 event_msg_say = {

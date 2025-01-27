@@ -598,7 +598,7 @@ local function PositionSetSlotToPositionUpdate(self, delta)
     local cx = Skits_Utils:Interpolation(up.ox, up.tx, 0, up.td, up.cd)
     local cy = Skits_Utils:Interpolation(up.oy, up.ty, 0, up.td, up.cd)
 
-    if slot.position.onLeft then
+    if slot.position and slot.position.onLeft then
         slot.modelFrame:SetPoint("BOTTOMLEFT", Skits_Style_Departure.mainFrame, "BOTTOMLEFT", cx, cy) 
     else
         slot.modelFrame:SetPoint("BOTTOMRIGHT", Skits_Style_Departure.mainFrame, "BOTTOMRIGHT", cx, cy) 
