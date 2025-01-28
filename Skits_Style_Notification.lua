@@ -338,6 +338,8 @@ function Skits_Style_Notification:msgMoveUp(msgData, ammount)
 end
 
 function Skits_Style_Notification:msgExpire(msgData)
+    msgData.speakFrame.main:SetScript("OnUpdate", nil)
+    
     if msgData.expireHandler then
         msgData.expireHandler:Cancel() 
     end

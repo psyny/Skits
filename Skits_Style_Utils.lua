@@ -16,7 +16,7 @@ Skits_Style_Utils.enum_styles = {
 
 -- Light Utils ---------------------------------------------------------------------
 
-Skits_Style_Utils.fallbackId = 114599
+Skits_Style_Utils.fallbackId = { f = 114599, m = 114603 }
 
 Skits_Style_Utils.lightPresets = {}
 

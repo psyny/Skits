@@ -226,7 +226,7 @@ function Skits_Style:MouseClickAction(clickAction, skitStyle)
     if clickAction == "CLOSE" then
         Skits_Style:ShowSkitStyle(Skits_Style_Utils.enum_styles.HIDDEN, true)
     elseif clickAction == "GOTOCOMBAT" then
-        Skits_Style:ChangeToCombatWithDelayedExit(true, 0)
+        Skits_Style:ChangeToCombatWithDelayedExit(true, 30)
     end
 end
 

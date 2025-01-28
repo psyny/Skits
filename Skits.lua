@@ -413,12 +413,11 @@ function Skits:StoreInMemory(creatureData, text, color)
 end
 
 -- Quest Frames
-function Skits:ClearQueuedSpeaks(maxPriority)
+function Skits:ClearQueuedSpeaks(minPriority)
     local clearedSpeakIds = {}
 
     for speakId, speakData in pairs(self.queuedSpeaks) do
-
-        if speakData.priority <= maxPriority  then
+        if speakData.priority < minPriority  then
             speakData.handler:Cancel()
             table.insert(clearedSpeakIds, speakId)
         end
@@ -430,7 +429,6 @@ function Skits:ClearQueuedSpeaks(maxPriority)
 end
 
 local function QueueNewSpeak(creatureData, delay, textData, priority)
-    -- xxx
     local id = Skits.queuedSpeaksNextId
     Skits.queuedSpeaksNextId = Skits.queuedSpeaksNextId + 1
 
@@ -455,7 +453,8 @@ end
 
 function Skits:HandleQuestFrame(creatureData, text, priority)
     -- Check if speak was seen recently
-    local speakId = creatureData.name .. #text .. text:sub(1, 10)
+    local npcName = Skits_Utils:GetUnitTokenFullName("npc")
+    local speakId = npcName .. creatureData.name .. #text .. text:sub(1, 10)
 
     local alreadySaw = self.speakerInteractRepeats[speakId]
     if alreadySaw then
@@ -488,7 +487,7 @@ function Skits:HandleQuestFrame(creatureData, text, priority)
         timeToEndCurrentMessage = 0
     end
 
-    local frameTextSpeed = 2.0 / (priority + 1)
+    local frameTextSpeed = 1.5
 
     local accDuration = math.max(timeToEndCurrentMessage, 0.2)
     local currSpeakText = ""
@@ -497,11 +496,7 @@ function Skits:HandleQuestFrame(creatureData, text, priority)
         -- If yes, send the current text as
         if #currSpeakText + #phrase > 200 then
             local textPart = currSpeakText
-            if textPart:sub(-1) == "." then
-                textPart = textPart .. ".."
-            else
-                textPart = textPart .. "..."
-            end
+            textPart = textPart .. " <...>"
 
             local thisSpeakDuration = math.max((Skits_Utils:MessageDuration(currSpeakText) / frameTextSpeed) - 0.1, 1)
             local textData = {
@@ -629,7 +624,76 @@ local function PlayerGossipAnswer(answerText)
     Skits:HandleQuestFrame(creatureData, answerText, 1)
 end
 
+local acceptVariations = {
+    "Ok.",
+    "Let's do it.",
+    "I'm on it.",
+    "Consider it done.",
+    "I'll handle this.",
+    "Yes, I'll help.",
+    "I'm in.",
+    "You can count on me.",
+    "I'll take care of it.",
+    "I'm ready for this.",
+    "Let's make it happen.",
+    "Got it.",
+    "This one's mine.",
+    "I'll take the job.",
+    "Challenge accepted.",
+    "I'm up for it.",
+    "I'll do what needs to be done.",
+    "Leave it to me.",
+    "You have my word."
+}
+
+local declineVariations = {
+    "No, thank you.",
+    "I can't do this.",
+    "This isn't for me.",
+    "Sorry, I'll pass.",
+    "Not today.",
+    "I'm not interested.",
+    "I have to decline.",
+    "I can't help with this.",
+    "I'll sit this one out.",
+    "Nope.",
+    "I'll leave this to someone else.",
+    "This isn't my fight.",
+    "Not my thing.",
+    "I'm going to pass on this.",
+    "Sorry, I can't.",
+    "This isn't my problem.",
+    "I won't be able to do this.",
+    "I'm out.",
+    "Not happening."
+}
+
+local goodbyeVariations = {
+    "Goodbye.",
+    "Farewell.",
+    "See you around.",
+    "Take care.",
+    "Catch you later.",
+    "Bye now.",
+    "Until next time.",
+    "Stay safe.",
+    "Later.",
+    "So long.",
+    "See you soon.",
+    "I'll be on my way.",
+    "I've got to go.",
+    "Be well.",
+    "Until we meet again.",
+    "I'll see you later."
+}
+
+
 hooksecurefunc('SelectGossipOption', function(index, text, confirm)
+    local options = Skits_Options.db
+    if not options.event_npc_interact then
+        return 
+    end    
+
     local optionText = Skits.gossip.options.byIndex[index]
     optionText = Skits.gossip.options.byOptionId[index]
     if not optionText then
@@ -640,6 +704,11 @@ hooksecurefunc('SelectGossipOption', function(index, text, confirm)
 end)   
 
 hooksecurefunc(C_GossipInfo, "SelectOption", function(optionID)
+    local options = Skits_Options.db
+    if not options.event_npc_interact then
+        return 
+    end    
+
     local optionText = Skits.gossip.options.byOptionId[optionID]
     if not optionText then
         return
@@ -649,12 +718,83 @@ hooksecurefunc(C_GossipInfo, "SelectOption", function(optionID)
 end)
 
 hooksecurefunc(C_GossipInfo, "SelectOptionByIndex", function(index, optionText)
+    local options = Skits_Options.db
+    if not options.event_npc_interact then
+        return 
+    end    
+
     local optionText = Skits.gossip.options.byIndex[index]
     if not optionText then
         return
     end
 
     PlayerGossipAnswer(optionText) 
+end)
+
+QuestFrameAcceptButton:HookScript("OnClick", function()    
+    --print("Quest Accepted")    
+    local options = Skits_Options.db
+    if not options.event_npc_interact then
+        return 
+    end    
+
+    local playerSay = acceptVariations[math.random(#acceptVariations)]  
+    PlayerGossipAnswer(playerSay)  
+end)
+
+QuestFrameDeclineButton:HookScript("OnClick", function()
+    --print("Quest Declined")
+    local options = Skits_Options.db
+    if not options.event_npc_interact then
+        return 
+    end    
+
+    local playerSay = declineVariations[math.random(#declineVariations)]  
+    PlayerGossipAnswer(playerSay)      
+end)
+
+QuestFrameGoodbyeButton:HookScript("OnClick", function()
+    --print("Goodbye clicked")
+    local options = Skits_Options.db
+    if not options.event_npc_interact then
+        return 
+    end    
+
+    local playerSay = goodbyeVariations[math.random(#goodbyeVariations)]  
+    PlayerGossipAnswer(playerSay)          
+end)
+
+QuestFrameCloseButton:HookScript("OnClick", function()
+    --print("Quest Frame closed via (X) button")
+    local options = Skits_Options.db
+    if not options.event_npc_interact then
+        return 
+    end    
+
+    local playerSay = goodbyeVariations[math.random(#goodbyeVariations)]  
+    PlayerGossipAnswer(playerSay)      
+end)
+
+GossipFrame.GreetingPanel.GoodbyeButton:HookScript("OnClick", function()
+    --print("Gossip Frame closed via GoodBye button")
+    local options = Skits_Options.db
+    if not options.event_npc_interact then
+        return 
+    end    
+
+    local playerSay = goodbyeVariations[math.random(#goodbyeVariations)]  
+    PlayerGossipAnswer(playerSay)      
+end)
+
+GossipFrameCloseButton:HookScript("OnClick", function()
+    --print("Gossip Frame closed via (X) button")
+    local options = Skits_Options.db
+    if not options.event_npc_interact then
+        return 
+    end    
+        
+    local playerSay = goodbyeVariations[math.random(#goodbyeVariations)]  
+    PlayerGossipAnswer(playerSay)      
 end)
 
 function Skits:HandleGossipShow()
@@ -698,11 +838,16 @@ function Skits:HandleQuestClosed()
         local creatureData = self.speakerLastInteracting
         self.speakerLastInteracting = nil
     
-        if self.lastSpeaker == creatureData.name then
-            if self.holdSpeakUntil <= GetTime() then
-                -- No priority on current message
-                -- Cancel Speaker
-                Skits_Style:CancelSpeaker(creatureData)                
+        -- Cancel Speaker: We dont need this anymore, skit clicks can do this.
+        if false then
+            if creatureData.isPlayer == false then
+                if self.lastSpeaker == creatureData.name then
+                    if self.holdSpeakUntil <= GetTime() then
+                        -- No priority on current message
+                        -- Cancel Speaker
+                        Skits_Style:CancelSpeaker(creatureData)                
+                    end
+                end
             end
         end
     end 

@@ -565,7 +565,9 @@ function Skits_UI_Utils:LoadModelAux(loaderData)
     
             loaderData.fallback = true
             if loaderData.displayOptions.fallbackId then
-                modelFrame:SetDisplayInfo(loaderData.displayOptions.fallbackId)
+                local gender = Skits_UI:GetGenderForName(creatureData.name)
+                local displayId = loaderData.displayOptions.fallbackId[gender] or Skits_Style_Utils.fallbackId[gender]
+                modelFrame:SetDisplayInfo(displayId)
             end
         end    
     end      

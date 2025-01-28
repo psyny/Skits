@@ -396,7 +396,7 @@ local function SlotExpireMsg(slot, hideMessage)
     if hideMessage then
         local speakerTextEle = nil
         local messageTextEle = nil    
-        if slot.position.onLeft then
+        if slot.position and slot.position.onLeft then
             speakerTextEle = Skits_Style_Tales.textLeftSpeakerText
             messageTextEle = Skits_Style_Tales.textLeftMessageText
         else
