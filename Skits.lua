@@ -26,7 +26,6 @@ Skits.lastSpeaker = ""
 Skits.lastSpeakerColor = 0
 Skits.speakerColorMapQueue = Skits_Deque:New()
 Skits.speakerColorMapQueueLimit = 30
-Skits.displayDurationEnd = GetTime()
 Skits.holdSpeakUntil = GetTime()
 Skits.speakerLastInteracting = nil
 Skits.speakerInteractRepeats = {}
@@ -39,10 +38,7 @@ Skits.msgMemoryQueue = nil
 -- TempDisable
 Skits.skitsActive = true
 
--- Queued Speaks
-Skits.queuedSpeaks = {}
-Skits.queuedSpeaksNextId = 1
-
+-- Soft Groups
 local avoidSoftGroupTokenAdd = {
     ["mou"] = true,
     ["tar"] = true,
@@ -53,11 +49,13 @@ local avoidSoftGroupTokenAdd = {
 -- Gossip Memory
 Skits.gossip = {
     options = {
-        priority1finish = GetTime(),
         count = 0,
         byIndex = {},
         byOptionId = {},
     },
+    quests = {
+        byId = {},
+    }    
 }
 
 ---------------------------------------------------------
@@ -413,48 +411,12 @@ function Skits:StoreInMemory(creatureData, text, color)
 end
 
 -- Quest Frames
-function Skits:ClearQueuedSpeaks(minPriority)
-    local clearedSpeakIds = {}
-
-    for speakId, speakData in pairs(self.queuedSpeaks) do
-        if speakData.priority < minPriority  then
-            speakData.handler:Cancel()
-            table.insert(clearedSpeakIds, speakId)
-        end
-    end
-
-    for _, speakId in ipairs(clearedSpeakIds) do
-        self.queuedSpeaks[speakId] = nil
-    end
-end
-
-local function QueueNewSpeak(creatureData, delay, textData, priority)
-    local id = Skits.queuedSpeaksNextId
-    Skits.queuedSpeaksNextId = Skits.queuedSpeaksNextId + 1
-
-    local p1finishRemaining = Skits.gossip.options.priority1finish - GetTime()
-    local baseDelay = math.max(0, p1finishRemaining)
-
-    if priority == 1 then
-        Skits.gossip.options.priority1finish = GetTime() + (textData.duration or 0)
-    end    
-    delay = delay + baseDelay
-
-    local handler = C_Timer.NewTimer(delay, function()        
-        Skits:ChatEvent(creatureData, textData, false)
-        Skits.queuedSpeaks[id] = nil
-    end)
-    Skits.queuedSpeaks[id] = {
-        handler = handler,
-        priority = priority,
-    }
-end
-
-
 function Skits:HandleQuestFrame(creatureData, text, priority)
     -- Check if speak was seen recently
     local npcName = Skits_Utils:GetUnitTokenFullName("npc")
     local speakId = npcName .. creatureData.name .. #text .. text:sub(1, 10)
+
+    Skits_SpeakQueue:RemoveByName(npcName)
 
     local alreadySaw = self.speakerInteractRepeats[speakId]
     if alreadySaw then
@@ -464,6 +426,10 @@ function Skits:HandleQuestFrame(creatureData, text, priority)
     -- Register as seen
     self.speakerInteractRepeats[speakId] = 1
     self.speakerInteractRepeatsQueue:AddToHead(speakId)
+
+    if creatureData.isPlayer == false then
+        Skits.speakerLastInteracting = creatureData
+    end
 
     -- Trim speak ids
     local overlimit = self.speakerInteractRepeatsQueue.size - 1000
@@ -476,20 +442,21 @@ function Skits:HandleQuestFrame(creatureData, text, priority)
         end        
     end    
 
-    -- Queue Speak
-    self:ClearQueuedSpeaks(1)
-    Skits.speakerLastInteracting = creatureData
-
-    local phrases = Skits_Utils:TextIntoPhrases(text)
-
+    -- Queue Pause
     local timeToEndCurrentMessage = self.holdSpeakUntil - GetTime()
     if timeToEndCurrentMessage < 0 then
         timeToEndCurrentMessage = 0
     end
+    local minPause = 0.2
+    if creatureData.isPlayer == false then
+        minPause = 0
+    end
+    local pauseDuration = math.max(timeToEndCurrentMessage, minPause)
+    Skits_SpeakQueue:AddPause(pauseDuration)
 
+    -- Queue Speak
     local frameTextSpeed = 1.5
-
-    local accDuration = math.max(timeToEndCurrentMessage, 0.2)
+    local phrases = Skits_Utils:TextIntoPhrases(text)
     local currSpeakText = ""
     for _, phrase in ipairs(phrases) do
         -- Concatenating will blow size?
@@ -498,16 +465,14 @@ function Skits:HandleQuestFrame(creatureData, text, priority)
             local textPart = currSpeakText
             textPart = textPart .. " <...>"
 
-            local thisSpeakDuration = math.max((Skits_Utils:MessageDuration(currSpeakText) / frameTextSpeed) - 0.1, 1)
             local textData = {
                 text = textPart,
                 speed = frameTextSpeed,
-                duration = thisSpeakDuration,
+                duration = math.max((Skits_Utils:MessageDuration(currSpeakText) / frameTextSpeed) - 0.1, 1),
             }
 
-            QueueNewSpeak(creatureData, accDuration, textData, priority)
+            Skits_SpeakQueue:AddSpeaker(creatureData, textData, textData.duration - 0.05, priority)
            
-            accDuration = accDuration + thisSpeakDuration
             currSpeakText = ""
         end
 
@@ -523,7 +488,7 @@ function Skits:HandleQuestFrame(creatureData, text, priority)
             duration = math.max((Skits_Utils:MessageDuration(currSpeakText) / frameTextSpeed) - 0.1, 1),
         }
 
-        QueueNewSpeak(creatureData, accDuration, textData, priority)
+        Skits_SpeakQueue:AddSpeaker(creatureData, textData, textData.duration - 0.05, priority)
     end
 end
 
@@ -542,9 +507,21 @@ function Skits:HandleQuestGreeting()
     if not questText then
         return
     end       
-    
+
     self:HandleQuestFrame(npcCreatureData, questText, 0)
 end
+
+local objectiveVariations = {
+    "So, what I need is for you to ",
+    "Your task is to ",
+    "I need you to ",
+    "The objective is simple: ",
+    "Here's what you must do: ",
+    "You have to ",
+    "You must ",
+    "Your mission is to ",
+    "I'm counting on you to ",
+}
 
 function Skits:HandleQuestDetail()
     local options = Skits_Options.db
@@ -563,8 +540,72 @@ function Skits:HandleQuestDetail()
     if not questText then
         return
     end       
+
+    local questObjective = GetObjectiveText() or ""
+    if #questObjective > 0 then
+        local subZoneName = GetSubZoneText()
+        local personName = npcCreatureData.name
+
+        -- Replace the person name with I or me
+        local subjectPatterns = {
+            {"^"..personName.." ", "I "}, -- Name at the start of a sentence
+            {" "..personName.." and", " I and"}, -- "John and" → "I and"
+            {" "..personName.." is", " I am"}, -- "John is" → "I am"
+            {" "..personName.." was", " I was"} -- "John was" → "I was"
+        }
     
-    self:HandleQuestFrame(npcCreatureData, questText, 0)
+        -- Patterns for object (replace with "me")
+        local objectPatterns = {
+            {" "..personName.."$", " me"}, -- Name at the end of a sentence
+            {" "..personName.."%.", " me."}, -- "John." → "me."
+            {" "..personName.."!", " me!"}, -- "John!" → "me!"
+            {" "..personName.."?", " me?"}, -- "John?" → "me?"
+            {" "..personName.." to", " me to"}, -- "to John" → "to me"
+            {" "..personName.." for", " me for"}, -- "for John" → "for me"
+            {" "..personName.." with", " me with"} -- "with John" → "with me"
+        }
+    
+        -- First, replace subjects with "I"
+        for _, pattern in ipairs(subjectPatterns) do
+            questObjective = questObjective:gsub(pattern[1], pattern[2])
+        end
+    
+        -- Then, replace objects with "me"
+        for _, pattern in ipairs(objectPatterns) do
+            questObjective = questObjective:gsub(pattern[1], pattern[2])
+        end        
+
+
+        -- Location name
+        local prepositions = { "at ", "in ", "on " }
+        
+        if string.find(questObjective, subZoneName, 1, true) ~= nil then
+            for _, preposition in ipairs(prepositions) do
+                local searchText = preposition .. subZoneName
+                local newText, replacements = questObjective:gsub(searchText, "here", 1) -- Only replace the first match
+        
+                if replacements > 0 then
+                    questObjective = newText -- Update the objective text
+                    break -- Stop after the first successful replacement
+                end
+            end
+        end
+
+        -- Avoid corner cases
+        questObjective = questObjective:gsub("I here", "I")
+        questObjective = questObjective:gsub("I wants", "I want")
+        questObjective = questObjective:gsub("I has", "I have")
+      
+        -- Add Prefix
+        if string.sub(questObjective, 1, 1) ~= "I" then
+            questObjective = objectiveVariations[math.random(#objectiveVariations)] .. questObjective        
+        end
+    end
+
+    -- Quest full text:
+    local questFullText = questText .. " " .. questObjective
+    
+    self:HandleQuestFrame(npcCreatureData, questFullText, 0)
 end
 
 function Skits:HandleQuestComplete()
@@ -582,12 +623,11 @@ function Skits:HandleQuestComplete()
     if not questText then
         return
     end       
-    
+
     self:HandleQuestFrame(npcCreatureData, questText, 0)
 end
 
-
-local function PlayerGossipAnswer(answerText) 
+local function GetPlayerGossipInfo()
     -- Update if player is the current    
     local unittoken = "player"
     local playerName = Skits_Utils:GetUnitTokenFullName(unittoken)
@@ -620,9 +660,39 @@ local function PlayerGossipAnswer(answerText)
         end
     end
 
+    return creatureData
+end
+
+
+local function PlayerGossipAnswer(answerText) 
+    local creatureData = GetPlayerGossipInfo()
+
     answerText = answerText:gsub("<.-?>", "")
     Skits:HandleQuestFrame(creatureData, answerText, 1)
 end
+
+
+local questVariations = {
+    {"I would like to talk about the ", " assignment."},  -- Formal
+    {"I have some questions about the ", " mission."}, -- Slightly formal
+    {"I'm here regarding the quest ", "."}, -- Neutral/formal
+    {"Let's discuss the ", " task."}, -- Neutral
+    {"So, about ", "..."}, -- Neutral/casual
+    {"Hey, I heard something about ", "."}, -- Casual
+    {"You got any info about the ", " quest?"}, -- Casual
+    {"Tell me more about ", "."}, -- Curious
+    {"What do you know about the topic ", "?"},
+}
+
+
+local function PlayerQuestSelected(questTitle) 
+    local creatureData = GetPlayerGossipInfo()
+
+    local idx = math.random(#questVariations)
+    local answerText = questVariations[idx][1] .. questTitle .. questVariations[idx][2]
+    Skits:HandleQuestFrame(creatureData, answerText, 1)
+end
+
 
 local acceptVariations = {
     "Ok.",
@@ -731,6 +801,35 @@ hooksecurefunc(C_GossipInfo, "SelectOptionByIndex", function(index, optionText)
     PlayerGossipAnswer(optionText) 
 end)
 
+hooksecurefunc(C_GossipInfo, "SelectAvailableQuest", function(questID)
+    local options = Skits_Options.db
+    if not options.event_npc_interact then
+        return 
+    end    
+
+    local questData = Skits.gossip.quests.byId[questID]
+    if not questData then
+        return
+    end
+
+    PlayerQuestSelected(questData.title) 
+end)
+
+hooksecurefunc(C_GossipInfo, "SelectActiveQuest", function(questID)
+    local options = Skits_Options.db
+    if not options.event_npc_interact then
+        return 
+    end    
+
+    local questData = Skits.gossip.quests.byId[questID]
+    if not questData then
+        return
+    end
+
+    PlayerQuestSelected(questData.title) 
+end)
+
+
 QuestFrameAcceptButton:HookScript("OnClick", function()    
     --print("Quest Accepted")    
     local options = Skits_Options.db
@@ -807,6 +906,7 @@ function Skits:HandleGossipShow()
         return
     end
 
+    -- Gossip Options
     local goptions = C_GossipInfo.GetOptions()
     if goptions then
         for i, goption in ipairs(goptions) do
@@ -816,13 +916,37 @@ function Skits:HandleGossipShow()
                 Skits.gossip.options.count = Skits.gossip.options.count + 1
             end
         end
+    end   
+     
+    -- Quest Options
+    local availableQuests = C_GossipInfo.GetAvailableQuests()
+    if availableQuests and #availableQuests > 0 then
+        for i, quest in ipairs(availableQuests) do
+            Skits.gossip.quests.byId[quest.questID] = {
+                id = quest.questID,
+                title = quest.title,
+            }
+        end
     end    
 
+    -- Get active quests
+    local activeQuests = C_GossipInfo.GetActiveQuests()
+    if activeQuests and #activeQuests > 0 then
+        for i, quest in ipairs(activeQuests) do
+            Skits.gossip.quests.byId[quest.questID] = {
+                id = quest.questID,
+                title = quest.title,
+            }        
+        end
+    end    
+
+    -- Creature Data
     local npcCreatureData = Skits:BuildCreatureDataOfToken("npc")
     if not npcCreatureData then
         return
     end
 
+    -- Gossip Text
     local gossipText = C_GossipInfo.GetText()
     if not gossipText then
         return
@@ -832,24 +956,11 @@ function Skits:HandleGossipShow()
 end
 
 function Skits:HandleQuestClosed()
-    self:ClearQueuedSpeaks(1)
-
     if self.speakerLastInteracting then
         local creatureData = self.speakerLastInteracting
         self.speakerLastInteracting = nil
-    
-        -- Cancel Speaker: We dont need this anymore, skit clicks can do this.
-        if false then
-            if creatureData.isPlayer == false then
-                if self.lastSpeaker == creatureData.name then
-                    if self.holdSpeakUntil <= GetTime() then
-                        -- No priority on current message
-                        -- Cancel Speaker
-                        Skits_Style:CancelSpeaker(creatureData)                
-                    end
-                end
-            end
-        end
+
+        Skits_SpeakQueue:RemoveByName(creatureData.name)
     end 
 end
 
@@ -874,7 +985,6 @@ function Skits:HandleNpcChatEvent(event, msg, sender, languageName, channelName,
         speed= 1.0,
     }
 
-    self:ClearQueuedSpeaks(1)
     self:ChatEvent(creatureData, textData, true)
 end
 
@@ -920,7 +1030,6 @@ function Skits:HandlePlayerChatEvent(event, msg, sender, languageName, channelNa
         speed = 1.0,
     }
 
-    self:ClearQueuedSpeaks(1)
     self:ChatEvent(creatureData, textData, true)
 end
 
@@ -937,7 +1046,6 @@ function Skits:ChatEvent(creatureData, textData, priority)
     else
         self.holdSpeakUntil = GetTime()
     end
-    self.displayDurationEnd = GetTime() + displayDuration
 
 	-- Store speak information in memory
     self:StoreInMemory(creatureData, textData.text, {r=r, g=g, b=b})

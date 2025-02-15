@@ -187,3 +187,45 @@ function Skits_Utils:GetUnitTokenFullName(unitToken)
     creatureName = creatureName .. "-" .. creatureServer
     return creatureName
 end
+
+function Skits_Utils:GetCurrentSubZone()
+    local mapID = C_Map.GetBestMapForUnit("player")
+    local mapName = nil
+    if mapID then
+        local mapInfo = C_Map.GetMapInfo(mapID)
+        if mapInfo and mapInfo.name then
+            mapName = mapInfo.name
+        end
+    end
+
+    return mapName
+end
+
+function Skits_Utils:GetAreaNames()
+    local mapID = C_Map.GetBestMapForUnit("player")
+    local areaNames = {}
+    if mapID then
+        local mapInfo = C_Map.GetMapInfo(mapID)
+        if mapInfo and mapInfo.name then
+            mapName = mapInfo.name
+        end
+
+        local position = C_Map.GetPlayerMapPosition(mapID, "player")
+        if position then
+            local areaIDs = C_MapExplorationInfo.GetExploredAreaIDsAtPosition(mapID, position)
+            if areaIDs and #areaIDs > 0 then
+                for _, areaID in ipairs(areaIDs) do
+                    local areaName = C_Map.GetAreaInfo(areaID) or nil
+
+                    if areaName then
+                        table.insert(areaNames, areaName)
+                    end
+                end
+            end
+
+        end        
+    end
+
+    return areaNames
+end
+

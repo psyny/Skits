@@ -225,6 +225,11 @@ end
 function Skits_Style:MouseClickAction(clickAction, skitStyle)
     if clickAction == "CLOSE" then
         Skits_Style:ShowSkitStyle(Skits_Style_Utils.enum_styles.HIDDEN, true)
+    elseif clickAction == "NEXT" then
+        local hadNext = Skits_SpeakQueue:ShowNext()
+        if hadNext == false then
+            Skits_Style:ShowSkitStyle(Skits_Style_Utils.enum_styles.HIDDEN, true)       
+        end
     elseif clickAction == "GOTOCOMBAT" then
         Skits_Style:ChangeToCombatWithDelayedExit(true, 30)
     end

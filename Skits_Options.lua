@@ -56,8 +56,8 @@ Skits_Options.defaults = {
 
         -- Style Warcraft
         style_warcraft_strata                                  = "TOOLTIP",
-        style_warcraft_click_left                              = "BLOCK",
-        style_warcraft_click_right                             = "CLOSE",        
+        style_warcraft_click_left                              = "NEXT",
+        style_warcraft_click_right                             = "BLOCK",        
         style_warcraft_speech_font_size                        = 12,
         style_warcraft_speech_font_name                        = "Friz Quadrata TT",        
         style_warcraft_speech_position_bottom_distance         = 200,
@@ -73,8 +73,8 @@ Skits_Options.defaults = {
 
         -- Style Tales
         style_tales_strata                           = "TOOLTIP",
-        style_tales_click_left                       = "GOTOCOMBAT",
-        style_tales_click_right                      = "CLOSE",           
+        style_tales_click_left                       = "NEXT",
+        style_tales_click_right                      = "GOTOCOMBAT",           
         style_tales_speech_font_size                 = 12,
         style_tales_speech_font_name                 = "Friz Quadrata TT",        
         style_tales_model_size                       = 500, 
@@ -85,8 +85,8 @@ Skits_Options.defaults = {
 
         -- Style Notification
         style_notification_strata                   = "TOOLTIP",
-        style_notification_click_left               = "BLOCK",
-        style_notification_click_right              = "CLOSE",          
+        style_notification_click_left               = "NEXT",
+        style_notification_click_right              = "BLOCK",          
         style_notification_instanceoptions          = {
             solo    = {
                 inherited                = false,
@@ -136,8 +136,8 @@ Skits_Options.defaults = {
 
         -- Style Departure
         style_departure_strata                           = "TOOLTIP",
-        style_departure_click_left                       = "GOTOCOMBAT",
-        style_departure_click_right                      = "CLOSE",          
+        style_departure_click_left                       = "NEXT",
+        style_departure_click_right                      = "GOTOCOMBAT",          
         style_departure_speech_font_size                 = 12,
         style_departure_speech_font_name                 = "Friz Quadrata TT",        
         style_departure_model_size                       = 500, 
@@ -178,6 +178,7 @@ local function GetClickOptions()
         ["PASS"] = "Pass click to UI below",
         ["BLOCK"] = "Block click",
         ["CLOSE"] = "Close skit",
+        ["NEXT"] = "Show next speech",
         ["GOTOCOMBAT"] = "Switch to Combat Style skit",
     }
 end
