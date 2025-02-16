@@ -410,25 +410,71 @@ function Skits:StoreInMemory(creatureData, text, color)
     end
 end
 
+local reGreetingVariations = {
+    "Hello again!",
+    "Welcome back!",
+    "Nice to see you again!",
+    "You're back.",
+    "Ah, we meet again.",
+    "Back so soon?",
+    "Good to see you again!",
+    "Look who's back!",
+    "Welcome back!",
+    "How’s it going?",
+}
+
+local questUpdateVariations = {
+    "Any updates on ",
+    "How is it going with ",
+    "Do you have any news about ",
+    "Have you made progress on ",
+    "What’s the status of ",
+    "How goes your task with ",
+    "Is there any progress on ",
+    "Can you update me on ",
+    "How are things with ",
+    "Tell me, what’s happening with ",
+}
+
 -- Quest Frames
-function Skits:HandleQuestFrame(creatureData, text, priority)
+function Skits:HandleQuestFrame(creatureData, mainText, extraText, priority)
     -- Check if speak was seen recently
     local npcName = Skits_Utils:GetUnitTokenFullName("npc")
-    local speakId = npcName .. creatureData.name .. #text .. text:sub(1, 10)
+    local speakId = npcName .. creatureData.name .. #mainText .. mainText:sub(1, 10)
 
     Skits_SpeakQueue:RemoveByName(npcName)
 
+    -- Repeat Status xxx
     local alreadySaw = self.speakerInteractRepeats[speakId]
     if alreadySaw then
-        return
-    end
+        if creatureData.isPlayer == false then
+            if Skits.speakerLastInteracting ~= nil and Skits.speakerLastInteracting.name == creatureData.name then
+                return
+            else
+                mainText = reGreetingVariations[math.random(#reGreetingVariations)]
+                extraText = ""
 
-    -- Register as seen
-    self.speakerInteractRepeats[speakId] = 1
-    self.speakerInteractRepeatsQueue:AddToHead(speakId)
+                local activeQuests = C_GossipInfo.GetActiveQuests()
+                if activeQuests and #activeQuests > 0 then
+                    mainText = mainText .. " " .. questUpdateVariations[math.random(#questUpdateVariations)]
+                    mainText = mainText .. activeQuests[math.random(#activeQuests)].title
+                end   
+            end
+        end
+    else
+        -- Register as seen
+        self.speakerInteractRepeats[speakId] = 1
+        self.speakerInteractRepeatsQueue:AddToHead(speakId)
+    end
 
     if creatureData.isPlayer == false then
         Skits.speakerLastInteracting = creatureData
+    end
+
+    -- Full text
+    local fullText = mainText
+    if #extraText > 0 then
+        fullText = fullText .. " " .. extraText
     end
 
     -- Trim speak ids
@@ -456,7 +502,7 @@ function Skits:HandleQuestFrame(creatureData, text, priority)
 
     -- Queue Speak
     local frameTextSpeed = 1.5
-    local phrases = Skits_Utils:TextIntoPhrases(text)
+    local phrases = Skits_Utils:TextIntoPhrases(fullText)
     local currSpeakText = ""
     for _, phrase in ipairs(phrases) do
         -- Concatenating will blow size?
@@ -508,7 +554,7 @@ function Skits:HandleQuestGreeting()
         return
     end       
 
-    self:HandleQuestFrame(npcCreatureData, questText, 0)
+    self:HandleQuestFrame(npcCreatureData, questText, "", 0)
 end
 
 local objectiveVariations = {
@@ -556,14 +602,14 @@ function Skits:HandleQuestDetail()
     
         -- Patterns for object (replace with "me")
         local objectPatterns = {
-            {" "..personName.."$", " me"}, -- Name at the end of a sentence
-            {" "..personName.."%.", " me."}, -- "John." → "me."
-            {" "..personName.."!", " me!"}, -- "John!" → "me!"
-            {" "..personName.."?", " me?"}, -- "John?" → "me?"
-            {" "..personName.." to", " me to"}, -- "to John" → "to me"
-            {" "..personName.." for", " me for"}, -- "for John" → "for me"
-            {" "..personName.." with", " me with"} -- "with John" → "with me"
-        }
+            {" "..personName.."%$", " me"}, -- Escape `$` (end of string marker)
+            {" "..personName.."%.", " me."}, -- Escape `.` (matches any character)
+            {" "..personName.."!", " me!"}, -- `!` does not need escaping in Lua patterns
+            {" "..personName.."%?", " me?"}, -- Escape `?` (pattern quantifier)
+            {" "..personName.." to", " me to"}, -- No special characters
+            {" "..personName.." for", " me for"}, -- No special characters
+            {" "..personName.." with", " me with"} -- No special characters
+        }        
     
         -- First, replace subjects with "I"
         for _, pattern in ipairs(subjectPatterns) do
@@ -603,11 +649,8 @@ function Skits:HandleQuestDetail()
             questObjective = objectiveVariations[math.random(#objectiveVariations)] .. questObjective        
         end
     end
-
-    -- Quest full text:
-    local questFullText = questText .. " " .. questObjective
     
-    self:HandleQuestFrame(npcCreatureData, questFullText, 0)
+    self:HandleQuestFrame(npcCreatureData, questText, questObjective, 0)
 end
 
 function Skits:HandleQuestComplete()
@@ -626,7 +669,7 @@ function Skits:HandleQuestComplete()
         return
     end       
 
-    self:HandleQuestFrame(npcCreatureData, questText, 0)
+    self:HandleQuestFrame(npcCreatureData, questText, "", 0)
 end
 
 local function GetPlayerGossipInfo()
@@ -670,7 +713,7 @@ local function PlayerGossipAnswer(answerText)
     local creatureData = GetPlayerGossipInfo()
 
     answerText = answerText:gsub("<.-?>", "")
-    Skits:HandleQuestFrame(creatureData, answerText, 1)
+    Skits:HandleQuestFrame(creatureData, answerText, "", 1)
 end
 
 
@@ -692,7 +735,7 @@ local function PlayerQuestSelected(questTitle)
 
     local idx = math.random(#questVariations)
     local answerText = questVariations[idx][1] .. questTitle .. questVariations[idx][2]
-    Skits:HandleQuestFrame(creatureData, answerText, 1)
+    Skits:HandleQuestFrame(creatureData, answerText, "", 1)
 end
 
 
@@ -954,7 +997,7 @@ function Skits:HandleGossipShow()
         return
     end    
 
-    self:HandleQuestFrame(npcCreatureData, gossipText, 0)
+    self:HandleQuestFrame(npcCreatureData, gossipText, "", 0)
 end
 
 function Skits:HandleQuestClosed()
