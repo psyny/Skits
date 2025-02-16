@@ -67,6 +67,12 @@ function Skits_Style:CancelSpeaker(creatureData)
     end
 end
 
+function Skits_Style:CloseSkit()
+    for _, style in pairs(self.ativeStyles) do
+        style:CloseSkit()
+    end
+end
+
 function Skits_Style:StyleToDisplay()
     local options = Skits_Options.db
 
@@ -224,14 +230,20 @@ end
 
 function Skits_Style:MouseClickAction(clickAction, skitStyle)
     if clickAction == "CLOSE" then
-        Skits_Style:ShowSkitStyle(Skits_Style_Utils.enum_styles.HIDDEN, true)
+        self:CloseSkit()
+
+    elseif clickAction == "HIDE" then
+        self:ShowSkitStyle(Skits_Style_Utils.enum_styles.HIDDEN, true)    
+
     elseif clickAction == "NEXT" then
         local hadNext = Skits_SpeakQueue:ShowNext()
         if hadNext == false then
-            Skits_Style:ShowSkitStyle(Skits_Style_Utils.enum_styles.HIDDEN, true)       
+            self:CloseSkit()    
         end
+
     elseif clickAction == "GOTOCOMBAT" then
-        Skits_Style:ChangeToCombatWithDelayedExit(true, 30)
+        self:ChangeToCombatWithDelayedExit(true, 30)
+
     end
 end
 

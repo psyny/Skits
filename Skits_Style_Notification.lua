@@ -347,6 +347,18 @@ function Skits_Style_Notification:msgExpire(msgData)
     Skits_UI_Utils:RemoveFrame(msgData.speakFrame.main) 
 end
 
+function Skits_Style_Notification:RemoveOldestMessages(maxMessages)
+    -- Trim old messages
+    local diff = #self.messages - maxMessages
+    if diff > 0 then
+        for i = 1, diff do
+            local oldMsg = self.messages[1]
+            self:msgExpire(oldMsg)
+            table.remove(self.messages, 1)
+        end
+    end
+end
+
 function Skits_Style_Notification:msgAdd(msgData)
     -- Move other messages up
     for _, otherMsgData in ipairs(self.messages) do
@@ -370,14 +382,7 @@ function Skits_Style_Notification:msgAdd(msgData)
     table.insert(self.messages, msgData)
 
     -- Trim old messages
-    local diff = #self.messages - self.maxMessages
-    if diff > 0 then
-        for i = 1, diff do
-            local oldMsg = self.messages[1]
-            self:msgExpire(oldMsg)
-            table.remove(self.messages, 1)
-        end
-    end
+    self:RemoveOldestMessages(self.maxMessages)
 end
 
 function Skits_Style_Notification:msgCreate(creatureData, textData, duration)
@@ -499,6 +504,7 @@ function Skits_Style_Notification:ResetLayout()
 end
 
 function Skits_Style_Notification:CloseSkit()
+    self:RemoveOldestMessages(0)
     self:HideSkit() 
 end
 

@@ -23,6 +23,8 @@ local isVisible = true
 
 -- AUX FUNCTIONS --------------------------------------------------------------------------------------------------------------
 local function setSpeakVisibility(msgData)
+    local options = Skits_Options.db
+
     if msgData then
         Skits_UI_Utils:ModelFrameSetVisible(msgData.modelFrame, isVisible)
 
@@ -486,6 +488,7 @@ function Skits_Style_Warcraft:ResetLayout()
 end
 
 function Skits_Style_Warcraft:CloseSkit()
+    self:RemoveOldestMessages(0)
     self:HideSkit() 
 end
 

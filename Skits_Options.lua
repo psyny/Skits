@@ -175,11 +175,12 @@ end
 
 local function GetClickOptions()
     return {
-        ["PASS"] = "Pass click to UI below",
-        ["BLOCK"] = "Block click",
-        ["CLOSE"] = "Close skit",
-        ["NEXT"] = "Show next speech",
-        ["GOTOCOMBAT"] = "Switch to Combat Style skit",
+        ["PASS"] = "Pass Click to UI Below",
+        ["BLOCK"] = "Block Clicks",
+        ["CLOSE"] = "Close Skit",
+        ["HIDE"] = "Hide Skit",
+        ["NEXT"] = "Show Next Speech",
+        ["GOTOCOMBAT"] = "Switch to Combat Style Skit",
     }
 end
 

@@ -595,6 +595,8 @@ function Skits:HandleQuestDetail()
         questObjective = questObjective:gsub("I here", "I")
         questObjective = questObjective:gsub("I wants", "I want")
         questObjective = questObjective:gsub("I has", "I have")
+        questObjective = questObjective:gsub("I's", personName .. "'s")
+        questObjective = questObjective:gsub("me's", personName .. "'s")
       
         -- Add Prefix
         if string.sub(questObjective, 1, 1) ~= "I" then
