@@ -444,11 +444,11 @@ function Skits:HandleQuestFrame(creatureData, mainText, extraText, priority)
 
     Skits_SpeakQueue:RemoveByName(npcName)
 
-    -- Repeat Status xxx
+    -- Repeat Status
     local alreadySaw = self.speakerInteractRepeats[speakId]
     if alreadySaw then
         if creatureData.isPlayer == false then
-            if Skits.speakerLastInteracting ~= nil and Skits.speakerLastInteracting.name == creatureData.name then
+            if self.speakerLastInteracting ~= nil and self.speakerLastInteracting.name == creatureData.name then
                 return
             else
                 mainText = reGreetingVariations[math.random(#reGreetingVariations)]
@@ -457,7 +457,7 @@ function Skits:HandleQuestFrame(creatureData, mainText, extraText, priority)
                 local activeQuests = C_GossipInfo.GetActiveQuests()
                 if activeQuests and #activeQuests > 0 then
                     mainText = mainText .. " " .. questUpdateVariations[math.random(#questUpdateVariations)]
-                    mainText = mainText .. activeQuests[math.random(#activeQuests)].title
+                    mainText = mainText .. "|cFFFFD100" .. activeQuests[math.random(#activeQuests)].title .. "|r"
                 end   
             end
         end
@@ -502,6 +502,10 @@ function Skits:HandleQuestFrame(creatureData, mainText, extraText, priority)
 
     -- Queue Speak
     local frameTextSpeed = 1.5
+    if creatureData.isPlayer == true then
+        frameTextSpeed = 3.0
+    end
+
     local phrases = Skits_Utils:TextIntoPhrases(fullText)
     local currSpeakText = ""
     for _, phrase in ipairs(phrases) do
@@ -718,15 +722,15 @@ end
 
 
 local questVariations = {
-    {"I would like to talk about the ", " assignment."},  -- Formal
-    {"I have some questions about the ", " mission."}, -- Slightly formal
-    {"I'm here regarding the quest ", "."}, -- Neutral/formal
+    {"About the ", " assignment."}, 
+    {"Tell me more about the ", " mission."},
+    {"I'm here regarding the ", " quest."}, -- Neutral/formal
     {"Let's discuss the ", " task."}, -- Neutral
     {"So, about ", "..."}, -- Neutral/casual
-    {"Hey, I heard something about ", "."}, -- Casual
-    {"You got any info about the ", " quest?"}, -- Casual
+    {"Hey, what is this ", " subject?"}, -- Casual
+    {"You got any info on ", " quest?"}, -- Casual
     {"Tell me more about ", "."}, -- Curious
-    {"What do you know about the topic ", "?"},
+    {"What do you know about ", "?"},
 }
 
 
@@ -734,7 +738,7 @@ local function PlayerQuestSelected(questTitle)
     local creatureData = GetPlayerGossipInfo()
 
     local idx = math.random(#questVariations)
-    local answerText = questVariations[idx][1] .. questTitle .. questVariations[idx][2]
+    local answerText = questVariations[idx][1] ..  "|cFFFFD100" .. questTitle .. "|r" .. questVariations[idx][2]
     Skits:HandleQuestFrame(creatureData, answerText, "", 1)
 end
 
@@ -957,7 +961,7 @@ function Skits:HandleGossipShow()
         for i, goption in ipairs(goptions) do
             if goption.gossipOptionID then
                 Skits.gossip.options.byOptionId[goption.gossipOptionID] = goption.name
-                Skits.gossip.options.byIndex[i-1] = goption.name
+                Skits.gossip.options.byIndex[goption.orderIndex or (i-1)] = goption.name
                 Skits.gossip.options.count = Skits.gossip.options.count + 1
             end
         end
@@ -1003,7 +1007,6 @@ end
 function Skits:HandleQuestClosed()
     if self.speakerLastInteracting then
         local creatureData = self.speakerLastInteracting
-        self.speakerLastInteracting = nil
 
         Skits_SpeakQueue:RemoveByName(creatureData.name)
     end 

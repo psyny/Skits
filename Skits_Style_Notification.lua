@@ -342,6 +342,7 @@ function Skits_Style_Notification:msgExpire(msgData)
     
     if msgData.expireHandler then
         msgData.expireHandler:Cancel() 
+        msgData.expireHandler = nil
     end
 
     Skits_UI_Utils:RemoveFrame(msgData.speakFrame.main) 
@@ -353,8 +354,10 @@ function Skits_Style_Notification:RemoveOldestMessages(maxMessages)
     if diff > 0 then
         for i = 1, diff do
             local oldMsg = self.messages[1]
-            self:msgExpire(oldMsg)
-            table.remove(self.messages, 1)
+            if oldMsg then
+                self:msgExpire(oldMsg)
+                table.remove(self.messages, 1)
+            end
         end
     end
 end

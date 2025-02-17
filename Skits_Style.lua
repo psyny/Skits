@@ -222,7 +222,7 @@ function Skits_Style:ChangeToCombatWithDelayedExit(onlyIfActive, delayExitTimer)
             self.inCombatDelayedHandler:Cancel()
         end
         local tOnlyIfActive = onlyIfActive
-        self.inCombatDelayedHandler = C_Timer.NewTimer(options.move_exit_exploration_for, function()        
+        self.inCombatDelayedHandler = C_Timer.NewTimer(delayExitTimer, function()        
             self:DelayedCombatExit(tOnlyIfActive)
         end) 
     end

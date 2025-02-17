@@ -1068,6 +1068,7 @@ function Skits_Style_Departure:CloseSkit()
 
     if self.controls.skitExpireHandler then
         self.controls.skitExpireHandler:Cancel()
+        self.controls.skitExpireHandler = nil
     end      
 
     self:HideSkit() 
