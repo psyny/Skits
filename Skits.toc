@@ -2,7 +2,7 @@
 ## Title: Skits
 ## Notes: Immersive chats.
 ## Author: Psyny
-## Version: 3.2.0
+## Version: 3.3.0
 ## DefaultState: enabled
 
 ## SavedVariables: SkitsDB
@@ -35,6 +35,7 @@ Skits_Deque.lua
 Skits_ID_Store.lua
 Skits_Utils.lua
 Skits_UI_Utils.lua
+Skits_QuestFrame.lua
 
 Skits.lua
 Skits_UI.lua
