@@ -27,9 +27,6 @@ Skits.lastSpeakerColor = 0
 Skits.speakerColorMapQueue = Skits_Deque:New()
 Skits.speakerColorMapQueueLimit = 30
 Skits.holdSpeakUntil = GetTime()
-Skits.speakerLastInteracting = nil
-Skits.speakerInteractRepeats = {}
-Skits.speakerInteractRepeatsQueue = Skits_Deque:New()
 
 -- Memory table for last 1000 speaks
 Skits.msgMemoryLimit = 1000
@@ -269,6 +266,7 @@ frame:RegisterEvent("CHAT_MSG_OFFICER")
 -- Quest Frames 
 frame:RegisterEvent("QUEST_GREETING")
 frame:RegisterEvent("QUEST_DETAIL")
+frame:RegisterEvent("QUEST_PROGRESS")
 frame:RegisterEvent("GOSSIP_SHOW")
 frame:RegisterEvent("QUEST_COMPLETE")
 frame:RegisterEvent("GOSSIP_CLOSED")
@@ -288,45 +286,53 @@ frame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 frame:RegisterEvent("PLAYER_ENTERING_WORLD")
 frame:RegisterEvent("PLAYER_STARTED_MOVING")
 
+-- Event-to-function mapping
+local eventHandlers = {
+    NAME_PLATE_UNIT_ADDED = function(event, ...) Skits:HandleNameplateAdded(event, ...) end,
+    NAME_PLATE_UNIT_REMOVED = function(event, ...) Skits:HandleNameplateRemoved(event, ...) end,
+    INSTANCE_ENCOUNTER_ENGAGE_UNIT = function(event, ...) Skits:HandleBossAppearance(event, ...) end,
+    PLAYER_TARGET_CHANGED = function(event, ...) Skits:HandleTargetChange(event, ...) end,
+    UPDATE_MOUSEOVER_UNIT = function(event, ...) Skits:HandleMouseoverChange(event, ...) end,
+    GROUP_ROSTER_UPDATE = function(event, ...) Skits:HandleRosterChange(event, ...) end,
+    TALKINGHEAD_REQUESTED = function(event, ...) Skits:HandleTalkingHead(event, ...) end,
+
+    -- Quest and Gossip Events
+    QUEST_GREETING = function(event, ...) Skits_QuestFrame:HandleQuestGreeting(event, ...) end,
+    QUEST_DETAIL = function(event, ...) Skits_QuestFrame:HandleQuestDetail(event, ...) end,
+    QUEST_PROGRESS = function(event, ...) Skits_QuestFrame:HandleQuestProgress(event, ...) end,
+    GOSSIP_SHOW = function(event, ...) Skits_QuestFrame:HandleGossipShow(event, ...) end,
+    QUEST_COMPLETE = function(event, ...) Skits_QuestFrame:HandleQuestComplete(event, ...) end,
+    GOSSIP_CLOSED = function(event, ...) Skits_QuestFrame:HandleQuestClosed(event, ...) end,
+    QUEST_FINISHED = function(event, ...) Skits_QuestFrame:HandleQuestClosed(event, ...) end,
+
+    -- Player State Changes
+    PLAYER_STARTED_MOVING = function(event, ...) Skits:HandlePlayerMoving(event, ...) end,
+    PLAYER_LOGOUT = function(event, ...) Skits:HandleLogout(event, ...) end,
+    PLAYER_LEAVING_WORLD = function(event, ...) Skits:HandleLogout(event, ...) end,
+
+    -- Situational Changes
+    PLAYER_REGEN_DISABLED = function(event, ...) Skits:HandleSituationChangeEvent(event, ...) end,
+    PLAYER_REGEN_ENABLED = function(event, ...) Skits:HandleSituationChangeEvent(event, ...) end,
+    ZONE_CHANGED_NEW_AREA = function(event, ...) Skits:HandleSituationChangeEvent(event, ...) end,
+    PLAYER_ENTERING_WORLD = function(event, ...) Skits:HandleSituationChangeEvent(event, ...) end,
+
+    -- NPC Chat Events
+    CHAT_MSG_MONSTER_SAY = function(event, ...) Skits:HandleNpcChatEvent(event, ...) end,
+    CHAT_MSG_MONSTER_YELL = function(event, ...) Skits:HandleNpcChatEvent(event, ...) end,
+    CHAT_MSG_MONSTER_WHISPER = function(event, ...) Skits:HandleNpcChatEvent(event, ...) end,
+    CHAT_MSG_MONSTER_PARTY = function(event, ...) Skits:HandleNpcChatEvent(event, ...) end,
+}
+
+-- Register event handler
 frame:SetScript("OnEvent", function(self, event, ...)
-    if event == "NAME_PLATE_UNIT_ADDED" then
-        Skits:HandleNameplateAdded(...)
-    elseif event == "NAME_PLATE_UNIT_REMOVED" then
-        Skits:HandleNameplateRemoved(...)        
-    elseif event == "INSTANCE_ENCOUNTER_ENGAGE_UNIT" then
-        Skits:HandleBossAppearance(...)
-    elseif event == "PLAYER_TARGET_CHANGED" then
-        Skits:HandleTargetChange(...)     
-    elseif event == "UPDATE_MOUSEOVER_UNIT" then
-        Skits:HandleMouseoverChange(...)
-    elseif event == "GROUP_ROSTER_UPDATE" then
-        Skits:HandleRosterChange(...)     
-    elseif event == "TALKINGHEAD_REQUESTED" then
-        Skits:HandleTalkingHead(...)  
-    elseif event == "QUEST_GREETING" then
-        Skits_QuestFrame:HandleQuestGreeting(...)             
-    elseif event == "QUEST_DETAIL" then
-        Skits_QuestFrame:HandleQuestDetail(...)       
-    elseif event == "GOSSIP_SHOW" then
-        Skits_QuestFrame:HandleGossipShow(...)     
-    elseif event == "QUEST_COMPLETE" then
-        Skits_QuestFrame:HandleQuestComplete(...)           
-    elseif event == "GOSSIP_CLOSED" then
-        Skits_QuestFrame:HandleQuestClosed(...)  
-    elseif event == "QUEST_FINISHED" then
-        Skits_QuestFrame:HandleQuestClosed(...)                              
-    elseif event == "PLAYER_STARTED_MOVING" then
-        Skits:HandlePlayerMoving(...)    
-    elseif event == "PLAYER_LOGOUT" or event == "PLAYER_LEAVING_WORLD" then
-        Skits:HandleLogout(event, ...)                        
-    elseif event == "PLAYER_REGEN_DISABLED" or event == "PLAYER_REGEN_ENABLED" or event == "ZONE_CHANGED_NEW_AREA" or event == "PLAYER_ENTERING_WORLD" then
-        Skits:HandleSituationChangeEvent(event, ...)            
-    elseif event == "CHAT_MSG_MONSTER_SAY" or event == "CHAT_MSG_MONSTER_YELL" or event == "CHAT_MSG_MONSTER_WHISPER" or event == "CHAT_MSG_MONSTER_PARTY" then
-        Skits:HandleNpcChatEvent(event, ...)                 
-    else      
+    local handler = eventHandlers[event]
+    if handler then
+        handler(event, ...) -- Call the function, passing all arguments
+    else 
         Skits:HandlePlayerChatEvent(event, ...)
     end
 end)
+
 
 -- Function to select color for the speaker dynamically
 function Skits:GetColorForSpeaker(name)
@@ -610,7 +616,7 @@ end
 
 
 -- Handle nameplate addition to update creatureIdMap
-function Skits:HandleNameplateAdded(unitToken)
+function Skits:HandleNameplateAdded(event, unitToken)
     self:SetCreatureDataOfToken(unitToken)
 
     if Skits_UI then
@@ -618,14 +624,14 @@ function Skits:HandleNameplateAdded(unitToken)
     end
 end
 
-function Skits:HandleNameplateRemoved(unitToken)
+function Skits:HandleNameplateRemoved(event, unitToken)
     if Skits_UI then
         Skits_UI:SpeakerMarker_NameplateRemoved(unitToken)
     end
 end
 
 -- Handle the appearance of the new boss
-function Skits:HandleBossAppearance()
+function Skits:HandleBossAppearance(event)
     -- Iterate over all potential boss frames (boss1, boss2, etc.)
     for i = 1, MAX_BOSS_FRAMES do
         -- Get the GUID of the boss unit (if available)
@@ -635,17 +641,17 @@ function Skits:HandleBossAppearance()
 end
 
 -- Handle the target change
-function Skits:HandleTargetChange()
+function Skits:HandleTargetChange(event)
     self:SetCreatureDataOfToken("target")
 end
 
 -- Handle the mouseover change
-function Skits:HandleMouseoverChange()
+function Skits:HandleMouseoverChange(event)
     self:SetCreatureDataOfToken("mouseover")
 end
 
 -- Handle the roster change (party or raid changes)
-function Skits:HandleRosterChange()
+function Skits:HandleRosterChange(event)
     if IsInRaid() then
         for i = 1, GetNumGroupMembers() do
             local unittoken = "raid" .. i
@@ -660,7 +666,7 @@ function Skits:HandleRosterChange()
 end
 
 -- Handle talking head appearance
-function Skits:HandleTalkingHead()
+function Skits:HandleTalkingHead(event)
     self:HandleTalkingHeadAux()
     C_Timer.After(0.1, function() Skits:HandleTalkingHeadAux() end)  
 end
@@ -719,7 +725,7 @@ function Skits:HandleSituationChangeEvent(event)
 end
 
 local debugCombat = true
-function Skits:HandlePlayerMoving()
+function Skits:HandlePlayerMoving(event)
     Skits_Style:SituationMoveExitExploration(true)
 
     if SkitsDB.debugMode and false then

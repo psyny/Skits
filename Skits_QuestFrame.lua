@@ -2,11 +2,15 @@
 
 Skits_QuestFrame = {}
 
+Skits_QuestFrame.speakerLastInteracting = nil
+Skits_QuestFrame.speakerInteractRepeats = {}
+Skits_QuestFrame.speakerInteractRepeatsQueue = Skits_Deque:New()
+
 local textColors = {
     yellow = "FFFFD100",
 }
 
-local getHighlightedText(text, color)
+local function getHighlightedText(text, color)
     if color == nil then
         color = textColors.yellow
     end
@@ -93,7 +97,7 @@ local reGreetingVariations = {
     "How’s it going?",
 }
 
-local questUpdateVariations = {
+local npcQuestUpdateVariations = {
     "Any updates on ",
     "How is it going with ",
     "Do you have any news about ",
@@ -107,16 +111,16 @@ local questUpdateVariations = {
 }
 
 local objectiveVariations = {
-    {"It seems I have to "},
-    {"So, I should "},
-    {"Guess I need to "},
-    {"Looks like I have to "},
-    {"I suppose I must "},
-    {"Oh, I need to "},
-    {"Alright, I have to "},
-    {"Seems like my job is to "},
-    {"Well, time to "},
-    {"Alright then, I should "}
+    "It seems I have to ",
+    "So, I should ",
+    "Guess I need to ",
+    "Looks like I have to ",
+    "I suppose I must ",
+    "Oh, I need to ",
+    "Alright, I have to ",
+    "Seems like my job is to ",
+    "Well, time to ",
+    "Alright then, I should ",
 }
 
 local newQuestVariations = {
@@ -131,7 +135,7 @@ local newQuestVariations = {
     {"What do you know about ", "?"},
 }
 
-local questUpdateVariations = {
+local playerQuestUpdateVariations = {
     {"Let's talk about ", "."},
     {"Got news on ", "."},
     {"Quick update on ", "."},
@@ -173,7 +177,7 @@ hooksecurefunc('SelectGossipOption', function(index, text, confirm)
         return
     end
 
-    Skits_QuestFrame:PlayerQuestTalk(optionText) 
+    Skits_QuestFrame:PlayerQuestTalk(optionText, true)    
 end)   
 
 hooksecurefunc(C_GossipInfo, "SelectOption", function(optionID)
@@ -187,7 +191,7 @@ hooksecurefunc(C_GossipInfo, "SelectOption", function(optionID)
         return
     end
 
-    Skits_QuestFrame:PlayerQuestTalk(optionText) 
+    Skits_QuestFrame:PlayerQuestTalk(optionText, true)    
 end)
 
 hooksecurefunc(C_GossipInfo, "SelectOptionByIndex", function(index, optionText)
@@ -201,7 +205,7 @@ hooksecurefunc(C_GossipInfo, "SelectOptionByIndex", function(index, optionText)
         return
     end
 
-    Skits_QuestFrame:PlayerQuestTalk(optionText) 
+    Skits_QuestFrame:PlayerQuestTalk(optionText, true)    
 end)
 
 hooksecurefunc(C_GossipInfo, "SelectAvailableQuest", function(questID)
@@ -243,7 +247,7 @@ QuestFrameAcceptButton:HookScript("OnClick", function()
     end    
 
     local playerSay = acceptVariations[math.random(#acceptVariations)]  
-    Skits_QuestFrame:PlayerQuestTalk(playerSay)  
+    Skits_QuestFrame:PlayerQuestTalk(playerSay, true)    
 end)
 
 QuestFrameDeclineButton:HookScript("OnClick", function()
@@ -254,7 +258,7 @@ QuestFrameDeclineButton:HookScript("OnClick", function()
     end    
 
     local playerSay = declineVariations[math.random(#declineVariations)]  
-    Skits_QuestFrame:PlayerQuestTalk(playerSay)      
+    Skits_QuestFrame:PlayerQuestTalk(playerSay, true)    
 end)
 
 QuestFrameGoodbyeButton:HookScript("OnClick", function()
@@ -265,7 +269,7 @@ QuestFrameGoodbyeButton:HookScript("OnClick", function()
     end    
 
     local playerSay = goodbyeVariations[math.random(#goodbyeVariations)]  
-    Skits_QuestFrame:PlayerQuestTalk(playerSay)          
+    Skits_QuestFrame:PlayerQuestTalk(playerSay, true)            
 end)
 
 QuestFrameCloseButton:HookScript("OnClick", function()
@@ -276,7 +280,7 @@ QuestFrameCloseButton:HookScript("OnClick", function()
     end    
 
     local playerSay = goodbyeVariations[math.random(#goodbyeVariations)]  
-    Skits_QuestFrame:PlayerQuestTalk(playerSay)      
+    Skits_QuestFrame:PlayerQuestTalk(playerSay, true)       
 end)
 
 GossipFrame.GreetingPanel.GoodbyeButton:HookScript("OnClick", function()
@@ -287,7 +291,7 @@ GossipFrame.GreetingPanel.GoodbyeButton:HookScript("OnClick", function()
     end    
 
     local playerSay = goodbyeVariations[math.random(#goodbyeVariations)]  
-    Skits_QuestFrame:PlayerQuestTalk(playerSay)      
+    Skits_QuestFrame:PlayerQuestTalk(playerSay, true)        
 end)
 
 GossipFrameCloseButton:HookScript("OnClick", function()
@@ -298,7 +302,7 @@ GossipFrameCloseButton:HookScript("OnClick", function()
     end    
         
     local playerSay = goodbyeVariations[math.random(#goodbyeVariations)]  
-    Skits_QuestFrame:PlayerQuestTalk(playerSay)      
+    Skits_QuestFrame:PlayerQuestTalk(playerSay, true)      
 end)
 
 
@@ -306,15 +310,15 @@ end)
 -- PLAYER RELATED
 -- -----------------------------------------------------------------
 
-function Skits_QuestFrame:PlayerQuestTalk(text) -- yyy
+function Skits_QuestFrame:PlayerQuestTalk(text, clearQueue)
     local creatureData = Skits:GetPlayerCreatureData()
 
     text = text:gsub("<.-?>", "")
-    self:HandleQuestFrame(creatureData, text, "", 1)
+    self:HandleQuestFrame(creatureData, text, "", 1, clearQueue)
 end
 
 function Skits_QuestFrame:PlayerQuestSelected(questTitle, activeQuest, isCompleted) 
-    local creatureData = GetPlayerCreatureData()
+    local creatureData = Skits:GetPlayerCreatureData()
 
     local answerText = questTitle
     if activeQuest == true then
@@ -322,28 +326,30 @@ function Skits_QuestFrame:PlayerQuestSelected(questTitle, activeQuest, isComplet
             local idx = math.random(#questTurnInVariations)
             answerText = questTurnInVariations[idx][1] .. getHighlightedText(questTitle) .. questTurnInVariations[idx][2]
         else
-            local idx = math.random(#questUpdateVariations)
-            answerText = questUpdateVariations[idx][1] .. getHighlightedText(questTitle) .. questUpdateVariations[idx][2]
+            local idx = math.random(#playerQuestUpdateVariations)
+            answerText = playerQuestUpdateVariations[idx][1] .. getHighlightedText(questTitle) .. playerQuestUpdateVariations[idx][2]
         end
     else
         local idx = math.random(#newQuestVariations)
         answerText = newQuestVariations[idx][1] .. getHighlightedText(questTitle) .. newQuestVariations[idx][2]
     end
 
-    self:HandleQuestFrame(creatureData, answerText, "", 1)
+    self:HandleQuestFrame(creatureData, answerText, "", 1, true)
 end
 
 -- -----------------------------------------------------------------
--- QUEST FRAME RELATED
+-- MAIN FUNC
 -- -----------------------------------------------------------------
 
 -- Quest Frames
-function Skits_QuestFrame:HandleQuestFrame(creatureData, mainText, extraText, priority)
+function Skits_QuestFrame:HandleQuestFrame(creatureData, mainText, extraText, priority, clearQueue)
     -- Check if speak was seen recently
     local npcName = Skits_Utils:GetUnitTokenFullName("npc") or "<no npc>"
     local speakId = npcName .. creatureData.name .. #mainText .. mainText:sub(1, 10)
 
-    Skits_SpeakQueue:RemoveByName(npcName)
+    if clearQueue == true then
+        Skits_SpeakQueue:RemoveByName(npcName)
+    end
 
     -- Repeat Status
     local alreadySaw = self.speakerInteractRepeats[speakId]
@@ -357,7 +363,7 @@ function Skits_QuestFrame:HandleQuestFrame(creatureData, mainText, extraText, pr
 
                 local activeQuests = C_GossipInfo.GetActiveQuests()
                 if activeQuests and #activeQuests > 0 then
-                    mainText = mainText .. " " .. questUpdateVariations[math.random(#questUpdateVariations)]
+                    mainText = mainText .. " " .. npcQuestUpdateVariations[math.random(#npcQuestUpdateVariations)]
                     mainText = mainText .. getHighlightedText(activeQuests[math.random(#activeQuests)].title)
                 end   
             end
@@ -369,7 +375,7 @@ function Skits_QuestFrame:HandleQuestFrame(creatureData, mainText, extraText, pr
     end
 
     if creatureData.isPlayer == false then
-        Skits.speakerLastInteracting = creatureData
+        self.speakerLastInteracting = creatureData
     end
 
     -- Full text
@@ -390,7 +396,7 @@ function Skits_QuestFrame:HandleQuestFrame(creatureData, mainText, extraText, pr
     end    
 
     -- Queue Pause
-    local timeToEndCurrentMessage = self.holdSpeakUntil - GetTime()
+    local timeToEndCurrentMessage = Skits.holdSpeakUntil - GetTime()
     if timeToEndCurrentMessage < 0 then
         timeToEndCurrentMessage = 0
     end
@@ -443,6 +449,10 @@ function Skits_QuestFrame:HandleQuestFrame(creatureData, mainText, extraText, pr
     end
 end
 
+-- -----------------------------------------------------------------
+-- EVENT HANDLERS
+-- -----------------------------------------------------------------
+
 function Skits_QuestFrame:GetQuestGiverCreatureData()
     local giverName = ""
 
@@ -473,7 +483,7 @@ function Skits_QuestFrame:GetQuestGiverCreatureData()
     return creatureData
 end
 
-function Skits_QuestFrame:HandleQuestGreeting()
+function Skits_QuestFrame:HandleQuestGreeting(event)
     local options = Skits_Options.db
     if not options.event_npc_interact then
         return 
@@ -489,10 +499,10 @@ function Skits_QuestFrame:HandleQuestGreeting()
         return
     end       
 
-    self:HandleQuestFrame(creatureData, questText, "", 0)
+    self:HandleQuestFrame(creatureData, questText, "", 0, true)
 end
 
-function Skits_QuestFrame:HandleQuestDetail()
+function Skits_QuestFrame:HandleQuestDetail(event)
     local options = Skits_Options.db
     if not options.event_npc_interact then
         return 
@@ -506,7 +516,7 @@ function Skits_QuestFrame:HandleQuestDetail()
     local questTitle = GetTitleText()
 
     local questText = GetQuestText()
-    if not questText then
+    if not questText then    
         return
     end       
 
@@ -530,19 +540,38 @@ function Skits_QuestFrame:HandleQuestDetail()
             end
         end
 
-        questObjective = "*'" .. objectiveVariations[math.random(#objectiveVariations)] .. questObjective .. "'*"
+        questObjective = "<" .. objectiveVariations[math.random(#objectiveVariations)] .. questObjective .. ">"
     end
 
     -- NPC Talk (quest text)   
-    self:HandleQuestFrame(creatureData, questText, questObjective, 0)
+    self:HandleQuestFrame(creatureData, questText, "", 0, true)
 
     -- Player Talk (quest objective)
     if #questObjective > 0 then
-        Skits_QuestFrame:PlayerQuestTalk(questObjective) 
+        Skits_QuestFrame:PlayerQuestTalk(questObjective, false) 
     end
 end
 
-function Skits_QuestFrame:HandleQuestComplete()
+function Skits_QuestFrame:HandleQuestProgress(event)
+    local options = Skits_Options.db
+    if not options.event_npc_interact then
+        return 
+    end    
+
+    local creatureData = self:GetQuestGiverCreatureData()
+    if not creatureData then
+        return
+    end
+
+    local questText = GetProgressText()
+    if not questText then
+        return
+    end       
+
+    self:HandleQuestFrame(creatureData, questText, "", 0, true)
+end
+
+function Skits_QuestFrame:HandleQuestComplete(event)
     local options = Skits_Options.db
     if not options.event_npc_interact then
         return 
@@ -558,10 +587,10 @@ function Skits_QuestFrame:HandleQuestComplete()
         return
     end       
 
-    self:HandleQuestFrame(creatureData, questText, "", 0)
+    self:HandleQuestFrame(creatureData, questText, "", 0, true)
 end
 
-function Skits_QuestFrame:HandleGossipShow()
+function Skits_QuestFrame:HandleGossipShow(event)
     Skits.gossip.options.count = 0
     Skits.gossip.options.byIndex = {}
     Skits.gossip.options.byOptionId = {}
@@ -617,10 +646,10 @@ function Skits_QuestFrame:HandleGossipShow()
         return
     end    
 
-    self:HandleQuestFrame(creatureData, gossipText, "", 0)
+    self:HandleQuestFrame(creatureData, gossipText, "", 0, true)
 end
 
-function Skits_QuestFrame:HandleQuestClosed()
+function Skits_QuestFrame:HandleQuestClosed(event)
     if self.speakerLastInteracting then
         local creatureData = self.speakerLastInteracting
 
