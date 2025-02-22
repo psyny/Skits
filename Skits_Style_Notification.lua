@@ -12,11 +12,12 @@ Skits_Style_Notification.portraitSize = 50
 Skits_Style_Notification.textAreaWidth = 300
 Skits_Style_Notification.sideDist = 50
 Skits_Style_Notification.topDist = 50
-Skits_Style_Notification.maxMessages = 3
 Skits_Style_Notification.messageGap = 10
 Skits_Style_Notification.speechDurationMax = 10
 
+Skits_Style_Notification.maxMessages = 3
 Skits_Style_Notification.messages = {}
+Skits_Style_Notification.nextMsgIdx = 1
 Skits_Style_Notification.lastMsgTimestamp = GetTime()
 Skits_Style_Notification.remainingDuration = 0
 
@@ -53,14 +54,14 @@ local function defineDatasetDb()
     end
 end
 
-local function setSpeakVisibility(speakFrame)
+local function setSpeakVisibility(speakFrame, toVisible)
     local options = Skits_Options.db
 
     if speakFrame then
-        Skits_UI_Utils:ModelFrameSetVisible(speakFrame.portrait, isVisible)
-        Skits_UI_Utils:ModelFrameSetVisible(speakFrame.portraitBg, isVisible)
+        Skits_UI_Utils:ModelFrameSetVisible(speakFrame.portrait, toVisible)
+        Skits_UI_Utils:ModelFrameSetVisible(speakFrame.portraitBg, toVisible)
 
-        if isVisible then
+        if toVisible then
             speakFrame.content:Show()
             speakFrame.bg.bg:Show()
             if speakFrame.portraitLoaderData then
@@ -68,14 +69,14 @@ local function setSpeakVisibility(speakFrame)
             end
             if speakFrame.portraitBgLoaderData then
                 Skits_UI_Utils:LoadReAppeared(speakFrame.portraitBgLoaderData)     
-            end                   
+            end              
         else
             speakFrame.content:Hide()
             speakFrame.bg.bg:Hide()
         end
 
         -- Click Behavior
-        if isVisible and (options.style_notification_click_left ~= "PASS" or options.style_notification_click_right ~= "PASS") then
+        if toVisible and (options.style_notification_click_left ~= "PASS" or options.style_notification_click_right ~= "PASS") then
             speakFrame.content:EnableMouse(true)
 
             local function OnClick(Skits_Style_Notification, button)
@@ -151,13 +152,31 @@ function Skits_Style_Notification:ResetLayouts()
     self.mainFrame:SetFrameStrata(options.style_notification_strata)
     self.mainFrame:EnableMouse(false) -- Allow clicks to pass through
     self.mainFrame:EnableMouseWheel(false) -- Ignore mouse wheel events
+
+    -- Create Message Slots
+    for _, msg in ipairs(self.messages) do
+        self:msgExpire(msg)
+    end
+
+    self.messages = {}
+    self.lastMsgTimestamp = GetTime()
+    self.remainingDuration = 0    
+    self.nextMsgIdx = 1
+
+    for i = 1, self.maxMessages do
+        local msgData = self:msgCreate()
+        table.insert(self.messages, msgData)
+    end
 end
 
 function Skits_Style_Notification:CreateSpeakFrame(creatureData, text, textColor, parameters)
+    local internalPositionData = {}
+
     local speakFrame = {
         creatureData = creatureData,
         textData = textData,
         parameters = parameters,
+        internalPositionData = internalPositionData,
         main = nil,
         content = nil,
         bg = nil,             
@@ -170,46 +189,47 @@ function Skits_Style_Notification:CreateSpeakFrame(creatureData, text, textColor
     }
 
     -- FRAMES AND POSITIONS (1) -------------------------------------------------------------------------------------------
-    local ancorRef1 = "BOTTOMLEFT"
-    local ancorRef2 = "BOTTOMLEFT"
-    local xfactor = 1
+    internalPositionData.ancorRef1 = "BOTTOMLEFT"
+    internalPositionData.ancorRef2 = "BOTTOMLEFT"
+    internalPositionData.xfactor = 1
     if parameters.onRight then
-        ancorRef1 = "BOTTOMRIGHT"
-        ancorRef2 = "BOTTOMRIGHT"
-        xfactor = -1
+        internalPositionData.ancorRef1 = "BOTTOMRIGHT"
+        internalPositionData.ancorRef2 = "BOTTOMRIGHT"
+        internalPositionData.xfactor = -1
     end
+    internalPositionData.totalHeight = parameters.portraitSize
 
     -- Main Frame: Container of the frame
     speakFrame.main = CreateFrame("Frame", nil, parameters.parent)
     speakFrame.main:SetSize(parameters.portraitSize, parameters.portraitSize)
-    speakFrame.main:SetPoint(ancorRef1, parameters.parent, ancorRef2, 0, 0)
+    speakFrame.main:SetPoint(internalPositionData.ancorRef1, parameters.parent, internalPositionData.ancorRef2, 0, 0)
 
     -- Portrait frame
-    local portraitYoffset = 5
+    internalPositionData.portraitYoffset = 5
     speakFrame.portrait = CreateFrame("PlayerModel", nil, speakFrame.main)
     Skits_UI_Utils:ModelFrameSetTargetSize(speakFrame.portrait, parameters.portraitSize, parameters.portraitSize)
     Skits_UI_Utils:ModelFrameSetVisible(speakFrame.portrait, isVisible) 
-    speakFrame.portrait:SetPoint(ancorRef1, speakFrame.main, ancorRef2, 0, portraitYoffset)    
+    speakFrame.portrait:SetPoint(internalPositionData.ancorRef1, speakFrame.main, internalPositionData.ancorRef2, 0, internalPositionData.portraitYoffset)    
 
     -- Portrait bg frame
-    local portraitBgOffsetY = math.max(parameters.portraitSize * 0.05, 3)
+    internalPositionData.portraitBgOffsetY = math.max(parameters.portraitSize * 0.05, 3)
     speakFrame.portraitBg = CreateFrame("PlayerModel", nil, speakFrame.main)
     Skits_UI_Utils:ModelFrameSetTargetSize(speakFrame.portraitBg, parameters.portraitSize, parameters.portraitSize)
     Skits_UI_Utils:ModelFrameSetVisible(speakFrame.portraitBg, isVisible)
-    speakFrame.portraitBg:SetPoint("BOTTOMLEFT", speakFrame.portrait, "BOTTOMLEFT", 0, portraitBgOffsetY)    
+    speakFrame.portraitBg:SetPoint("BOTTOMLEFT", speakFrame.portrait, "BOTTOMLEFT", 0, internalPositionData.portraitBgOffsetY)    
 
     -- Content Frame: Frame contents
-    local textAreaWidth = parameters.textAreaWidth 
-    local contentOffsetX = (parameters.portraitSize + 10 ) * xfactor
+    internalPositionData.textAreaWidth = parameters.textAreaWidth 
+    internalPositionData.contentOffsetX = (parameters.portraitSize + 10 ) * internalPositionData.xfactor
     speakFrame.content = CreateFrame("Frame", nil, speakFrame.main)
-    speakFrame.content:SetSize(textAreaWidth, parameters.portraitSize)
-    speakFrame.content:SetPoint(ancorRef1, speakFrame.main, ancorRef2, contentOffsetX, portraitYoffset)
+    speakFrame.content:SetSize(internalPositionData.textAreaWidth, parameters.portraitSize)
+    speakFrame.content:SetPoint(internalPositionData.ancorRef1, speakFrame.main, internalPositionData.ancorRef2, internalPositionData.contentOffsetX, internalPositionData.portraitYoffset)
 
     -- Text: Ele
     speakFrame.textEle = speakFrame.content:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    speakFrame.textEle:SetPoint(ancorRef1, speakFrame.content, ancorRef2, 0, 0)
+    speakFrame.textEle:SetPoint(internalPositionData.ancorRef1, speakFrame.content, internalPositionData.ancorRef2, 0, 0)
     speakFrame.textEle:SetFont(parameters.font, parameters.fontSize)
-    speakFrame.textEle:SetSize(textAreaWidth, 500)
+    speakFrame.textEle:SetSize(internalPositionData.textAreaWidth, 500)
     speakFrame.textEle:SetJustifyV("BOTTOM")
     if parameters.onRight then
         speakFrame.textEle:SetJustifyH("RIGHT")
@@ -219,27 +239,37 @@ function Skits_Style_Notification:CreateSpeakFrame(creatureData, text, textColor
     speakFrame.textEle:SetWordWrap(true)
 
     -- CONTENTS, SIZES, and POSITIONS (2) -------------------------------------------------------------------------------------------
+    self:SetSpeakFrameData(speakFrame, creatureData, text, textColor) 
+
+    return speakFrame
+end
+
+function Skits_Style_Notification:SetSpeakFrameData(speakFrame, creatureData, text, textColor) 
+    local parameters = speakFrame.parameters
+    local internalPositionData = speakFrame.internalPositionData
+
+    -- CONTENTS, SIZES, and POSITIONS (2) -------------------------------------------------------------------------------------------
     speakFrame.textEle:SetText(text)
     speakFrame.textEle:SetTextColor(textColor.r, textColor.g, textColor.b)
     
     local textHeight = speakFrame.textEle:GetStringHeight()
     local textWidth = math.min(parameters.textAreaWidth, speakFrame.textEle:GetStringWidth())
-    local textAreaHeight = textHeight + (portraitYoffset * 2)
-    textAreaWidth = textWidth
+    internalPositionData.textAreaHeight = textHeight + (internalPositionData.portraitYoffset * 2)
+    internalPositionData.textAreaWidth = textWidth
 
     -- Bg:
     local fadedFrameParameters = {
         parent = speakFrame.main,
         alpha = 0.6,
-        contentHeight = textAreaHeight,
-        contentWidth = textAreaWidth,
+        contentHeight = internalPositionData.textAreaHeight,
+        contentWidth = internalPositionData.textAreaWidth,
         leftSize = 100,
         rightSize = 100,
         topSize = 2,
         bottomSize = 2,
     }   
     speakFrame.bg = Skits_UI_Utils:CreateFadedFrame(fadedFrameParameters) 
-    speakFrame.bg.main:SetPoint(ancorRef1, speakFrame.main, ancorRef2, contentOffsetX, 0) 
+    speakFrame.bg.main:SetPoint(internalPositionData.ancorRef1, speakFrame.main, internalPositionData.ancorRef2, internalPositionData.contentOffsetX, 0) 
 
     -- Organize Levels -------------------------------------------------------------------------------------------
     speakFrame.content:SetFrameLevel(100)
@@ -269,7 +299,6 @@ function Skits_Style_Notification:CreateSpeakFrame(creatureData, text, textColor
         callback = nil,
     }
     speakFrame.portraitLoaderData = Skits_UI_Utils:LoadModel(creatureData, portraitDisplayOptions, portraitLoadOptions)
-    speakFrame.portrait:Show()
 
     -- Portrait Bg Frame: Load Model
     -- TODO: It would make more sense if we try to load this model as part of the portrait callback...
@@ -279,12 +308,10 @@ function Skits_Style_Notification:CreateSpeakFrame(creatureData, text, textColor
         callback = nil,
     }
     speakFrame.portraitBgLoaderData = Skits_UI_Utils:LoadModel(creatureData, portraitBgDisplayOptions, portraitBgLoadOptions)
-    speakFrame.portraitBg:Show()
 
     -- Finals    
-    speakFrame.height = math.max(parameters.portraitSize + portraitYoffset, textAreaHeight)
-
-    return speakFrame
+    internalPositionData.totalHeight = math.max(parameters.portraitSize + internalPositionData.portraitYoffset, internalPositionData.textAreaHeight)
+    speakFrame.height = internalPositionData.totalHeight
 end
 
 -- MSG add --------------------------------------------------------------------------------------------------------------
@@ -307,6 +334,13 @@ local function msgPositionUpdate(self, delta)
     if ending then
         self:SetScript("OnUpdate", nil)
     end
+end
+
+function Skits_Style_Notification:msgMoveToBase(msgData)
+    local up = msgData.positionData
+    up.ty = 0
+    up.oy = 0
+    msgData.speakFrame.main:SetPoint(up.anchor, self.mainFrame, up.anchor, up.x, up.ty)
 end
 
 function Skits_Style_Notification:msgMoveUp(msgData, ammount)
@@ -345,28 +379,34 @@ function Skits_Style_Notification:msgExpire(msgData)
         msgData.expireHandler = nil
     end
 
-    Skits_UI_Utils:RemoveFrame(msgData.speakFrame.main) 
+    msgData.expired = true
+    setSpeakVisibility(msgData.speakFrame, false)
 end
 
-function Skits_Style_Notification:RemoveOldestMessages(maxMessages)
-    -- Trim old messages
-    local diff = #self.messages - maxMessages
-    if diff > 0 then
-        for i = 1, diff do
-            local oldMsg = self.messages[1]
-            if oldMsg then
-                self:msgExpire(oldMsg)
-                table.remove(self.messages, 1)
+function Skits_Style_Notification:msgAdd(creatureData, textData, duration)
+    -- Build next message data 
+    local msgData = self.messages[self.nextMsgIdx]
+    self:msgExpire(msgData)
+    msgData.expired = false
+    msgData.duration = duration    
+    msgData.text = textData.text
+    setSpeakVisibility(msgData.speakFrame, false)    
+
+    self:SetSpeakFrameData(msgData.speakFrame, creatureData, textData.text, textData) 
+    local newMsgHeight = msgData.speakFrame.internalPositionData.totalHeight
+
+    -- Move other messages up
+    for otherIdx, otherMsgData in ipairs(self.messages) do
+        if otherMsgData.expired == false then
+            if otherIdx ~= self.nextMsgIdx  then
+                self:msgMoveUp(otherMsgData, newMsgHeight + self.messageGap)
             end
         end
     end
-end
 
-function Skits_Style_Notification:msgAdd(msgData)
-    -- Move other messages up
-    for _, otherMsgData in ipairs(self.messages) do
-        self:msgMoveUp(otherMsgData, msgData.speakFrame.height + self.messageGap)
-    end
+    -- Reposition new message
+    self:msgMoveToBase(msgData)
+    setSpeakVisibility(msgData.speakFrame, isVisible)
 
     -- Set current message expire timer
     if msgData.expireHandler then
@@ -375,21 +415,31 @@ function Skits_Style_Notification:msgAdd(msgData)
     local tMsgData = msgData  
     msgData.expireHandler = C_Timer.NewTimer(msgData.duration, function()        
         self:msgExpire(tMsgData)
-    end)
+    end)    
 
-    -- Show current message
-    msgData.speakFrame.main:Show()
-    setSpeakVisibility(msgData.speakFrame)
-
-    -- Add it to the frame
-    table.insert(self.messages, msgData)
-
-    -- Trim old messages
-    self:RemoveOldestMessages(self.maxMessages)
+    -- Update next msg idx
+    self.nextMsgIdx = self.nextMsgIdx + 1
+    if self.nextMsgIdx > self.maxMessages then
+        self.nextMsgIdx = 1
+    end
 end
 
-function Skits_Style_Notification:msgCreate(creatureData, textData, duration)
-    -- Create Speak Frame
+function Skits_Style_Notification:msgCreate()
+    -- Dummy Text and creature data
+    local textData = {
+        text = "",   
+        speed = 1.0,
+        duration = 0,
+        r = 1,
+        g = 1,
+        b = 1,        
+    }    
+    local creatureData = {
+        name = "dummy",
+        displayId = Skits_Style_Utils.fallbackId.m,
+    }
+
+    -- Create Speak Frame    
     local parameters = {
         parent = self.mainFrame,
         onRight = self.isOnRight,
@@ -408,9 +458,10 @@ function Skits_Style_Notification:msgCreate(creatureData, textData, duration)
 
     local msgData = {
         speakFrame = speakFrame,
-        duration = duration,
+        duration = 0,
         text = textData.text,
         expireHandler = nil,
+        expired = true,
         positionData = {
             x = 0,
             oy = 0,
@@ -422,7 +473,10 @@ function Skits_Style_Notification:msgCreate(creatureData, textData, duration)
     }
     speakFrame.main.msgData = msgData
 
-    self:msgAdd(msgData)
+    -- Hide Message
+    setSpeakVisibility(msgData.speakFrame, false)
+
+    return msgData
 end
 
 -- Skit General Visibility Control --------------------------------------------------------
@@ -439,8 +493,12 @@ local function HideSkit(forceHide)
     -- Hide all messages
     for _, msgData in ipairs(Skits_Style_Notification.messages) do
         local speakFrame = msgData.speakFrame
-        setSpeakVisibility(speakFrame)
-    end   
+        local toVisible = false
+        if msgData.expired == false then
+            toVisible = isVisible
+        end
+        setSpeakVisibility(speakFrame, toVisible)
+    end    
 
     return
 end
@@ -458,7 +516,11 @@ local function ShowSkit(forceShow)
     -- Show all messages
     for _, msgData in ipairs(Skits_Style_Notification.messages) do
         local speakFrame = msgData.speakFrame
-        setSpeakVisibility(speakFrame)
+        local toVisible = false
+        if msgData.expired == false then
+            toVisible = isVisible
+        end
+        setSpeakVisibility(speakFrame, toVisible)
     end    
 
     return
@@ -497,7 +559,7 @@ function Skits_Style_Notification:NewSpeak(creatureData, textData)
     self.remainingDuration = adjustedDuration
 
     -- Create Message
-    self:msgCreate(creatureData, textData, adjustedDuration)
+    self:msgAdd(creatureData, textData, adjustedDuration)
 
     ShowSkit(false)
 end
@@ -507,7 +569,9 @@ function Skits_Style_Notification:ResetLayout()
 end
 
 function Skits_Style_Notification:CloseSkit()
-    self:RemoveOldestMessages(0)
+    for _, msgData in ipairs(self.messages) do
+        self:msgExpire(msgData)
+    end
     self:HideSkit() 
 end
 

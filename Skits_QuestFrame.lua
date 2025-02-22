@@ -478,6 +478,9 @@ function Skits_QuestFrame:GetQuestGiverCreatureData()
         creatureData = Skits:GetPlayerCreatureData()
     else
         creatureData = Skits:BuildCreatureDataOfToken("npc")
+        if not creatureData then
+            creatureData = Skits_ID_Store:GetCreatureDataByName(giverName, false)
+        end            
     end
 
     return creatureData
