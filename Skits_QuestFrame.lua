@@ -314,6 +314,9 @@ function Skits_QuestFrame:PlayerQuestTalk(text, clearQueue)
     local creatureData = Skits:GetPlayerCreatureData()
 
     text = text:gsub("<.-?>", "")
+    text = text:gsub("%(Quest%)", "")
+    text = text:gsub("Make this inn your home.", "Make this inn my home.")    
+
     self:HandleQuestFrame(creatureData, text, "", 1, clearQueue)
 end
 
@@ -334,6 +337,9 @@ function Skits_QuestFrame:PlayerQuestSelected(questTitle, activeQuest, isComplet
         answerText = newQuestVariations[idx][1] .. getHighlightedText(questTitle) .. newQuestVariations[idx][2]
     end
 
+    answerText = answerText:gsub("%(Quest%)", "")
+    answerText = answerText:gsub("Make this inn your home.", "Make this inn my home.")    
+
     self:HandleQuestFrame(creatureData, answerText, "", 1, true)
 end
 
@@ -345,7 +351,7 @@ end
 function Skits_QuestFrame:HandleQuestFrame(creatureData, mainText, extraText, priority, clearQueue)
     -- Check if speak was seen recently
     local npcName = Skits_Utils:GetUnitTokenFullName("npc") or "<no npc>"
-    local speakId = npcName .. creatureData.name .. #mainText .. mainText:sub(1, 10)
+    local speakId = npcName .. creatureData.name .. #mainText .. mainText:sub(1, 30)
 
     if clearQueue == true then
         Skits_SpeakQueue:RemoveByName(npcName)
@@ -516,8 +522,6 @@ function Skits_QuestFrame:HandleQuestDetail(event)
         return
     end
 
-    local questTitle = GetTitleText()
-
     local questText = GetQuestText()
     if not questText then    
         return
@@ -526,7 +530,6 @@ function Skits_QuestFrame:HandleQuestDetail(event)
     local questObjective = GetObjectiveText() or ""
     if #questObjective > 0 then
         local subZoneName = GetSubZoneText()
-        local personName = creatureData.name
 
         -- Location name
         local prepositions = { "at ", "in ", "on " }

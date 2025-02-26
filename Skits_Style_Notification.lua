@@ -282,7 +282,7 @@ function Skits_Style_Notification:SetSpeakFrameData(speakFrame, creatureData, te
     -- MODELS -------------------------------------------------------------------------------------------
     -- Model: display options
 
-    local light = nil
+    local light = Skits_Style_Utils:GetHourLight()
     local lightBg = Skits_Style_Utils.lightPresets.pitchblack
     local portraitZoom = 0.9
     local rotation = nil
@@ -372,14 +372,29 @@ function Skits_Style_Notification:msgMoveUp(msgData, ammount)
 end
 
 function Skits_Style_Notification:msgExpire(msgData)
-    msgData.speakFrame.main:SetScript("OnUpdate", nil)
-    
+    -- Timers Updates
     if msgData.expireHandler then
         msgData.expireHandler:Cancel() 
         msgData.expireHandler = nil
     end
-
     msgData.expired = true
+
+    -- Clear Model Data xxx
+    msgData.speakFrame.main:SetScript("OnUpdate", nil)    
+    msgData.speakFrame.portrait:SetDisplayInfo(0)
+    msgData.speakFrame.portrait:ClearModel()
+    msgData.speakFrame.portraitBg:SetDisplayInfo(0)
+    msgData.speakFrame.portraitBg:ClearModel()    
+
+    if msgData.portraitLoaderData then
+        Skits_UI_Utils:LoadModelStopTimer(msgData.portraitLoaderData)
+        msgData.portraitLoaderData = nil
+    end    
+    if msgData.portraitBgLoaderData then
+        Skits_UI_Utils:LoadModelStopTimer(msgData.portraitBgLoaderData)
+        msgData.portraitBgLoaderData = nil
+    end        
+    
     setSpeakVisibility(msgData.speakFrame, false)
 end
 
