@@ -380,7 +380,7 @@ end
 
 function Skits_ID_Store:GetCreatureDataByName(creatureName, isPlayer)
     local creatureData = nil
-    local source = nil
+    local sources = nil
 
     -- Player data is only retrieved from the local cache
     if isPlayer then
