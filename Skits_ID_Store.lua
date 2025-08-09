@@ -222,6 +222,12 @@ function Skits_ID_Store:LocalDB_Start()
     if not SkitsDB then
         SkitsDB = {}
     end
+
+    -- Debug
+    if not SkitsDB.debugMode then
+        SkitsDB.debugMode = false
+    end
+
     if not SkitsDB.creatureIdStore then
         SkitsDB.creatureIdStore = {
             mapNpcNameToIdx = {},

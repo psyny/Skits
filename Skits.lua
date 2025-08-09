@@ -58,12 +58,7 @@ Skits.gossip = {
 ---------------------------------------------------------
 -- Addon events
 
-function Skits:OnInitialize()
-    -- Debug
-    if not SkitsDB.debugMode then
-        SkitsDB.debugMode = false
-    end
-    
+function Skits:OnInitialize()   
 	-- Set up our database
     local options = Skits_Options.options
     local defaults = Skits_Options.defaults
@@ -762,6 +757,13 @@ SlashCmdList["SkitsDebug"] = function()
         print("Skits Debug is now disabled")
     end
 end
+
+-- Reset the Layouts
+SLASH_SkitsLayout1 = "/SkitsLayout"
+SlashCmdList["SkitsLayout"] = function()   
+    Skits_Style:Initialize()
+end
+
 
 
 
