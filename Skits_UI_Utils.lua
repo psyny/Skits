@@ -220,6 +220,16 @@ local function LoadModelApplyLoadOptions(loaderData, setAnimations)
         --local posx = Skits_Utils:Interpolation(-15, 15, 0, 2, displayOptions.scale)
         --modelFrame:SetPosition(posx, 0, 0) 
         modelFrame:SetModelScale(displayOptions.scale)
+
+        -- DEBUG: Print when target size is set
+        if SkitsDB.debugMode then
+            print("[DEBUG] " .. loaderData.creatureData.name .. " | LoadModelApplyLoadOptions: Setting scale to " .. displayOptions.scale)
+        end        
+        
+        -- FIX: Re-apply the target size after scale change to ensure proper bounds
+        if modelFrame.targetSize then
+            -- modelFrame:SetSize(modelFrame.targetSize.w, modelFrame.targetSize.h)
+        end
     end  
 
     if loaderData.fallback then
@@ -742,6 +752,11 @@ function Skits_UI_Utils:ModelFrameSetTargetSize(modelframe, w, h)
         h = h,
     }
 
+    -- DEBUG: Print when target size is set
+    if SkitsDB.debugMode then
+        print("[DEBUG] ModelFrameSetTargetSize: w=" .. w .. ", h=" .. h)
+    end
+
     return modelframe
 end
 
@@ -756,6 +771,10 @@ function Skits_UI_Utils:ModelFrameSetVisible(modelframe, visible)
         end
     else
         if visible then
+            -- DEBUG: Print when size is applied
+            if SkitsDB.debugMode then
+                print("[DEBUG] ModelFrameSetVisible: Setting size to w=" .. targetSize.w .. ", h=" .. targetSize.h)
+            end
             modelframe:SetSize(targetSize.w, targetSize.h)
         else
             modelframe:SetSize(0.01, 0.01)
