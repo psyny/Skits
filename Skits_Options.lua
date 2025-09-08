@@ -146,8 +146,8 @@ Skits_Options.defaults = {
         -- Quests
         event_npc_interact                               = false,  
         quest_frame_model_enabled                        = false,
-        quest_frame_model_size                           = 120,
-        quest_frame_model_offsetx                        = -5,
+        quest_frame_model_size                           = 80,
+        quest_frame_model_offsetx                        = 5,
         quest_frame_model_offsety                        = -50,
         quest_frame_model_animated                       = false,
         quest_frame_model_poser                          = false,
