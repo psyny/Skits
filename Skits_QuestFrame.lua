@@ -789,11 +789,16 @@ function Skits_QuestFrame:AttachFrameToQuestFrame(framename, questText)
     local fallbackLight = Skits_Style_Utils.lightPresets.hidden
     local pauseAfter = 0
     local animations = {60}
-    if true or options.style_departure_model_poser then
-        if questText then
-            animations = Skits_UI_Utils:GetAnimationIdsFromText(questText, true)        
+    if options.quest_frame_model_animated then
+        if options.quest_frame_model_poser then
+            if questText then
+                animations = Skits_UI_Utils:GetAnimationIdsFromText(questText, true)        
+            end
+            pauseAfter = (math.random() * 2)
+        else
+            pauseAfter = 60
+            animations = {60}
         end
-        pauseAfter = (math.random() * 2)
     end     
     local displayOptions = Skits_UI_Utils:BuildDisplayOptions(0.9, 0, 1, animations, light, pauseAfter, fallbackId, fallbackLight)
     
