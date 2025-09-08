@@ -784,39 +784,3 @@ function Skits_UI_Utils:ModelFrameSetVisible(modelframe, visible)
     return modelframe
 end
 
--- ---------------------------------------------------------------------------------
--- Quest Frame Model Creation
--- ---------------------------------------------------------------------------------
-
-function Skits_UI_Utils:CreateQuestModelFrame(parentFrame, frameSize)
-    -- Create the model frame
-    local modelFrame = CreateFrame("PlayerModel", nil, parentFrame, "BackdropTemplate")
-    modelFrame:SetSize(frameSize * 0.75, frameSize)
-    modelFrame:SetBackdrop({
-        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
-        edgeFile = nil,
-        tile = true, tileSize = 16, edgeSize = 0,
-        insets = { left = 0, right = 0, top = 0, bottom = 0 }
-    })
-    modelFrame:SetBackdropColor(0, 0, 0, 0.75)
-    modelFrame:SetFacing(0)
-
-    -- Create the border frame to follow the model frame with 3px offset
-    local borderFrame = CreateFrame("Frame", nil, modelFrame, "BackdropTemplate")
-    borderFrame:SetPoint("TOPLEFT", modelFrame, "TOPLEFT", -3, 3)
-    borderFrame:SetPoint("BOTTOMRIGHT", modelFrame, "BOTTOMRIGHT", 3, -3)
-    borderFrame:SetBackdrop({
-        bgFile = nil,
-        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
-        tile = true, tileSize = 16, edgeSize = 8,
-    })
-    borderFrame:SetBackdropBorderColor(1, 1, 1)
-
-    -- Set target size for the model frame
-    Skits_UI_Utils:ModelFrameSetTargetSize(modelFrame, frameSize * 0.75, frameSize)
-    
-    -- Initially hide the model frame
-    Skits_UI_Utils:ModelFrameSetVisible(modelFrame, false)
-
-    return modelFrame, borderFrame
-end

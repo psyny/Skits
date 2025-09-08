@@ -166,16 +166,10 @@ local questTurnInVariations = {
 
 
 function Skits_QuestFrame:Initialize()
-    local options = Skits_Options.db
-
-    -- Create Quest Giver Model Frame
-    local modelSize = options.style_warcraft_speaker_face_size
-    Skits_QuestFrame.questGiverModelFrame, Skits_QuestFrame.questGiverBorderFrame = Skits_UI_Utils:CreateQuestModelFrame(UIParent, modelSize)
-    
-    -- Store reference to current model loader for cleanup
-    Skits_QuestFrame.currentModelLoader = nil
+    Skits_QuestFrame.questGiverModelFrame = self:CreateQuestModelFrame()
 end
 
+-----------------------------------------------------------------------------
 
 -- -----------------------------------------------------------------
 -- HOOKS
@@ -577,7 +571,11 @@ function Skits_QuestFrame:HandleQuestDetail(event)
 end
 
 function Skits_QuestFrame:HandleQuestProgress(event)
-    self:AttachFrameToQuestFrame("QuestFrame")
+    local questText = GetProgressText()
+    if not questText then
+        questText = ""
+    end        
+    self:AttachFrameToQuestFrame("QuestFrame", questText)
 
     local options = Skits_Options.db
     if not options.event_npc_interact then
@@ -588,17 +586,16 @@ function Skits_QuestFrame:HandleQuestProgress(event)
     if not creatureData then
         return
     end
-
-    local questText = GetProgressText()
-    if not questText then
-        return
-    end       
-
+   
     self:HandleQuestFrame(creatureData, questText, "", 0, true)
 end
 
 function Skits_QuestFrame:HandleQuestComplete(event)
-    self:AttachFrameToQuestFrame("QuestFrame")
+    local questText = GetRewardText()
+    if not questText then
+        questText = ""
+    end        
+    self:AttachFrameToQuestFrame("QuestFrame", questText)
 
     local options = Skits_Options.db
     if not options.event_npc_interact then
@@ -609,17 +606,17 @@ function Skits_QuestFrame:HandleQuestComplete(event)
     if not creatureData then
         return
     end
-
-    local questText = GetRewardText()
-    if not questText then
-        return
-    end       
 
     self:HandleQuestFrame(creatureData, questText, "", 0, true)
 end
 
 function Skits_QuestFrame:HandleGossipShow(event)
-    self:AttachFrameToQuestFrame("GossipFrame")
+    -- Gossip Text
+    local gossipText = C_GossipInfo.GetText()
+    if not gossipText then
+        gossipText = ""
+    end       
+    self:AttachFrameToQuestFrame("GossipFrame", gossipText)
 
     Skits.gossip.options.count = 0
     Skits.gossip.options.byIndex = {}
@@ -668,13 +665,7 @@ function Skits_QuestFrame:HandleGossipShow(event)
     local creatureData = self:GetQuestGiverCreatureData()
     if not creatureData then
         return
-    end
-
-    -- Gossip Text
-    local gossipText = C_GossipInfo.GetText()
-    if not gossipText then
-        return
-    end    
+    end 
 
     self:HandleQuestFrame(creatureData, gossipText, "", 0, true)
 end
@@ -693,7 +684,77 @@ end
 -- Quest Speaker Model Frame
 -- -----------------------------------------------------------------
 
-function Skits_QuestFrame:AttachFrameToQuestFrame(framename)
+
+function Skits_QuestFrame:CreateQuestModelFrame()
+    local options = Skits_Options.db
+    --local modelSize = options.style_warcraft_speaker_face_size
+    local modelSize = 120
+    local parentFrame = UIParent
+
+    local frameSizeX = modelSize*0.75
+    local frameSizeY = modelSize
+
+    local questModelFrame = {
+        main = nil,
+        border = nil,
+        background = nil,
+        model = nil,
+        modelLoader = nil,
+        modelSize = modelSize,
+    }
+    local boderSize = 4    
+
+    -- Base Frame
+    questModelFrame.main = CreateFrame("Frame", nil, parentFrame)
+    questModelFrame.main:SetSize(frameSizeX, frameSizeY)
+    questModelFrame.main:SetPoint("BOTTOMLEFT", parentFrame, "TOPLEFT", 50, -50)
+
+    -- Create the border frame to follow the model frame with 3px offset
+    questModelFrame.border = CreateFrame("Frame", nil, questModelFrame.main, "BackdropTemplate")
+    questModelFrame.border:SetSize(frameSizeX + (boderSize*2), frameSizeY + (boderSize*2))        
+    questModelFrame.border:SetPoint("TOPLEFT", questModelFrame.main, "TOPLEFT", -boderSize, boderSize)
+    questModelFrame.border:SetBackdrop({
+        bgFile = nil,
+        --edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Gold-Border",
+        --edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+        --edgeFile = "Interface\\FriendsFrame\\UI-Toast-Border",
+        edgeSize = 12,
+    })
+
+    -- Background Frame
+    questModelFrame.background = CreateFrame("Frame", nil, questModelFrame.main, "BackdropTemplate")
+    questModelFrame.background:SetSize(frameSizeX + (boderSize*0.8), frameSizeY + (boderSize*0.8))        
+    questModelFrame.background:SetPoint("TOPLEFT", questModelFrame.main, "TOPLEFT", -(boderSize*0.4), (boderSize*0.4))
+    questModelFrame.background:SetBackdrop({
+        --bgFile = "Interface\\AchievementFrame\\UI-Achievement-Parchment-Horizontal",
+        --bgFile = "Interface\\FrameGeneral\\UI-Background-Marble",
+        --bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
+        --bgFile = "Interface\\TabardFrame\\TabardFrameBackground",
+        bgFile = "Interface\\AchievementFrame\\UI-GuildAchievement-Parchment-Horizontal",
+        --bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",        
+        tile = false, tileSize = 32, edgeSize = 0,
+    })
+
+    -- Create the model frame
+    questModelFrame.model = CreateFrame("PlayerModel", nil, questModelFrame.main, "BackdropTemplate")
+    questModelFrame.model:SetPoint("TOPLEFT", questModelFrame.main, "TOPLEFT", 0, 0)
+    questModelFrame.model:SetSize(frameSizeX, frameSizeY)    
+    questModelFrame.model:Show()
+    Skits_UI_Utils:ModelFrameSetTargetSize(questModelFrame.model, frameSizeX, frameSizeY)
+    Skits_UI_Utils:ModelFrameSetVisible(questModelFrame.model, false)
+
+    -- Levels
+    questModelFrame.border:SetFrameLevel(100)
+    questModelFrame.model:SetFrameLevel(50)
+    questModelFrame.background:SetFrameLevel(10)
+
+    questModelFrame.main:Hide()
+    return questModelFrame
+end
+
+
+function Skits_QuestFrame:AttachFrameToQuestFrame(framename, questText)
     local options = Skits_Options.db
     
     -- Get creature data for the quest giver
@@ -713,46 +774,56 @@ function Skits_QuestFrame:AttachFrameToQuestFrame(framename)
     if not targetFrame then
         return
     end
-    
+
     -- Position the model frame relative to the quest frame
-    -- Position it on the left side of the quest frame
-    Skits_QuestFrame.questGiverModelFrame:SetPoint("TOPRIGHT", targetFrame, "TOPLEFT", -20, -50)
-    Skits_QuestFrame.questGiverBorderFrame:Show()
+    local yOffset = -50
+    local xOffset = -5
+
+    self.questGiverModelFrame.main:SetPoint("BOTTOMLEFT", targetFrame, "TOPLEFT", xOffset, yOffset)
+    self.questGiverModelFrame.main:Show()
+    self.questGiverModelFrame.main:SetFrameStrata("HIGH")
     
     -- Build display options for the model
+    local light = Skits_Style_Utils:GetHourLight()
     local fallbackId = Skits_Style_Utils.fallbackId
     local fallbackLight = Skits_Style_Utils.lightPresets.hidden
-    local displayOptions = Skits_UI_Utils:BuildDisplayOptions(0.9, 0, 1, {60}, nil, 0, fallbackId, fallbackLight)
+    local pauseAfter = 0
+    local animations = {60}
+    if true or options.style_departure_model_poser then
+        if questText then
+            animations = Skits_UI_Utils:GetAnimationIdsFromText(questText, true)        
+        end
+        pauseAfter = (math.random() * 2)
+    end     
+    local displayOptions = Skits_UI_Utils:BuildDisplayOptions(0.9, 0, 1, animations, light, pauseAfter, fallbackId, fallbackLight)
     
     -- Build load options
-    local loadOptions = Skits_UI_Utils:BuildLoadOptions(Skits_QuestFrame.questGiverModelFrame, nil)
+    local loadOptions = Skits_UI_Utils:BuildLoadOptions(self.questGiverModelFrame.model, nil)
     
     -- Load the model
-    Skits_QuestFrame.currentModelLoader = Skits_UI_Utils:LoadModel(creatureData, displayOptions, loadOptions)
-    
-    -- Show the model frame
-    Skits_UI_Utils:ModelFrameSetVisible(Skits_QuestFrame.questGiverModelFrame, true)
+    self.questGiverModelFrame.modelLoader = Skits_UI_Utils:LoadModel(creatureData, displayOptions, loadOptions)  
+    Skits_UI_Utils:ModelFrameSetVisible(self.questGiverModelFrame.model, true)
 end
 
 function Skits_QuestFrame:DetachFrameFromQuestFrame()
     -- Stop and cleanup the current model loader
-    if Skits_QuestFrame.currentModelLoader then
-        Skits_UI_Utils:LoadModelStopTimer(Skits_QuestFrame.currentModelLoader)
-        Skits_QuestFrame.currentModelLoader = nil
+    if self.questGiverModelFrame and self.questGiverModelFrame.modelLoader then
+        Skits_UI_Utils:LoadModelStopTimer(self.questGiverModelFrame.modelLoader)
+        self.questGiverModelFrame.modelLoader = nil
     end
     
     -- Clear the model from the frame
-    if Skits_QuestFrame.questGiverModelFrame then
-        Skits_QuestFrame.questGiverModelFrame:ClearModel()
-        Skits_QuestFrame.questGiverModelFrame.pauseOn = nil
+    if self.questGiverModelFrame then
+        self.questGiverModelFrame.model:ClearModel()
+        self.questGiverModelFrame.model.pauseOn = nil
     end
     
     -- Hide the model frame and border
-    if Skits_QuestFrame.questGiverModelFrame then
-        Skits_UI_Utils:ModelFrameSetVisible(Skits_QuestFrame.questGiverModelFrame, false)
+    if self.questGiverModelFrame then
+        Skits_UI_Utils:ModelFrameSetVisible(self.questGiverModelFrame.model, false)
     end
     
-    if Skits_QuestFrame.questGiverBorderFrame then
-        Skits_QuestFrame.questGiverBorderFrame:Hide()
+    if self.questGiverModelFrame then
+        self.questGiverModelFrame.main:Hide()
     end
 end
