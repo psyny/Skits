@@ -1,7 +1,6 @@
 -- Skits_QuestFrame.lua
 
 Skits_QuestFrame = {}
-
 Skits_QuestFrame.speakerLastInteracting = nil
 Skits_QuestFrame.speakerInteractRepeats = {}
 Skits_QuestFrame.speakerInteractRepeatsQueue = Skits_Deque:New()
@@ -160,6 +159,23 @@ local questTurnInVariations = {
     {"Turning in ", " task."},
     {"Ready to hand in ", " quest."}
 }
+
+-- -----------------------------------------------------------------
+-- INIT
+-- -----------------------------------------------------------------
+
+
+function Skits_QuestFrame:Initialize()
+    local options = Skits_Options.db
+
+    -- Create Quest Giver Model Frame
+    local modelSize = options.style_warcraft_speaker_face_size
+    Skits_QuestFrame.questGiverModelFrame, Skits_QuestFrame.questGiverBorderFrame = Skits_UI_Utils:CreateQuestModelFrame(UIParent, modelSize)
+    
+    -- Store reference to current model loader for cleanup
+    Skits_QuestFrame.currentModelLoader = nil
+end
+
 
 -- -----------------------------------------------------------------
 -- HOOKS
@@ -512,6 +528,8 @@ function Skits_QuestFrame:HandleQuestGreeting(event)
 end
 
 function Skits_QuestFrame:HandleQuestDetail(event)
+    self:AttachFrameToQuestFrame("QuestFrame")
+
     local options = Skits_Options.db
     if not options.event_npc_interact then
         return 
@@ -559,6 +577,8 @@ function Skits_QuestFrame:HandleQuestDetail(event)
 end
 
 function Skits_QuestFrame:HandleQuestProgress(event)
+    self:AttachFrameToQuestFrame("QuestFrame")
+
     local options = Skits_Options.db
     if not options.event_npc_interact then
         return 
@@ -578,6 +598,8 @@ function Skits_QuestFrame:HandleQuestProgress(event)
 end
 
 function Skits_QuestFrame:HandleQuestComplete(event)
+    self:AttachFrameToQuestFrame("QuestFrame")
+
     local options = Skits_Options.db
     if not options.event_npc_interact then
         return 
@@ -597,6 +619,8 @@ function Skits_QuestFrame:HandleQuestComplete(event)
 end
 
 function Skits_QuestFrame:HandleGossipShow(event)
+    self:AttachFrameToQuestFrame("GossipFrame")
+
     Skits.gossip.options.count = 0
     Skits.gossip.options.byIndex = {}
     Skits.gossip.options.byOptionId = {}
@@ -656,9 +680,79 @@ function Skits_QuestFrame:HandleGossipShow(event)
 end
 
 function Skits_QuestFrame:HandleQuestClosed(event)
+    self:DetachFrameFromQuestFrame()
+
     if self.speakerLastInteracting then
         local creatureData = self.speakerLastInteracting
 
         Skits_SpeakQueue:RemoveByName(creatureData.name)
     end 
+end
+
+-- -----------------------------------------------------------------
+-- Quest Speaker Model Frame
+-- -----------------------------------------------------------------
+
+function Skits_QuestFrame:AttachFrameToQuestFrame(framename)
+    local options = Skits_Options.db
+    
+    -- Get creature data for the quest giver
+    local creatureData = self:GetQuestGiverCreatureData()
+    if not creatureData then
+        return
+    end
+    
+    -- Get the target frame to attach to
+    local targetFrame = nil
+    if framename == "QuestFrame" then
+        targetFrame = QuestFrame
+    elseif framename == "GossipFrame" then
+        targetFrame = GossipFrame
+    end
+    
+    if not targetFrame then
+        return
+    end
+    
+    -- Position the model frame relative to the quest frame
+    -- Position it on the left side of the quest frame
+    Skits_QuestFrame.questGiverModelFrame:SetPoint("TOPRIGHT", targetFrame, "TOPLEFT", -20, -50)
+    Skits_QuestFrame.questGiverBorderFrame:Show()
+    
+    -- Build display options for the model
+    local fallbackId = Skits_Style_Utils.fallbackId
+    local fallbackLight = Skits_Style_Utils.lightPresets.hidden
+    local displayOptions = Skits_UI_Utils:BuildDisplayOptions(0.9, 0, 1, {60}, nil, 0, fallbackId, fallbackLight)
+    
+    -- Build load options
+    local loadOptions = Skits_UI_Utils:BuildLoadOptions(Skits_QuestFrame.questGiverModelFrame, nil)
+    
+    -- Load the model
+    Skits_QuestFrame.currentModelLoader = Skits_UI_Utils:LoadModel(creatureData, displayOptions, loadOptions)
+    
+    -- Show the model frame
+    Skits_UI_Utils:ModelFrameSetVisible(Skits_QuestFrame.questGiverModelFrame, true)
+end
+
+function Skits_QuestFrame:DetachFrameFromQuestFrame()
+    -- Stop and cleanup the current model loader
+    if Skits_QuestFrame.currentModelLoader then
+        Skits_UI_Utils:LoadModelStopTimer(Skits_QuestFrame.currentModelLoader)
+        Skits_QuestFrame.currentModelLoader = nil
+    end
+    
+    -- Clear the model from the frame
+    if Skits_QuestFrame.questGiverModelFrame then
+        Skits_QuestFrame.questGiverModelFrame:ClearModel()
+        Skits_QuestFrame.questGiverModelFrame.pauseOn = nil
+    end
+    
+    -- Hide the model frame and border
+    if Skits_QuestFrame.questGiverModelFrame then
+        Skits_UI_Utils:ModelFrameSetVisible(Skits_QuestFrame.questGiverModelFrame, false)
+    end
+    
+    if Skits_QuestFrame.questGiverBorderFrame then
+        Skits_QuestFrame.questGiverBorderFrame:Hide()
+    end
 end

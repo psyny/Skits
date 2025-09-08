@@ -51,6 +51,8 @@ function Skits_Style:Initialize()
     initialize_aux_addActiveStyleByName(options.style_general_styleonsituation_combat)
     initialize_aux_addActiveStyleByName(options.style_general_styleonsituation_instance_solo)
     initialize_aux_addActiveStyleByName(options.style_general_styleonsituation_instance_group)
+
+    Skits_QuestFrame:Initialize()
 end
 
 function Skits_Style:NewSpeak(creatureData, textData)
