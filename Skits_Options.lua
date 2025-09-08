@@ -415,7 +415,7 @@ Skits_Options.options = {
                     width = optionWidth,
                 },
                 quest_frame_model_offsetx = {
-                    type = "input",
+                    type = "range",
                     name = L["Skits.options.quest_frame_model_offsetx.title"],
                     desc = L["Skits.options.quest_frame_model_offsetx.desc"],
                     min = -2000, max = 2000, step = 5,                    
@@ -424,7 +424,7 @@ Skits_Options.options = {
                     width = optionWidth,
                 },
                 quest_frame_model_offsety = {
-                    type = "input",
+                    type = "range",
                     name = L["Skits.options.quest_frame_model_offsety.title"],
                     desc = L["Skits.options.quest_frame_model_offsety.desc"],
                     min = -2000, max = 2000, step = 5,                    
