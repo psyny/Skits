@@ -685,10 +685,13 @@ end
 -- -----------------------------------------------------------------
 
 
-function Skits_QuestFrame:CreateQuestModelFrame()
+function Skits_QuestFrame:CreateQuestModelFrame()    
     local options = Skits_Options.db
-    --local modelSize = options.style_warcraft_speaker_face_size
-    local modelSize = 120
+    if not options.quest_frame_model_enabled then
+        return nil
+    end
+
+    local modelSize = options.quest_frame_model_size
     local parentFrame = UIParent
 
     local frameSizeX = modelSize*0.75
@@ -709,16 +712,13 @@ function Skits_QuestFrame:CreateQuestModelFrame()
     questModelFrame.main:SetSize(frameSizeX, frameSizeY)
     questModelFrame.main:SetPoint("BOTTOMLEFT", parentFrame, "TOPLEFT", 50, -50)
 
-    -- Create the border frame to follow the model frame with 3px offset
+    -- Create the border frame to follow the model frame 
     questModelFrame.border = CreateFrame("Frame", nil, questModelFrame.main, "BackdropTemplate")
     questModelFrame.border:SetSize(frameSizeX + (boderSize*2), frameSizeY + (boderSize*2))        
     questModelFrame.border:SetPoint("TOPLEFT", questModelFrame.main, "TOPLEFT", -boderSize, boderSize)
     questModelFrame.border:SetBackdrop({
         bgFile = nil,
-        --edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
-        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Gold-Border",
-        --edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-        --edgeFile = "Interface\\FriendsFrame\\UI-Toast-Border",
+        edgeFile = options.quest_frame_model_border,
         edgeSize = 12,
     })
 
@@ -727,12 +727,7 @@ function Skits_QuestFrame:CreateQuestModelFrame()
     questModelFrame.background:SetSize(frameSizeX + (boderSize*0.8), frameSizeY + (boderSize*0.8))        
     questModelFrame.background:SetPoint("TOPLEFT", questModelFrame.main, "TOPLEFT", -(boderSize*0.4), (boderSize*0.4))
     questModelFrame.background:SetBackdrop({
-        --bgFile = "Interface\\AchievementFrame\\UI-Achievement-Parchment-Horizontal",
-        --bgFile = "Interface\\FrameGeneral\\UI-Background-Marble",
-        --bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
-        --bgFile = "Interface\\TabardFrame\\TabardFrameBackground",
-        bgFile = "Interface\\AchievementFrame\\UI-GuildAchievement-Parchment-Horizontal",
-        --bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",        
+        bgFile = options.quest_frame_model_bg,
         tile = false, tileSize = 32, edgeSize = 0,
     })
 
@@ -755,7 +750,12 @@ end
 
 
 function Skits_QuestFrame:AttachFrameToQuestFrame(framename, questText)
+    -- todo: move to local function
     local options = Skits_Options.db
+
+    if not options.quest_frame_model_enabled then
+        return
+    end
     
     -- Get creature data for the quest giver
     local creatureData = self:GetQuestGiverCreatureData()
@@ -776,8 +776,8 @@ function Skits_QuestFrame:AttachFrameToQuestFrame(framename, questText)
     end
 
     -- Position the model frame relative to the quest frame
-    local yOffset = -50
-    local xOffset = -5
+    local yOffset = tonumber(options.quest_frame_model_offsety) or -50
+    local xOffset = tonumber(options.quest_frame_model_offsetx) or -5
 
     self.questGiverModelFrame.main:SetPoint("BOTTOMLEFT", targetFrame, "TOPLEFT", xOffset, yOffset)
     self.questGiverModelFrame.main:Show()
@@ -806,6 +806,11 @@ function Skits_QuestFrame:AttachFrameToQuestFrame(framename, questText)
 end
 
 function Skits_QuestFrame:DetachFrameFromQuestFrame()
+    local options = Skits_Options.db
+    if not options.quest_frame_model_enabled then
+        return
+    end
+
     -- Stop and cleanup the current model loader
     if self.questGiverModelFrame and self.questGiverModelFrame.modelLoader then
         Skits_UI_Utils:LoadModelStopTimer(self.questGiverModelFrame.modelLoader)

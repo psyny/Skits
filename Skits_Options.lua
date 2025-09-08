@@ -14,8 +14,7 @@ Skits_Options.defaults = nil
 Skits_Options.defaults = {
 	profile = {
         enabled                             = true,
-        block_talking_head                  = true,
-        event_npc_interact                  = false,             
+        block_talking_head                  = true,           
         combat_easy_in                      = false,
         combat_easy_out                     = true,
         combat_exit_delay                   = 3,
@@ -143,6 +142,15 @@ Skits_Options.defaults = {
         style_departure_model_size                       = 500, 
         style_departure_model_poser                      = true,       
         style_departure_previous_speaker_lingertime      = 30,       
+
+        -- Quests
+        event_npc_interact                               = false,  
+        quest_frame_model_enabled                        = false,
+        quest_frame_model_size                           = 120,
+        quest_frame_model_offsetx                        = -5,
+        quest_frame_model_offsety                        = -50,
+        quest_frame_model_bg                             = "Interface\\AchievementFrame\\UI-GuildAchievement-Parchment-Horizontal",
+        quest_frame_model_border                         = "Interface\\DialogFrame\\UI-DialogBox-Gold-Border",
 	},  
 }
 
@@ -181,6 +189,25 @@ local function GetClickOptions()
         ["HIDE"] = "Hide Skit",
         ["NEXT"] = "Show Next Speech",
         ["GOTOCOMBAT"] = "Switch to Combat Style Skit",
+    }
+end
+
+local function GetQuestModelBackgroundOptions()
+    return {
+        ["Interface\\AchievementFrame\\UI-GuildAchievement-Parchment-Horizontal"] = "Guild Achievement Parchment",
+        ["Interface\\AchievementFrame\\UI-Achievement-Parchment-Horizontal"] = "Achievement Parchment",
+        ["Interface\\FrameGeneral\\UI-Background-Marble"] = "Marble Background",
+        ["Interface\\DialogFrame\\UI-DialogBox-Background-Dark"] = "Dark Dialog Background",
+        ["Interface\\TabardFrame\\TabardFrameBackground"] = "Tabard Background",
+    }
+end
+
+local function GetQuestModelBorderOptions()
+    return {
+        ["Interface\\DialogFrame\\UI-DialogBox-Gold-Border"] = "Gold Dialog Border",
+        ["Interface\\DialogFrame\\UI-DialogBox-Border"] = "Standard Dialog Border",
+        ["Interface\\Tooltips\\UI-Tooltip-Border"] = "Tooltip Border",
+        ["Interface\\FriendsFrame\\UI-Toast-Border"] = "Toast Border",
     }
 end
 
@@ -312,20 +339,12 @@ Skits_Options.options = {
                     order = 2,
                     width = optionWidth,
                 },   
-                event_npc_interact = {
-                    type = "toggle",
-                    name = L["Skits.options.event_npc_interact.title"],
-                    desc = L["Skits.options.event_npc_interact.desc"],
-                    arg = "event_npc_interact",
-                    order = 3,
-                    width = optionWidth,
-                },                     
                 combat_easy_in = {
                     type = "toggle",
                     name = L["Skits.options.combat_easy_in.title"],
                     desc = L["Skits.options.combat_easy_in.desc"],
                     arg = "combat_easy_in",
-                    order = 4,
+                    order = 3,
                     width = optionWidth,
                 },      
                 combat_easy_out = {
@@ -333,7 +352,7 @@ Skits_Options.options = {
                     name = L["Skits.options.combat_easy_out.title"],
                     desc = L["Skits.options.combat_easy_out.desc"],
                     arg = "combat_easy_out",
-                    order = 5,
+                    order = 4,
                     width = optionWidth,
                 },   
                 combat_exit_delay = {
@@ -342,7 +361,7 @@ Skits_Options.options = {
                     desc = L["Skits.options.combat_exit_delay.desc"],
                     min = 0, max = 60, step = 1,
                     arg = "combat_exit_delay",
-                    order = 6,
+                    order = 5,
                     width = optionWidth,  
                 },    
                 move_exit_exploration_for = {
@@ -351,15 +370,92 @@ Skits_Options.options = {
                     desc = L["Skits.options.move_exit_exploration_for.desc"],
                     min = 0, max = 60, step = 1,
                     arg = "move_exit_exploration_for",
-                    order = 7,
+                    order = 6,
                     width = optionWidth,  
                 },                                                                     
+            },
+        },
+        tab_quests = {
+            type = "group",
+            name = "Quests",
+            order = 2,
+            get = function(info) return Skits_Options.db[info.arg] end,
+            set = function(info, v)
+                local arg = info.arg
+                Skits_Options.db[arg] = v
+                Skits:GeneralParameterChanges()
+            end,   
+            disabled = false,         
+            args = {
+                event_npc_interact = {
+                    type = "toggle",
+                    name = L["Skits.options.event_npc_interact.title"],
+                    desc = L["Skits.options.event_npc_interact.desc"],
+                    arg = "event_npc_interact",
+                    order = 1,
+                    width = optionWidth,
+                },
+                quest_frame_model_enabled = {
+                    type = "toggle",
+                    name = L["Skits.options.quest_frame_model_enabled.title"],
+                    desc = L["Skits.options.quest_frame_model_enabled.desc"],
+                    arg = "quest_frame_model_enabled",
+                    order = 2,
+                    width = optionWidth,
+                },
+                quest_frame_model_size = {
+                    type = "range",
+                    name = L["Skits.options.quest_frame_model_size.title"],
+                    desc = L["Skits.options.quest_frame_model_size.desc"],
+                    min = 20, max = 200, step = 5,
+                    arg = "quest_frame_model_size",
+                    order = 3,
+                    width = optionWidth,
+                },
+                quest_frame_model_offsetx = {
+                    type = "input",
+                    name = L["Skits.options.quest_frame_model_offsetx.title"],
+                    desc = L["Skits.options.quest_frame_model_offsetx.desc"],
+                    arg = "quest_frame_model_offsetx",
+                    order = 4,
+                    width = optionWidth,
+                },
+                quest_frame_model_offsety = {
+                    type = "input",
+                    name = L["Skits.options.quest_frame_model_offsety.title"],
+                    desc = L["Skits.options.quest_frame_model_offsety.desc"],
+                    arg = "quest_frame_model_offsety",
+                    order = 5,
+                    width = optionWidth,
+                },
+                quest_frame_model_bg = {
+                    type = "select",
+                    name = L["Skits.options.quest_frame_model_bg.title"],
+                    desc = L["Skits.options.quest_frame_model_bg.desc"],
+                    values = function()
+                        return GetQuestModelBackgroundOptions()
+                    end,
+                    arg = "quest_frame_model_bg",
+                    order = 6,
+                    width = optionWidth,
+                },
+                quest_frame_model_border = {
+                    type = "select",
+                    name = L["Skits.options.quest_frame_model_border.title"],
+                    desc = L["Skits.options.quest_frame_model_border.desc"],
+                    values = function()
+                        return GetQuestModelBorderOptions()
+                    end,
+                    arg = "quest_frame_model_border",
+                    order = 7,
+                    width = optionWidth,
+                },
             },
         },
         tab_speech_events = {
             type = "group",
             name = "Events",
-            order = 2,
+            order = 3,
             get = function(info) return Skits_Options.db[info.arg] end,
             set = function(info, v)
                 local arg = info.arg
@@ -505,7 +601,7 @@ Skits_Options.options = {
             type = "group",
             name = "Style", 
             childGroups = "tab",           
-            order = 3,
+            order = 4,
             args = {
                 tab_style_general = {
                     type = "group",
@@ -1077,7 +1173,7 @@ Skits_Options.options = {
         tab_speech_duration = {
             type = "group",
             name = "Duration",
-            order = 4,
+            order = 5,
             get = function(info) return Skits_Options.db[info.arg] end,
             set = function(info, v)
                 local arg = info.arg
