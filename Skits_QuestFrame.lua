@@ -503,6 +503,13 @@ function Skits_QuestFrame:GetQuestGiverCreatureData()
 end
 
 function Skits_QuestFrame:HandleQuestGreeting(event)
+    local questText = GetGreetingText()
+    if not questText then
+        questText = ""
+    end      
+    
+    self:AttachFrameToQuestFrame("QuestFrame", questText)
+    
     local options = Skits_Options.db
     if not options.event_npc_interact then
         return 
@@ -512,17 +519,17 @@ function Skits_QuestFrame:HandleQuestGreeting(event)
     if not creatureData then
         return
     end
-
-    local questText = GetGreetingText()
-    if not questText then
-        return
-    end       
 
     self:HandleQuestFrame(creatureData, questText, "", 0, true)
 end
 
 function Skits_QuestFrame:HandleQuestDetail(event)
-    self:AttachFrameToQuestFrame("QuestFrame")
+    local questText = GetQuestText()
+    if not questText then
+        questText = ""
+    end      
+    
+    self:AttachFrameToQuestFrame("QuestFrame", questText)
 
     local options = Skits_Options.db
     if not options.event_npc_interact then
@@ -533,11 +540,6 @@ function Skits_QuestFrame:HandleQuestDetail(event)
     if not creatureData then
         return
     end
-
-    local questText = GetQuestText()
-    if not questText then    
-        return
-    end       
 
     local questObjective = GetObjectiveText() or ""
     if #questObjective > 0 then

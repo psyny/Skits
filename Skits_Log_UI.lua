@@ -260,7 +260,17 @@ function Skits_Log_UI:PopulateLogFrame()
                 local fallbackId = Skits_Style_Utils.fallbackId
                 local fallbackLight = Skits_Style_Utils.lightPresets.hidden
                 local displayOptions =  Skits_UI_Utils:BuildDisplayOptions(0.9, 0, 1, {60}, nil, 0, fallbackId, fallbackLight) 
-                local textFrame, textLabel, speakerNameFrame, modelFrame, borderFrame = Skits_Style_Warcraft:CreateSpeakFrame(entry.creatureData, textData, displayOptions, modelSize, logFrame, altSpeakerSide, textAreaWidth, font, fontSize, showSpeakerName)
+
+                local frameStyle = {
+                    textAreaWidth = textAreaWidth,
+                    font = font,
+                    fontSize = fontSize,
+                    showSpeakerName = showSpeakerName,
+                    modelBorder = "Interface\\DialogFrame\\UI-DialogBox-Gold-Border",
+                    modelBg = "Interface\\AchievementFrame\\UI-GuildAchievement-Parchment-Horizontal",
+                }                       
+
+                local textFrame, textLabel, speakerNameFrame, modelFrame, borderFrame = Skits_Style_Warcraft:CreateSpeakFrame(entry.creatureData, textData, displayOptions, modelSize, logFrame, altSpeakerSide, frameStyle)
                 if modelFrame then
                     modelFrame:SetPaused(true) 
                 end        

@@ -60,7 +60,14 @@ local function setSpeakVisibility(msgData)
     end
 end
 
-function Skits_Style_Warcraft:CreateSpeakFrame(creatureData, textData, displayOptions, frameSize, parentFrame, altSpeakerSide, textAreaWidth, font, fontSize, showSpeakerName)
+function Skits_Style_Warcraft:CreateSpeakFrame(creatureData, textData, displayOptions, frameSize, parentFrame, altSpeakerSide, styleOptions)
+    local textAreaWidth = styleOptions.textAreaWidth
+    local font = styleOptions.font
+    local fontSize = styleOptions.fontSize
+    local showSpeakerName = styleOptions.showSpeakerName
+    local modelBorder = styleOptions.modelBorder
+    local modelBg = styleOptions.modelBg
+
     local options = Skits_Options.db
 
     local speaker = creatureData.name
@@ -113,13 +120,6 @@ function Skits_Style_Warcraft:CreateSpeakFrame(creatureData, textData, displayOp
     -- Create the model frame
     local modelFrame = CreateFrame("PlayerModel", nil, parentFrame, "BackdropTemplate")
     modelFrame:SetSize(frameSize * 0.75, frameSize)
-    modelFrame:SetBackdrop({
-        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
-        edgeFile = nil,
-        tile = true, tileSize = 16, edgeSize = 0,
-        insets = { left = 0, right = 0, top = 0, bottom = 0 }
-    })
-    modelFrame:SetBackdropColor(0, 0, 0, 0.75)
 
     -- Position the model frame to the left or right of the text based on speaker order
     modelFrame:SetFacing(0)
@@ -135,10 +135,24 @@ function Skits_Style_Warcraft:CreateSpeakFrame(creatureData, textData, displayOp
     borderFrame:SetPoint("BOTTOMRIGHT", modelFrame, "BOTTOMRIGHT", 3, -3)
     borderFrame:SetBackdrop({
         bgFile = nil,
-        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
-        tile = true, tileSize = 16, edgeSize = 8,
+        edgeFile = modelBorder,
+        edgeSize = 12,
     })
-    borderFrame:SetBackdropBorderColor(1, 1, 1)
+
+    -- Background Frame
+    bgFrame = CreateFrame("Frame", nil, modelFrame, "BackdropTemplate")
+    bgFrame:SetSize(frameSize * 0.75, frameSize)    
+    bgFrame:SetPoint("TOPLEFT", modelFrame, "TOPLEFT", 0, 0)
+    bgFrame:SetPoint("BOTTOMRIGHT", modelFrame, "BOTTOMRIGHT", 0, 0)  
+    bgFrame:SetBackdrop({
+        bgFile = modelBg,
+        tile = false, tileSize = 32, edgeSize = 0,
+    })     
+
+    -- Levels
+    borderFrame:SetFrameLevel(100)
+    modelFrame:SetFrameLevel(50)
+    bgFrame:SetFrameLevel(10)    
 
     -- Create and register the speaker frame
     local loadOptions = {
@@ -433,7 +447,18 @@ function Skits_Style_Warcraft:NewSpeak(creatureData, textData)
 
     local displayOptions =  Skits_UI_Utils:BuildDisplayOptions(portraitZoom, rotation, scale, animations, nil, pauseAfter, fallbackId, fallbackLight) 
 
-    local textFrame, textLabel, speakerNameFrame, modelFrame, borderFrame, modelLoader = Skits_Style_Warcraft:CreateSpeakFrame(creatureData, textData, displayOptions, modelFrameSize, Skits_Style_Warcraft.mainFrame, self.speakerOrder, textAreaWidth, font, fontSize, showSpeakerName)
+    local frameStyle = {
+        textAreaWidth = textAreaWidth,
+        font = font,
+        fontSize = fontSize,
+        showSpeakerName = showSpeakerName,
+        modelBorder = options.style_warcraft_model_border,
+        modelBg = options.style_warcraft_model_bg,
+    } 
+
+    print(options.style_warcraft_model_border)
+
+    local textFrame, textLabel, speakerNameFrame, modelFrame, borderFrame, modelLoader = Skits_Style_Warcraft:CreateSpeakFrame(creatureData, textData, displayOptions, modelFrameSize, Skits_Style_Warcraft.mainFrame, self.speakerOrder, frameStyle)
   
     if options.style_warcraft_speaker_face_animated then
         animations = Skits_UI_Utils:GetAnimationIdsFromText(textData.text, true)

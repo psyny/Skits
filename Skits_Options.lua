@@ -69,6 +69,8 @@ Skits_Options.defaults = {
         style_warcraft_speaker_face_size                       = 100,    
         style_warcraft_speaker_face_animated                   = true,
         style_warcraft_speaker_name_enabled                    = true,  
+        style_warcraft_model_bg                                = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
+        style_warcraft_model_border                            = "Interface\\DialogFrame\\UI-DialogBox-Border",        
 
         -- Style Tales
         style_tales_strata                           = "TOOLTIP",
@@ -200,6 +202,7 @@ local function GetQuestModelBackgroundOptions()
         ["Interface\\AchievementFrame\\UI-Achievement-Parchment-Horizontal"] = "Achievement Parchment",
         ["Interface\\FrameGeneral\\UI-Background-Marble"] = "Marble Background",
         ["Interface\\DialogFrame\\UI-DialogBox-Background-Dark"] = "Dark Dialog Background",
+        ["Interface\\DialogFrame\\UI-DialogBox-Background"] = "Dialog Background",
         ["Interface\\TabardFrame\\TabardFrameBackground"] = "Tabard Background",
     }
 end
@@ -853,7 +856,29 @@ Skits_Options.options = {
                             arg = "style_warcraft_speech_frame_size",
                             order = 15,
                             width = optionWidth,
-                        },                                                                                           
+                        },  
+                        style_warcraft_model_bg = {
+                            type = "select",
+                            name = L["Skits.options.style_warcraft_model_bg.title"],
+                            desc = L["Skits.options.style_warcraft_model_bg.desc"],
+                            values = function()
+                                return GetQuestModelBackgroundOptions()
+                            end,
+                            arg = "style_warcraft_model_bg",
+                            order = 16,
+                            width = optionWidth,
+                        },
+                        style_warcraft_model_border = {
+                            type = "select",
+                            name = L["Skits.options.style_warcraft_model_border.title"],
+                            desc = L["Skits.options.style_warcraft_model_border.desc"],
+                            values = function()
+                                return GetQuestModelBorderOptions()
+                            end,
+                            arg = "style_warcraft_model_border",
+                            order = 17,
+                            width = optionWidth,
+                        },                        
                     },
                 },      
                 tab_style_tales = {

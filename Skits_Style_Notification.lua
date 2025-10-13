@@ -204,19 +204,29 @@ function Skits_Style_Notification:CreateSpeakFrame(creatureData, text, textColor
     speakFrame.main:SetSize(parameters.portraitSize, parameters.portraitSize)
     speakFrame.main:SetPoint(internalPositionData.ancorRef1, parameters.parent, internalPositionData.ancorRef2, 0, 0)
 
+    -- Portrait frame container
+    internalPositionData.portraitYoffset = 5    
+    speakFrame.portraitContainer = CreateFrame("Frame", nil, speakFrame.main)
+    speakFrame.portraitContainer:SetPoint(internalPositionData.ancorRef1, speakFrame.main, internalPositionData.ancorRef2, 0, internalPositionData.portraitYoffset)   
+    speakFrame.portraitContainer:SetSize(parameters.portraitSize, parameters.portraitSize)  
+
     -- Portrait frame
-    internalPositionData.portraitYoffset = 5
-    speakFrame.portrait = CreateFrame("PlayerModel", nil, speakFrame.main)
+    speakFrame.portrait = CreateFrame("PlayerModel", nil, speakFrame.portraitContainer)
     Skits_UI_Utils:ModelFrameSetTargetSize(speakFrame.portrait, parameters.portraitSize, parameters.portraitSize)
     Skits_UI_Utils:ModelFrameSetVisible(speakFrame.portrait, isVisible) 
-    speakFrame.portrait:SetPoint(internalPositionData.ancorRef1, speakFrame.main, internalPositionData.ancorRef2, 0, internalPositionData.portraitYoffset)    
+    speakFrame.portrait:SetPoint(internalPositionData.ancorRef1, speakFrame.portraitContainer, internalPositionData.ancorRef2, 0, 0)    
+
+    -- Portrait bg frame container
+    internalPositionData.portraitBgOffsetY = internalPositionData.portraitYoffset + math.max(parameters.portraitSize * 0.05, 3)
+    speakFrame.portraitBgContainer = CreateFrame("Frame", nil, speakFrame.main)
+    speakFrame.portraitBgContainer:SetPoint(internalPositionData.ancorRef1, speakFrame.main, internalPositionData.ancorRef2, 0, internalPositionData.portraitBgOffsetY)   
+    speakFrame.portraitBgContainer:SetSize(parameters.portraitSize, parameters.portraitSize) 
 
     -- Portrait bg frame
-    internalPositionData.portraitBgOffsetY = math.max(parameters.portraitSize * 0.05, 3)
-    speakFrame.portraitBg = CreateFrame("PlayerModel", nil, speakFrame.main)
+    speakFrame.portraitBg = CreateFrame("PlayerModel", nil, speakFrame.portraitBgContainer)
     Skits_UI_Utils:ModelFrameSetTargetSize(speakFrame.portraitBg, parameters.portraitSize, parameters.portraitSize)
     Skits_UI_Utils:ModelFrameSetVisible(speakFrame.portraitBg, isVisible)
-    speakFrame.portraitBg:SetPoint("BOTTOMLEFT", speakFrame.portrait, "BOTTOMLEFT", 0, internalPositionData.portraitBgOffsetY)    
+    speakFrame.portraitBg:SetPoint(internalPositionData.ancorRef1, speakFrame.portraitBgContainer, internalPositionData.ancorRef2, 0, 0)     
 
     -- Content Frame: Frame contents
     internalPositionData.textAreaWidth = parameters.textAreaWidth 
@@ -273,11 +283,12 @@ function Skits_Style_Notification:SetSpeakFrameData(speakFrame, creatureData, te
 
     -- Organize Levels -------------------------------------------------------------------------------------------
     speakFrame.content:SetFrameLevel(100)
-    speakFrame.portraitBg:SetFrameLevel(50)
-    speakFrame.portrait:SetFrameLevel(51)
-    speakFrame.bg.main:SetFrameLevel(1)
+
+    speakFrame.portraitContainer:SetFrameLevel(51)    
+    speakFrame.portraitBgContainer:SetFrameLevel(50)
+
+    speakFrame.bg.main:SetFrameLevel(2)
     speakFrame.bg.bg:SetFrameLevel(1)
-    
 
     -- MODELS -------------------------------------------------------------------------------------------
     -- Model: display options
@@ -307,7 +318,8 @@ function Skits_Style_Notification:SetSpeakFrameData(speakFrame, creatureData, te
         modelFrame = speakFrame.portraitBg,
         callback = nil,
     }
-    speakFrame.portraitBgLoaderData = Skits_UI_Utils:LoadModel(creatureData, portraitBgDisplayOptions, portraitBgLoadOptions)
+    -- Todo: disabled. Reason: something changed on Wow Api and this wont work anymore. Models wont respect framelevel.
+    -- speakFrame.portraitBgLoaderData = Skits_UI_Utils:LoadModel(creatureData, portraitBgDisplayOptions, portraitBgLoadOptions)
 
     -- Finals    
     internalPositionData.totalHeight = math.max(parameters.portraitSize + internalPositionData.portraitYoffset, internalPositionData.textAreaHeight)
@@ -379,7 +391,7 @@ function Skits_Style_Notification:msgExpire(msgData)
     end
     msgData.expired = true
 
-    -- Clear Model Data xxx
+    -- Clear Model Data
     msgData.speakFrame.main:SetScript("OnUpdate", nil)    
     msgData.speakFrame.portrait:SetDisplayInfo(0)
     msgData.speakFrame.portrait:ClearModel()

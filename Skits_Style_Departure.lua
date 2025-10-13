@@ -17,7 +17,7 @@ Skits_Style_Departure.modelLeftBgFrame = CreateFrame("Frame", nil, Skits_Style_D
 Skits_Style_Departure.modelLeftBgFrameTexture = Skits_Style_Departure.modelLeftBgFrame:CreateTexture(nil, "BACKGROUND")
 
 Skits_Style_Departure.modelRightBgFrame = CreateFrame("Frame", nil, Skits_Style_Departure.mainFrame)
-Skits_Style_Departure.modelRightBgFrameTexture = Skits_Style_Departure.modelLeftBgFrame:CreateTexture(nil, "BACKGROUND")
+Skits_Style_Departure.modelRightBgFrameTexture = Skits_Style_Departure.modelRightBgFrame:CreateTexture(nil, "BACKGROUND")
 
 -- Left Text Frames
 Skits_Style_Departure.textLeftFrame = CreateFrame("Frame", nil, Skits_Style_Departure.mainFrame)
@@ -373,7 +373,7 @@ local function SlotExpireMsg(slot, hideMessage)
     if hideMessage then
         local speakerTextEle = nil
         local messageTextEle = nil    
-        if slot.position.onLeft then
+        if slot.position and slot.position.onLeft then
             speakerTextEle = Skits_Style_Departure.textLeftSpeakerText
             messageTextEle = Skits_Style_Departure.textLeftMessageText
         else
@@ -599,8 +599,10 @@ local function PositionSetSlotToPositionUpdate(self, delta)
     local cy = Skits_Utils:Interpolation(up.oy, up.ty, 0, up.td, up.cd)
 
     if slot.position and slot.position.onLeft then
+        slot.modelFrame:ClearAllPoints()
         slot.modelFrame:SetPoint("BOTTOMLEFT", Skits_Style_Departure.mainFrame, "BOTTOMLEFT", cx, cy) 
     else
+        slot.modelFrame:ClearAllPoints()
         slot.modelFrame:SetPoint("BOTTOMRIGHT", Skits_Style_Departure.mainFrame, "BOTTOMRIGHT", cx, cy) 
     end
     
@@ -642,8 +644,10 @@ local function PositionSetSlotToPosition(slot, toPosition, instant)
         up.h = nil
 
         if slot.position.onLeft then
+            slot.modelFrame:ClearAllPoints()
             slot.modelFrame:SetPoint("BOTTOMLEFT", Skits_Style_Departure.mainFrame, "BOTTOMLEFT", toPosition.x, toPosition.y) 
         else
+            slot.modelFrame:ClearAllPoints()
             slot.modelFrame:SetPoint("BOTTOMRIGHT", Skits_Style_Departure.mainFrame, "BOTTOMRIGHT", toPosition.x, toPosition.y) 
         end
     else         

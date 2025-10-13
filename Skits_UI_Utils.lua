@@ -230,6 +230,8 @@ local function LoadModelApplyLoadOptions(loaderData, setAnimations)
         if modelFrame.targetSize then
             -- modelFrame:SetSize(modelFrame.targetSize.w, modelFrame.targetSize.h)
         end
+    else
+        modelFrame:SetModelScale(1.0)   
     end  
 
     if loaderData.fallback then
@@ -243,25 +245,26 @@ local function LoadModelApplyLoadOptions(loaderData, setAnimations)
         end  
     end
 
-    if setAnimations then
+    if setAnimations then        
+        local animFrame = 0
+        if displayOptions.pauseAfter and displayOptions.pauseAfter > 0 then      
+            -- Todo: maybe convert pauseAfter time (seconds) to frame?   
+            animFrame = 300 + math.random(1500)
+        end
+
+        local animationId = 0
         if displayOptions.animations and #displayOptions.animations > 0 then
-            local animationId = displayOptions.animations[math.random(#displayOptions.animations)]
-            modelFrame:SetAnimation(animationId)
+            animationId = displayOptions.animations[math.random(#displayOptions.animations)]
+            modelFrame:FreezeAnimation(animationId, 0, animFrame)
         end
-        
-        if displayOptions.pauseAfter then          
-            if displayOptions.pauseAfter <= 0 then     
-                modelFrame.pauseOn = GetTime()           
-                modelFrame:SetPaused(true) 
-            else
-                modelFrame.pauseOn = GetTime() + displayOptions.pauseAfter
-                local thisModelFrame = modelFrame
-                modelFrame.pauseHandler = C_Timer.NewTimer(displayOptions.pauseAfter, function()
-                    thisModelFrame:SetPaused(true) 
-                end) 
-            end
-        end
+
+        modelFrame:FreezeAnimation(animationId, 0, animFrame)
     end 
+
+    modelFrame:SetPosition(0, 0, 0) 
+    modelFrame:SetCamDistanceScale(1)
+    modelFrame:ZeroCachedCenterXY()
+    modelFrame:RefreshCamera()    
 end
 
 function Skits_UI_Utils:LoadReAppeared(loaderData)
@@ -436,6 +439,10 @@ function Skits_UI_Utils:LoadModelAux(loaderData)
     -- Set model (trying to load it)
     modelFrame:SetPosition(0, 0, 0) 
     modelFrame:SetModelScale(1.0)
+    modelFrame:SetCamDistanceScale(1)
+    modelFrame:ZeroCachedCenterXY()
+    modelFrame:RefreshCamera()    
+    
     local maxAttempts = 50
     if creatureData.isPlayer then        
         -- Player   

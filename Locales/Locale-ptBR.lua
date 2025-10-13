@@ -115,6 +115,10 @@ L["Skits.options.style_warcraft_speech_position_bottom_distance.title"] = "Dist�
 L["Skits.options.style_warcraft_speech_position_bottom_distance.desc"] = "Distância até a parte inferior da tela."
 L["Skits.options.style_warcraft_speech_frame_size.title"] = "Largura do Quadro de Discurso"
 L["Skits.options.style_warcraft_speech_frame_size.desc"] = "Definir a largura da área de texto para exibição do discurso."
+L["Skits.options.style_warcraft_model_bg.title"] = "Fundo do modelo"
+L["Skits.options.style_warcraft_model_bg.desc"] = "Fundo do modelo"
+L["Skits.options.style_warcraft_model_border.title"] = "Borda do modelo"
+L["Skits.options.style_warcraft_model_border.desc"] = "Borda do modelo"
 
 -- Style Tales
 L["Skits.options.style_tales_model_size.title"] = "Tamanho do Personagem"

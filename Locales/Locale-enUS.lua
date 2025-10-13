@@ -115,6 +115,10 @@ L["Skits.options.style_warcraft_speech_position_bottom_distance.title"] = "Botto
 L["Skits.options.style_warcraft_speech_position_bottom_distance.desc"] = "Distance to the bottom of the screen."
 L["Skits.options.style_warcraft_speech_frame_size.title"] = "Speech Frame Width"
 L["Skits.options.style_warcraft_speech_frame_size.desc"] = "Set the width of the text area for speech display."
+L["Skits.options.style_warcraft_model_bg.title"] = "Speaker Frame Background"
+L["Skits.options.style_warcraft_model_bg.desc"] = "Speaker Frame Background"
+L["Skits.options.style_warcraft_model_border.title"] = "Speaker Frame Border"
+L["Skits.options.style_warcraft_model_border.desc"] = "Speaker Frame Border"
 
 -- Style Tales
 L["Skits.options.style_tales_model_size.title"] = "Character Size"
