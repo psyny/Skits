@@ -437,15 +437,15 @@ function Skits_Style_Warcraft:NewSpeak(creatureData, textData)
     local portraitZoom = 0.9
     local scale = 1.0
     local animations = {0}
-    local pauseAfter = 0
+    local posePoint = 0.0
     local fallbackId = Skits_Style_Utils.fallbackId
     local fallbackLight = Skits_Style_Utils.lightPresets.hidden    
     
     if options.style_warcraft_speaker_face_animated then
-        pauseAfter = nil
+        posePoint = nil
     end
 
-    local displayOptions =  Skits_UI_Utils:BuildDisplayOptions(portraitZoom, rotation, scale, animations, nil, pauseAfter, fallbackId, fallbackLight) 
+    local displayOptions =  Skits_UI_Utils:BuildDisplayOptions(portraitZoom, rotation, scale, animations, nil, posePoint, fallbackId, fallbackLight) 
 
     local frameStyle = {
         textAreaWidth = textAreaWidth,

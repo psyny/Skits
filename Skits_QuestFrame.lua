@@ -789,20 +789,20 @@ function Skits_QuestFrame:AttachFrameToQuestFrame(framename, questText)
     local light = Skits_Style_Utils:GetHourLight()
     local fallbackId = Skits_Style_Utils.fallbackId
     local fallbackLight = Skits_Style_Utils.lightPresets.hidden
-    local pauseAfter = 0
+    local posePoint = 0.0
     local animations = {60}
     if options.quest_frame_model_animated then
         if options.quest_frame_model_poser then
             if questText then
                 animations = Skits_UI_Utils:GetAnimationIdsFromText(questText, true)        
             end
-            pauseAfter = (math.random() * 2)
+            posePoint = (math.random() * 1.0)
         else
-            pauseAfter = 60
+            posePoint = nil
             animations = {60}
         end
     end     
-    local displayOptions = Skits_UI_Utils:BuildDisplayOptions(0.9, 0, 1, animations, light, pauseAfter, fallbackId, fallbackLight)
+    local displayOptions = Skits_UI_Utils:BuildDisplayOptions(0.9, 0, 1, animations, light, posePoint, fallbackId, fallbackLight)
     
     -- Build load options
     local loadOptions = Skits_UI_Utils:BuildLoadOptions(self.questGiverModelFrame.model, nil)

@@ -176,13 +176,13 @@ local npcIdsByRaceAndGender = {
     [85] = { [0] = 210158, [1] = 228111 },
 }
 
-function Skits_UI_Utils:BuildDisplayOptions(portraitZoom, rotation, scale, animations, light, pauseAfter, fallbackId, fallbackLight) 
+function Skits_UI_Utils:BuildDisplayOptions(portraitZoom, rotation, scale, animations, light, posePoint, fallbackId, fallbackLight) 
     local displayOptions = {
         portraitZoom = portraitZoom,
         scale = scale,
         rotation = rotation,
         animations = animations,
-        pauseAfter = pauseAfter,
+        posePoint = posePoint,
         light = light,
         fallbackId = fallbackId,
         fallbackLight = fallbackLight,
@@ -245,20 +245,27 @@ local function LoadModelApplyLoadOptions(loaderData, setAnimations)
         end  
     end
 
-    if setAnimations then        
-        local animFrame = 0
-        if displayOptions.pauseAfter and displayOptions.pauseAfter > 0 then      
-            -- Todo: maybe convert pauseAfter time (seconds) to frame?   
-            animFrame = 300 + math.random(1500)
-        end
-
-        local animationId = 0
+    if setAnimations then     
+        -- Animation Id
+        local animationId = 0  
         if displayOptions.animations and #displayOptions.animations > 0 then
             animationId = displayOptions.animations[math.random(#displayOptions.animations)]
-            modelFrame:FreezeAnimation(animationId, 0, animFrame)
         end
 
-        modelFrame:FreezeAnimation(animationId, 0, animFrame)
+        -- Animation Frame
+        local animFrame = nil
+        if displayOptions.posePoint then      
+            animFrame = math.floor(displayOptions.posePoint * 3000)
+        end
+
+        -- Animate Logic
+        if animFrame then
+            modelFrame:FreezeAnimation(animationId, 0, animFrame)
+        else
+            modelFrame:SetAnimation(animationId)
+        end
+    else
+        modelFrame:SetPaused(true)
     end 
 
     modelFrame:SetPosition(0, 0, 0) 

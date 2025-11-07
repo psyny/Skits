@@ -299,12 +299,12 @@ function Skits_Style_Notification:SetSpeakFrameData(speakFrame, creatureData, te
     local rotation = nil
     local scale = nil
     local animations = {0}
-    local pauseAfter = 0
+    local posePoint = 0
     local fallbackId = Skits_Style_Utils.fallbackId
     local fallbackLight = Skits_Style_Utils.lightPresets.hidden    
 
     -- Portrait Frame: Load Model
-    local portraitDisplayOptions = Skits_UI_Utils:BuildDisplayOptions(portraitZoom, rotation, scale, animations, light, pauseAfter, fallbackId, fallbackLight) 
+    local portraitDisplayOptions = Skits_UI_Utils:BuildDisplayOptions(portraitZoom, rotation, scale, animations, light, posePoint, fallbackId, fallbackLight) 
     local portraitLoadOptions = {
         modelFrame = speakFrame.portrait,
         callback = nil,
@@ -313,7 +313,7 @@ function Skits_Style_Notification:SetSpeakFrameData(speakFrame, creatureData, te
 
     -- Portrait Bg Frame: Load Model
     -- TODO: It would make more sense if we try to load this model as part of the portrait callback...
-    local portraitBgDisplayOptions = Skits_UI_Utils:BuildDisplayOptions(portraitZoom, rotation, scale, animations, lightBg, pauseAfter, fallbackId, fallbackLight) 
+    local portraitBgDisplayOptions = Skits_UI_Utils:BuildDisplayOptions(portraitZoom, rotation, scale, animations, lightBg, posePoint, fallbackId, fallbackLight) 
     local portraitBgLoadOptions = {
         modelFrame = speakFrame.portraitBg,
         callback = nil,

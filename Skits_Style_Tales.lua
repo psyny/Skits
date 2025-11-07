@@ -840,14 +840,14 @@ local function ModelAdd(creatureData, textData, slot, duration)
     local rotation = rotation
     local scale = nil
     local animations = {0}
-    local pauseAfter = 0
+    local posePoint = 0.0
     local fallbackId = Skits_Style_Utils.fallbackId
     local fallbackLight = Skits_Style_Utils.lightPresets.hidden    
     if options.style_tales_model_poser then
         animations = Skits_UI_Utils:GetAnimationIdsFromText(textData.text, true)
-        pauseAfter = 1 + (math.random() * 1)
+        posePoint = (math.random() * 1.0)
     end    
-    local displayOptions =  Skits_UI_Utils:BuildDisplayOptions(portraitZoom, rotation, scale, animations, hourLight, pauseAfter, fallbackId, fallbackLight) 
+    local displayOptions =  Skits_UI_Utils:BuildDisplayOptions(portraitZoom, rotation, scale, animations, hourLight, posePoint, fallbackId, fallbackLight) 
 
     -- Model Frame: Load Model
     local loadOptions = {
