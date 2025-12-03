@@ -26,7 +26,7 @@ Skits_Style_Tales.modelLeftBgBorderFrame = CreateFrame("Frame", nil, Skits_Style
 Skits_Style_Tales.modelLeftBgBorderFrameTexture = Skits_Style_Tales.modelLeftBgBorderFrame:CreateTexture(nil, "BACKGROUND")
 
 Skits_Style_Tales.modelRightBgFrame = CreateFrame("Frame", nil, Skits_Style_Tales.mainFrame)
-Skits_Style_Tales.modelRightBgFrameTexture = Skits_Style_Tales.modelLeftBgFrame:CreateTexture(nil, "BACKGROUND")
+Skits_Style_Tales.modelRightBgFrameTexture = Skits_Style_Tales.modelRightBgFrame:CreateTexture(nil, "BACKGROUND")
 Skits_Style_Tales.modelRightBgBorderFrame = CreateFrame("Frame", nil, Skits_Style_Tales.modelRightBgFrame)
 Skits_Style_Tales.modelRightBgBorderFrameTexture = Skits_Style_Tales.modelRightBgBorderFrame:CreateTexture(nil, "BACKGROUND")
 
