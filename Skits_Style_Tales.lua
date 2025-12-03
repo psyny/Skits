@@ -990,14 +990,7 @@ local function LayoutUpdateBackgrounds()
 end
 
 -- Skit General Visibility Control --------------------------------------------------------
-local function HideSkit(forceHide)
-    if isVisible == true then
-        if forceHide == false then
-            return
-        end
-    else
-        return
-    end
+local function HideSkit()
     isVisible = false
 
     -- Hide all frames
@@ -1013,14 +1006,7 @@ local function HideSkit(forceHide)
     return
 end
 
-local function ShowSkit(forceShow)
-    if isVisible == false then
-        if forceShow == false then
-            return
-        end
-    else
-        return
-    end
+local function ShowSkit()
     isVisible = true
 
     local options = Skits_Options.db
@@ -1139,8 +1125,6 @@ function Skits_Style_Tales:NewSpeak(creatureData, textData)
 
     -- Update Controls
     SlotSetCurrentSpeaker(slot, creatureData)
-
-    ShowSkit(false)
 end
 
 function Skits_Style_Tales:ResetLayout()
@@ -1184,11 +1168,11 @@ function Skits_Style_Tales:CloseSkit()
 end
 
 function Skits_Style_Tales:HideSkit()
-    HideSkit(true)
+    HideSkit()
 end
 
 function Skits_Style_Tales:ShowSkit()
-    ShowSkit(true)
+    ShowSkit()
 end
 
 function Skits_Style_Tales:ShouldDisplay()

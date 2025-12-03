@@ -332,14 +332,7 @@ function Skits_Style_Warcraft:SetLoopingAnimation(modelFrame, animationIDs)
 end
 
 -- Skit General Visibility Control --------------------------------------------------------
-local function HideSkit(forceHide)
-    if isVisible == true then
-        if forceHide == false then
-            return
-        end
-    else
-        return
-    end
+local function HideSkit()
     isVisible = false
 
     -- Hide all messages
@@ -350,14 +343,7 @@ local function HideSkit(forceHide)
     return
 end
 
-local function ShowSkit(forceShow)
-    if isVisible == false then
-        if forceShow == false then
-            return
-        end
-    else
-        return
-    end
+local function ShowSkit()
     isVisible = true
 
     -- Show all messages
@@ -501,8 +487,6 @@ function Skits_Style_Warcraft:NewSpeak(creatureData, textData)
 
     -- Trim messages
     self:TrimMessages()
-
-    ShowSkit(false)
 end
 
 function Skits_Style_Warcraft:ResetLayout()
@@ -518,11 +502,11 @@ function Skits_Style_Warcraft:CloseSkit()
 end
 
 function Skits_Style_Warcraft:HideSkit()
-    HideSkit(true)
+    HideSkit()
 end
 
 function Skits_Style_Warcraft:ShowSkit()
-    ShowSkit(true)
+    ShowSkit()
 end
 
 function Skits_Style_Warcraft:ShouldDisplay()

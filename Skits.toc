@@ -2,7 +2,7 @@
 ## Title: Skits
 ## Notes: Immersive chats.
 ## Author: Psyny
-## Version: 4.0.0
+## Version: 4.0.1
 ## DefaultState: enabled
 
 ## SavedVariables: SkitsDB

@@ -890,14 +890,7 @@ local function ModelAdd(creatureData, textData, slot, duration)
 end
 
 -- Skit General Visibility Control --------------------------------------------------------
-local function HideSkit(forceHide)
-    if isVisible == true then
-        if forceHide == false then
-            return
-        end
-    else
-        return
-    end
+local function HideSkit()
     isVisible = false
 
     -- Hide all frames
@@ -913,14 +906,7 @@ local function HideSkit(forceHide)
     return
 end
 
-local function ShowSkit(forceShow)
-    if isVisible == false then
-        if forceShow == false then
-            return
-        end
-    else
-        return
-    end
+local function ShowSkit()
     isVisible = true
 
     -- Show all frames
@@ -936,7 +922,6 @@ local function ShowSkit(forceShow)
                 Skits_UI_Utils:LoadReAppeared(slot.loaderData)
             end            
         end
-
     end   
 
     return
@@ -1034,8 +1019,6 @@ function Skits_Style_Departure:NewSpeak(creatureData, textData)
 
     -- Update Controls
     SlotSetCurrentSpeaker(slot, creatureData)
-
-    ShowSkit(false)
 end
 
 function Skits_Style_Departure:ResetLayout()
@@ -1079,11 +1062,11 @@ function Skits_Style_Departure:CloseSkit()
 end
 
 function Skits_Style_Departure:HideSkit()
-    HideSkit(true)
+    HideSkit()
 end
 
 function Skits_Style_Departure:ShowSkit()
-    ShowSkit(true)
+    ShowSkit()
 end
 
 function Skits_Style_Departure:ShouldDisplay()

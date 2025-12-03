@@ -507,14 +507,7 @@ function Skits_Style_Notification:msgCreate()
 end
 
 -- Skit General Visibility Control --------------------------------------------------------
-local function HideSkit(forceHide)
-    if isVisible == true then
-        if forceHide == false then
-            return
-        end
-    else
-        return
-    end
+local function HideSkit()
     isVisible = false
 
     -- Hide all messages
@@ -530,14 +523,7 @@ local function HideSkit(forceHide)
     return
 end
 
-local function ShowSkit(forceShow)
-    if isVisible == false then
-        if forceShow == false then
-            return
-        end
-    else
-        return
-    end
+local function ShowSkit()
     isVisible = true
 
     -- Show all messages
@@ -587,8 +573,6 @@ function Skits_Style_Notification:NewSpeak(creatureData, textData)
 
     -- Create Message
     self:msgAdd(creatureData, textData, adjustedDuration)
-
-    ShowSkit(false)
 end
 
 function Skits_Style_Notification:ResetLayout()
@@ -603,11 +587,11 @@ function Skits_Style_Notification:CloseSkit()
 end
 
 function Skits_Style_Notification:HideSkit()
-    HideSkit(true)
+    HideSkit()
 end
 
 function Skits_Style_Notification:ShowSkit()
-    ShowSkit(true)
+    ShowSkit()
 end
 
 function Skits_Style_Notification:ShouldDisplay()
