@@ -159,28 +159,13 @@ function Skits_Style_Warcraft:CreateSpeakFrame(creatureData, textData, displayOp
     local loadOptions = {
         modelFrame = modelFrame,
         callback = nil,
-    }
-    
-    -- Store model data for potential reloading
-    local storedModelData = {
-        creatureData = creatureData,
-        displayOptions = displayOptions,
-        loadOptions = loadOptions,
-    }
-    
-    local modelLoader = nil
-    -- Only load model if style is visible (SetDisplayInfo/SetUnit don't work well with hidden frames)
-    if isVisible then
-        modelLoader = Skits_UI_Utils:LoadModel(creatureData, displayOptions, loadOptions)
-    end
+    }    
+    local modelLoader = Skits_UI_Utils:LoadModel(creatureData, displayOptions, loadOptions)
 
     Skits_UI_Utils:ModelFrameSetTargetSize(modelFrame, frameSize * 0.75, frameSize)    
-    Skits_UI_Utils:ModelFrameSetVisible(modelFrame, isVisible)
-    
-    -- Return stored model data along with loader
-    return storedModelData, modelLoader 
+    Skits_UI_Utils:ModelFrameSetVisible(modelFrame, true) 
 
-    return textFrame, textLabel, speakerNameFrame, modelFrame, borderFrame, storedModelData, modelLoader
+    return textFrame, textLabel, speakerNameFrame, modelFrame, borderFrame, modelLoader
 end
 
 function Skits_Style_Warcraft:UpdateText(text, textFrame, textLabel, showSpeakerName)
@@ -354,24 +339,8 @@ local function HideSkit()
     end
     isVisible = false
 
-    -- Hide all messages and clear models
+    -- Hide all messages
     for _, msgData in ipairs(Skits_Style_Warcraft.activeMessages) do
-        -- If message has active model loader, save it as pending for reload
-        if msgData.modelLoader then
-            -- Use stored model data if available
-            if msgData.storedModelData then
-                msgData.pendingModelData = msgData.storedModelData
-            end
-            
-            -- Stop loader timer
-            Skits_UI_Utils:LoadModelStopTimer(msgData.modelLoader)
-            
-            -- Clear model
-            msgData.modelFrame:SetDisplayInfo(0)
-            msgData.modelFrame:ClearModel()
-            msgData.modelLoader = nil
-        end
-        
         setSpeakVisibility(msgData)
     end   
 
@@ -384,25 +353,8 @@ local function ShowSkit()
     end
     isVisible = true
 
-    -- Show all messages and reload pending models
-    local currTime = GetTime()
+    -- Show all messages
     for _, msgData in ipairs(Skits_Style_Warcraft.activeMessages) do
-        -- Check if we have pending model data to load
-        if msgData.pendingModelData then
-            -- Check if message hasn't expired (using timestamp + duration)
-            local msgExpireTime = msgData.timestamp + msgData.duration
-            if msgExpireTime > currTime then
-                -- Reload the model
-                local pending = msgData.pendingModelData
-                msgData.modelLoader = Skits_UI_Utils:LoadModel(pending.creatureData, pending.displayOptions, pending.loadOptions)
-                msgData.pendingModelData = nil -- Clear pending data
-            else
-                -- Message expired, clear pending data
-                msgData.pendingModelData = nil
-                msgData.storedModelData = nil
-            end
-        end
-        
         setSpeakVisibility(msgData)
     end  
 
@@ -499,7 +451,7 @@ function Skits_Style_Warcraft:NewSpeak(creatureData, textData)
 
     print(options.style_warcraft_model_border)
 
-    local textFrame, textLabel, speakerNameFrame, modelFrame, borderFrame, storedModelData, modelLoader = Skits_Style_Warcraft:CreateSpeakFrame(creatureData, textData, displayOptions, modelFrameSize, Skits_Style_Warcraft.mainFrame, self.speakerOrder, frameStyle)
+    local textFrame, textLabel, speakerNameFrame, modelFrame, borderFrame, modelLoader = Skits_Style_Warcraft:CreateSpeakFrame(creatureData, textData, displayOptions, modelFrameSize, Skits_Style_Warcraft.mainFrame, self.speakerOrder, frameStyle)
   
     if options.style_warcraft_speaker_face_animated then
         animations = Skits_UI_Utils:GetAnimationIdsFromText(textData.text, true)
@@ -530,8 +482,6 @@ function Skits_Style_Warcraft:NewSpeak(creatureData, textData)
         duration = adjustedDuration,
         timerHandle = nil,
         modelLoader = modelLoader,
-        storedModelData = storedModelData, -- Store model data for reloading
-        pendingModelData = not isVisible and storedModelData or nil, -- Mark as pending if hidden
     }
     lastMsgData = msgData
     setSpeakVisibility(msgData)
