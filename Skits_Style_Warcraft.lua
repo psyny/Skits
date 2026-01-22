@@ -19,7 +19,8 @@ Skits_Style_Warcraft.mainFrame:SetAllPoints(UIParent)
 Skits_Style_Warcraft.mainFrame:EnableMouse(false)
 Skits_Style_Warcraft.mainFrame:EnableMouseWheel(false)
 
-local isVisible = true
+local isVisible = false
+local needsLayoutReset = true
 
 -- AUX FUNCTIONS --------------------------------------------------------------------------------------------------------------
 local function setSpeakVisibility(msgData)
@@ -333,6 +334,9 @@ end
 
 -- Skit General Visibility Control --------------------------------------------------------
 local function HideSkit()
+    if isVisible == false then
+        return    
+    end
     isVisible = false
 
     -- Hide all messages
@@ -344,6 +348,9 @@ local function HideSkit()
 end
 
 local function ShowSkit()
+    if isVisible == true then
+        return    
+    end
     isVisible = true
 
     -- Show all messages

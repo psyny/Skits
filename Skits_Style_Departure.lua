@@ -192,8 +192,6 @@ function Skits_Style_Departure:ResetLayouts()
     end
     needsLayoutReset = false
 
-    print("Skits_Style_Departure layout reset")
-
     local options = Skits_Options.db
     local font = LibStub("LibSharedMedia-3.0"):Fetch("font", options.style_departure_speech_font_name)    
     local fontSize = options.style_departure_speech_font_size
@@ -926,7 +924,7 @@ local function ShowSkit()
     end
     isVisible = true
 
-    Skits_Style_Notification:ResetLayouts()        
+    Skits_Style_Departure:ResetLayouts()        
 
     -- Show all frames
     LayoutUpdateBackgrounds()
@@ -948,10 +946,6 @@ end
 
 -- EXTERNAL: Speak --------------------------------------------------------------------------------------------------------------
 function Skits_Style_Departure:NewSpeak(creatureData, textData)
-    if isVisible == false then
-        return
-    end
-    
     self:ResetLayouts()
 
     -- Duration

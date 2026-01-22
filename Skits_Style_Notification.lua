@@ -110,8 +110,6 @@ function Skits_Style_Notification:ResetLayouts()
     end
     needsLayoutReset = false
 
-    print("Skits_Style_Notification layout reset")
-
     local options = Skits_Options.db
 
     -- Options db
@@ -321,16 +319,6 @@ function Skits_Style_Notification:SetSpeakFrameData(speakFrame, creatureData, te
     }
     speakFrame.portraitLoaderData = Skits_UI_Utils:LoadModel(creatureData, portraitDisplayOptions, portraitLoadOptions)
 
-    -- Portrait Bg Frame: Load Model
-    -- TODO: It would make more sense if we try to load this model as part of the portrait callback...
-    local portraitBgDisplayOptions = Skits_UI_Utils:BuildDisplayOptions(portraitZoom, rotation, scale, animations, lightBg, posePoint, fallbackId, fallbackLight) 
-    local portraitBgLoadOptions = {
-        modelFrame = speakFrame.portraitBg,
-        callback = nil,
-    }
-    -- Todo: disabled. Reason: something changed on Wow Api and this wont work anymore. Models wont respect framelevel.
-    -- speakFrame.portraitBgLoaderData = Skits_UI_Utils:LoadModel(creatureData, portraitBgDisplayOptions, portraitBgLoadOptions)
-
     -- Finals    
     internalPositionData.totalHeight = math.max(parameters.portraitSize + internalPositionData.portraitYoffset, internalPositionData.textAreaHeight)
     speakFrame.height = internalPositionData.totalHeight
@@ -534,8 +522,6 @@ local function HideSkit()
         setSpeakVisibility(speakFrame, toVisible)
     end    
 
-    print("Notification Hide")
-
     return
 end
 
@@ -557,17 +543,11 @@ local function ShowSkit()
         setSpeakVisibility(speakFrame, toVisible)
     end    
 
-    print("Notification Show")
-
     return
 end
 
 -- EXTERNAL: Speak --------------------------------------------------------------------------------------------------------------
 function Skits_Style_Notification:NewSpeak(creatureData, textData)
-    if isVisible == false then
-        return
-    end
-
     self:ResetLayouts()
 
     local options = Skits_Options.db

@@ -991,6 +991,9 @@ end
 
 -- Skit General Visibility Control --------------------------------------------------------
 local function HideSkit()
+    if isVisible == false then
+        return    
+    end
     isVisible = false
 
     -- Hide all frames
@@ -1007,7 +1010,12 @@ local function HideSkit()
 end
 
 local function ShowSkit()
+    if isVisible == true then
+        return    
+    end
     isVisible = true
+
+    Skits_Style_Tales:ResetLayouts()   
 
     local options = Skits_Options.db
     local optionsModelSize = options.style_tales_model_size

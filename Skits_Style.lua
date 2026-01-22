@@ -144,14 +144,11 @@ function Skits_Style:ShowSkitStyle(styleToShow, onlyIfActive)
         end
     end
 
-    print("-----")
     -- First, hide, than show styles
     for _, style in pairs(toHide) do
-        print("closing: " .. style.name)
         style:CloseSkit()
     end       
     for _, style in pairs(toShow) do
-        print("showing: " .. style.name)
         style:ShowSkit()
     end
 end
@@ -172,7 +169,6 @@ function Skits_Style:GetInstanceInformation()
 end
 
 function Skits_Style:SituationEnterCombat(onlyIfActive)
-    print("Situation: Entered Combat")
     local options = Skits_Options.db
 
     self.inCombat = true
@@ -188,14 +184,15 @@ function Skits_Style:SituationEnterCombat(onlyIfActive)
 end
 
 function Skits_Style:DelayedCombatExit(onlyIfActive)
-    print("Situation: Delayed Exited Combat")
     local options = Skits_Options.db
 
     self.inCombat = Skits_Utils:IsInCombat()
 
     if not options.combat_easy_out then
         self:ShowSituationSkit(onlyIfActive)
-    end    
+    else
+        self:ShowSituationSkit(onlyIfActive)
+    end
 
     -- Stop delayed combat checks
     if self.inCombatDelayedHandler then
@@ -205,7 +202,6 @@ function Skits_Style:DelayedCombatExit(onlyIfActive)
 end
 
 function Skits_Style:SituationExitCombat(onlyIfActive)
-    print("Situation: Exited Combat")
     local options = Skits_Options.db
 
     if options.combat_exit_delay <= 0 then
