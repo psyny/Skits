@@ -31,8 +31,6 @@ local function initialize_aux_addActiveStyleByName(styleName)
     local styleObj = styleNameToObj(styleName, true)
     if styleObj then
         Skits_Style.ativeStyles[styleObj.name] = styleObj
-        styleObj:ResetLayout()
-        styleObj:CloseSkit()
     else
         if not styleName then
             styleName = "<nil>"
@@ -51,6 +49,13 @@ function Skits_Style:Initialize()
     initialize_aux_addActiveStyleByName(options.style_general_styleonsituation_combat)
     initialize_aux_addActiveStyleByName(options.style_general_styleonsituation_instance_solo)
     initialize_aux_addActiveStyleByName(options.style_general_styleonsituation_instance_group)
+
+    -- Initialize Skits Layouts
+    for _, styleObj in pairs(self.ativeStyles) do
+        styleObj:ResetLayout()
+        styleObj:ShowSkit()
+        styleObj:CloseSkit()
+    end
 
     Skits_QuestFrame:Initialize()
 end
@@ -119,6 +124,9 @@ function Skits_Style:StyleToDisplay()
 end
 
 function Skits_Style:ShowSkitStyle(styleToShow, onlyIfActive)
+    toShow = {}
+    toHide = {}
+
     for _, style in pairs(self.ativeStyles) do
         local shouldShow = false
         if style.name == styleToShow.name then
@@ -130,10 +138,21 @@ function Skits_Style:ShowSkitStyle(styleToShow, onlyIfActive)
         end
 
         if shouldShow then
-            style:ShowSkit()
+            table.insert(toShow, style)
         else
-            style:HideSkit()
+            table.insert(toHide, style)
         end
+    end
+
+    print("-----")
+    -- First, hide, than show styles
+    for _, style in pairs(toHide) do
+        print("closing: " .. style.name)
+        style:CloseSkit()
+    end       
+    for _, style in pairs(toShow) do
+        print("showing: " .. style.name)
+        style:ShowSkit()
     end
 end
 
@@ -145,7 +164,7 @@ function Skits_Style:ShowSituationSkit(onlyIfActive)
     maxPlayers = lMaxPlayers
 
     local styleToShow = Skits_Style:StyleToDisplay()
-    Skits_Style:ShowSkitStyle(styleToShow, onlyIfActive)
+    self:ShowSkitStyle(styleToShow, onlyIfActive)
 end
 
 function Skits_Style:GetInstanceInformation()
@@ -153,6 +172,7 @@ function Skits_Style:GetInstanceInformation()
 end
 
 function Skits_Style:SituationEnterCombat(onlyIfActive)
+    print("Situation: Entered Combat")
     local options = Skits_Options.db
 
     self.inCombat = true
@@ -168,6 +188,7 @@ function Skits_Style:SituationEnterCombat(onlyIfActive)
 end
 
 function Skits_Style:DelayedCombatExit(onlyIfActive)
+    print("Situation: Delayed Exited Combat")
     local options = Skits_Options.db
 
     self.inCombat = Skits_Utils:IsInCombat()
@@ -184,6 +205,7 @@ function Skits_Style:DelayedCombatExit(onlyIfActive)
 end
 
 function Skits_Style:SituationExitCombat(onlyIfActive)
+    print("Situation: Exited Combat")
     local options = Skits_Options.db
 
     if options.combat_exit_delay <= 0 then

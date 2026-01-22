@@ -21,9 +21,8 @@ Skits_Style_Notification.nextMsgIdx = 1
 Skits_Style_Notification.lastMsgTimestamp = GetTime()
 Skits_Style_Notification.remainingDuration = 0
 
+local isVisible = false
 local needsLayoutReset = true
-
-local isVisible = true
 
 local datasetname = "solo"
 
@@ -102,6 +101,17 @@ local instanceStyleFallback = {
 }
 
 function Skits_Style_Notification:ResetLayouts()    
+    if isVisible == false then
+        needsLayoutReset = true
+        return
+    end
+    if needsLayoutReset == false then
+        return
+    end
+    needsLayoutReset = false
+
+    print("Skits_Style_Notification layout reset")
+
     local options = Skits_Options.db
 
     -- Options db
@@ -417,6 +427,7 @@ function Skits_Style_Notification:msgAdd(creatureData, textData, duration)
     msgData.expired = false
     msgData.duration = duration    
     msgData.text = textData.text
+
     setSpeakVisibility(msgData.speakFrame, false)    
 
     self:SetSpeakFrameData(msgData.speakFrame, creatureData, textData.text, textData) 
@@ -508,6 +519,9 @@ end
 
 -- Skit General Visibility Control --------------------------------------------------------
 local function HideSkit()
+    if isVisible == false then
+        return    
+    end
     isVisible = false
 
     -- Hide all messages
@@ -520,11 +534,18 @@ local function HideSkit()
         setSpeakVisibility(speakFrame, toVisible)
     end    
 
+    print("Notification Hide")
+
     return
 end
 
 local function ShowSkit()
+    if isVisible == true then
+        return    
+    end
     isVisible = true
+
+    Skits_Style_Notification:ResetLayouts()    
 
     -- Show all messages
     for _, msgData in ipairs(Skits_Style_Notification.messages) do
@@ -536,22 +557,25 @@ local function ShowSkit()
         setSpeakVisibility(speakFrame, toVisible)
     end    
 
+    print("Notification Show")
+
     return
 end
 
 -- EXTERNAL: Speak --------------------------------------------------------------------------------------------------------------
 function Skits_Style_Notification:NewSpeak(creatureData, textData)
-    if needsLayoutReset then
-        self:ResetLayouts()
-        needsLayoutReset = false
+    if isVisible == false then
+        return
     end
+
+    self:ResetLayouts()
 
     local options = Skits_Options.db
 
     -- Calculate position
     local datasetchanged, _ = defineDatasetDb()
     if datasetchanged then
-        self:ResetLayouts()
+        needsLayoutReset = true
     end
 
     -- Duration

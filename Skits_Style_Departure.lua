@@ -4,10 +4,10 @@ Skits_Style_Departure = {}
 Skits_Style_Departure.name = Skits_Style_Utils.enum_styles.DEPARTURE
 
 local numberOfSlots = 2
-local needsLayoutReset = true
 local textAreaHeight = 100
 
-local isVisible = true
+local isVisible = false
+local needsLayoutReset = true
 
 -- MainFrames
 Skits_Style_Departure.mainFrame = CreateFrame("Frame", "SkitsStyleDeparture", UIParent)
@@ -183,6 +183,17 @@ local function LayoutUpdateBackgrounds()
 end
 
 function Skits_Style_Departure:ResetLayouts()
+    if isVisible == false then
+        needsLayoutReset = true
+        return
+    end
+    if needsLayoutReset == false then
+        return
+    end
+    needsLayoutReset = false
+
+    print("Skits_Style_Departure layout reset")
+
     local options = Skits_Options.db
     local font = LibStub("LibSharedMedia-3.0"):Fetch("font", options.style_departure_speech_font_name)    
     local fontSize = options.style_departure_speech_font_size
@@ -891,6 +902,9 @@ end
 
 -- Skit General Visibility Control --------------------------------------------------------
 local function HideSkit()
+    if isVisible == false then
+        return    
+    end
     isVisible = false
 
     -- Hide all frames
@@ -907,7 +921,12 @@ local function HideSkit()
 end
 
 local function ShowSkit()
+    if isVisible == true then
+        return    
+    end
     isVisible = true
+
+    Skits_Style_Notification:ResetLayouts()        
 
     -- Show all frames
     LayoutUpdateBackgrounds()
@@ -929,10 +948,11 @@ end
 
 -- EXTERNAL: Speak --------------------------------------------------------------------------------------------------------------
 function Skits_Style_Departure:NewSpeak(creatureData, textData)
-    if needsLayoutReset then
-        self:ResetLayouts()
-        needsLayoutReset = false
+    if isVisible == false then
+        return
     end
+    
+    self:ResetLayouts()
 
     -- Duration
     local duration = textData.duration
