@@ -192,6 +192,8 @@ function Skits_Style_Notification:CreateSpeakFrame(creatureData, text, textColor
         portraitLoaderData = nil,
         portraitBg = nil,
         portraitBgLoaderData = nil,
+        pendingPortraitModelData = nil, -- Stores model data when style is hidden
+        storedPortraitModelData = nil, -- Always stores last model data for reloading
         textEle = nil,
         height = 0,
     }
@@ -317,7 +319,23 @@ function Skits_Style_Notification:SetSpeakFrameData(speakFrame, creatureData, te
         modelFrame = speakFrame.portrait,
         callback = nil,
     }
-    speakFrame.portraitLoaderData = Skits_UI_Utils:LoadModel(creatureData, portraitDisplayOptions, portraitLoadOptions)
+    
+    -- Always store model data for potential reloading
+    speakFrame.storedPortraitModelData = {
+        creatureData = creatureData,
+        displayOptions = portraitDisplayOptions,
+        loadOptions = portraitLoadOptions,
+    }
+    
+    -- Only load model if style is visible (SetDisplayInfo/SetUnit don't work well with hidden frames)
+    if isVisible then
+        speakFrame.portraitLoaderData = Skits_UI_Utils:LoadModel(creatureData, portraitDisplayOptions, portraitLoadOptions)
+        speakFrame.pendingPortraitModelData = nil -- Clear any pending data since we loaded it
+    else
+        -- Store model data to load when style becomes visible
+        speakFrame.pendingPortraitModelData = speakFrame.storedPortraitModelData
+        speakFrame.portraitLoaderData = nil
+    end
 
     -- Finals    
     internalPositionData.totalHeight = math.max(parameters.portraitSize + internalPositionData.portraitYoffset, internalPositionData.textAreaHeight)
@@ -389,21 +407,28 @@ function Skits_Style_Notification:msgExpire(msgData)
     end
     msgData.expired = true
 
-    -- Clear Model Data
-    msgData.speakFrame.main:SetScript("OnUpdate", nil)    
-    msgData.speakFrame.portrait:SetDisplayInfo(0)
-    msgData.speakFrame.portrait:ClearModel()
-    msgData.speakFrame.portraitBg:SetDisplayInfo(0)
-    msgData.speakFrame.portraitBg:ClearModel()    
+    -- Clear Model Data (only if visible to avoid issues with hidden frames)
+    msgData.speakFrame.main:SetScript("OnUpdate", nil)
+    
+    if isVisible then
+        msgData.speakFrame.portrait:SetDisplayInfo(0)
+        msgData.speakFrame.portrait:ClearModel()
+        msgData.speakFrame.portraitBg:SetDisplayInfo(0)
+        msgData.speakFrame.portraitBg:ClearModel()
+    end
 
-    if msgData.portraitLoaderData then
-        Skits_UI_Utils:LoadModelStopTimer(msgData.portraitLoaderData)
-        msgData.portraitLoaderData = nil
+    if msgData.speakFrame.portraitLoaderData then
+        Skits_UI_Utils:LoadModelStopTimer(msgData.speakFrame.portraitLoaderData)
+        msgData.speakFrame.portraitLoaderData = nil
     end    
-    if msgData.portraitBgLoaderData then
-        Skits_UI_Utils:LoadModelStopTimer(msgData.portraitBgLoaderData)
-        msgData.portraitBgLoaderData = nil
-    end        
+    if msgData.speakFrame.portraitBgLoaderData then
+        Skits_UI_Utils:LoadModelStopTimer(msgData.speakFrame.portraitBgLoaderData)
+        msgData.speakFrame.portraitBgLoaderData = nil
+    end
+    
+    -- Clear pending and stored model data
+    msgData.speakFrame.pendingPortraitModelData = nil
+    msgData.speakFrame.storedPortraitModelData = nil
     
     setSpeakVisibility(msgData.speakFrame, false)
 end
@@ -533,9 +558,19 @@ local function ShowSkit()
 
     Skits_Style_Notification:ResetLayouts()    
 
-    -- Show all messages
+    -- Show all messages and reload pending models
+    local currTime = GetTime()
     for _, msgData in ipairs(Skits_Style_Notification.messages) do
         local speakFrame = msgData.speakFrame
+        
+        -- Check if we have pending portrait model data to load
+        if speakFrame.pendingPortraitModelData and not msgData.expired then
+            -- Reload the model (expiration is handled by the timer, so if not expired, load it)
+            local pending = speakFrame.pendingPortraitModelData
+            speakFrame.portraitLoaderData = Skits_UI_Utils:LoadModel(pending.creatureData, pending.displayOptions, pending.loadOptions)
+            speakFrame.pendingPortraitModelData = nil -- Clear pending data
+        end
+        
         local toVisible = false
         if msgData.expired == false then
             toVisible = isVisible

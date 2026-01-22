@@ -101,6 +101,8 @@ for i = 1, numberOfSlots do
         slotExpireHandler = nil,
         onLeft = tempOnLeft,
         loaderData = nil,
+        pendingModelData = nil, -- Stores model data when style is hidden: {creatureData, textData, duration, displayOptions}
+        storedModelData = nil, -- Always stores last model data for reloading: {creatureData, textData, displayOptions}
         position = nil,
         positionUpdate = {ox = 0, oy = 0, tx = 0, ty = 0, cd = 0, td = 0, h = nil},
     }
@@ -357,8 +359,11 @@ local function SlotClearData(slot)
         return
     end
 
-    slot.modelFrame:SetDisplayInfo(0)
-    slot.modelFrame:ClearModel()
+    -- Clear model only if visible (to avoid issues with hidden frames)
+    if isVisible then
+        slot.modelFrame:SetDisplayInfo(0)
+        slot.modelFrame:ClearModel()
+    end
     
     slot.creatureData = nil
 
@@ -390,6 +395,10 @@ local function SlotClearData(slot)
         Skits_UI_Utils:LoadModelStopTimer(slot.loaderData)
         slot.loaderData = nil
     end
+
+    -- Clear pending and stored model data
+    slot.pendingModelData = nil
+    slot.storedModelData = nil
 end
 
 local function SlotExpireMsg(slot, hideMessage)
@@ -849,15 +858,31 @@ local function ModelAdd(creatureData, textData, slot, duration)
     end    
     local displayOptions =  Skits_UI_Utils:BuildDisplayOptions(portraitZoom, rotation, scale, animations, hourLight, posePoint, fallbackId, fallbackLight) 
 
-    -- Model Frame: Load Model
-    local loadOptions = {
-        modelFrame = slot.modelFrame,
-        callback = nil,
+    -- Always store model data for potential reloading
+    slot.storedModelData = {
+        creatureData = creatureData,
+        textData = textData,
+        duration = duration,
+        displayOptions = displayOptions,
     }
-    
-    local loaderData = Skits_UI_Utils:LoadModel(creatureData, displayOptions, loadOptions)
-    Skits_UI_Utils:ModelFrameSetVisible(slot.modelFrame, isVisible)
-    slot.loaderData = loaderData
+
+    -- Only load model if style is visible (SetDisplayInfo/SetUnit don't work well with hidden frames)
+    if isVisible then
+        -- Model Frame: Load Model
+        local loadOptions = {
+            modelFrame = slot.modelFrame,
+            callback = nil,
+        }
+        
+        local loaderData = Skits_UI_Utils:LoadModel(creatureData, displayOptions, loadOptions)
+        Skits_UI_Utils:ModelFrameSetVisible(slot.modelFrame, isVisible)
+        slot.loaderData = loaderData
+        slot.pendingModelData = nil -- Clear any pending data since we loaded it
+    else
+        -- Store model data to load when style becomes visible
+        slot.pendingModelData = slot.storedModelData
+        slot.loaderData = nil
+    end
 end
 
 -- Layout update functions
@@ -999,10 +1024,26 @@ local function HideSkit()
     -- Hide all frames
     LayoutUpdateBackgrounds()
 
-    -- Hide model
-    -- Why set to size 0 instead of hidding? WOW Api has a memory leak when changing model of hidden model frames.
+    -- Clear models and save state for reloading later
     for i = 1, numberOfSlots do
         slot = Skits_Style_Tales.speakerSlots[i]
+        
+        -- If slot has active model data, save it as pending for reload
+        if slot.creatureData and slot.loaderData then
+            -- Use stored model data if available, otherwise mark as needing reload
+            if slot.storedModelData then
+                slot.pendingModelData = slot.storedModelData
+            end
+            
+            -- Stop loader timer
+            Skits_UI_Utils:LoadModelStopTimer(slot.loaderData)
+            
+            -- Clear model (only works when frame is still technically visible/sized)
+            slot.modelFrame:SetDisplayInfo(0)
+            slot.modelFrame:ClearModel()
+            slot.loaderData = nil
+        end
+        
         Skits_UI_Utils:ModelFrameSetVisible(slot.modelFrame, isVisible)
     end 
 
@@ -1024,13 +1065,61 @@ local function ShowSkit()
     -- Show all frames
     LayoutUpdateBackgrounds()
 
-    -- Show model slots
+    -- Show model slots and load pending models
+    local currTime = GetTime()
     for i = 1, numberOfSlots do
         slot = Skits_Style_Tales.speakerSlots[i]
         if slot then
             Skits_UI_Utils:ModelFrameSetVisible(slot.modelFrame, isVisible)
 
-            if slot.loaderData then                                
+            -- Check if we have pending model data to load
+            if slot.pendingModelData then
+                -- Check if message hasn't expired
+                if slot.msgExpireTimestamp and slot.msgExpireTimestamp > currTime then
+                    -- Reload the model
+                    local pending = slot.pendingModelData
+                    
+                    -- Use stored display options or regenerate if needed
+                    local displayOptions = pending.displayOptions
+                    if not displayOptions then
+                        local hourLight = slot.modelLight or Skits_Style_Utils:GetHourLight()
+                        
+                        local minAngle = 350
+                        local maxAngle = 370    
+                        local randomAngle = math.random() * (maxAngle - minAngle) + minAngle
+                        if randomAngle >= 360 then
+                            randomAngle = randomAngle - 360
+                        end
+                        local rotation = Skits_UI_Utils:GetRadAngle(randomAngle)
+                        
+                        local portraitZoom = 0
+                        local scale = nil
+                        local animations = {0}
+                        local posePoint = 0.0
+                        local fallbackId = Skits_Style_Utils.fallbackId
+                        local fallbackLight = Skits_Style_Utils.lightPresets.hidden    
+                        if options.style_tales_model_poser then
+                            animations = Skits_UI_Utils:GetAnimationIdsFromText(pending.textData.text, true)
+                            posePoint = (math.random() * 1.0)
+                        end    
+                        displayOptions = Skits_UI_Utils:BuildDisplayOptions(portraitZoom, rotation, scale, animations, hourLight, posePoint, fallbackId, fallbackLight)
+                    end
+                    
+                    -- Load model now that we're visible
+                    local loadOptions = {
+                        modelFrame = slot.modelFrame,
+                        callback = nil,
+                    }
+                    
+                    slot.loaderData = Skits_UI_Utils:LoadModel(pending.creatureData, displayOptions, loadOptions)
+                    slot.pendingModelData = nil -- Clear pending data
+                else
+                    -- Message expired, clear pending data
+                    slot.pendingModelData = nil
+                    slot.storedModelData = nil
+                end
+            elseif slot.loaderData then
+                -- Model was already loaded, just reappear
                 Skits_UI_Utils:LoadReAppeared(slot.loaderData)
             end            
         end

@@ -146,7 +146,7 @@ function Skits_Style:ShowSkitStyle(styleToShow, onlyIfActive)
 
     -- First, hide, than show styles
     for _, style in pairs(toHide) do
-        style:CloseSkit()
+        style:HideSkit()
     end       
     for _, style in pairs(toShow) do
         style:ShowSkit()
