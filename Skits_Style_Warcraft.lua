@@ -160,15 +160,7 @@ function Skits_Style_Warcraft:CreateSpeakFrame(creatureData, textData, displayOp
         callback = nil,
     }   
     
-    local modelLoader    
-    
-    if true or isVisible == true then 
-        -- This works.. why? Its because we created modelFrame now?
-        modelLoader = Skits_UI_Utils:LoadModel(creatureData, displayOptions, loadOptions)
-    else
-        -- todo: instead of just clearing the model, store model to reload on show
-        modelFrame:ClearModel()      
-    end
+    local modelLoader = Skits_UI_Utils:LoadModel(creatureData, displayOptions, loadOptions)
 
     Skits_UI_Utils:ModelFrameSetTargetSize(modelFrame, frameSize * 0.75, frameSize)    
     Skits_UI_Utils:ModelFrameSetVisible(modelFrame, true) 

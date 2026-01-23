@@ -299,12 +299,7 @@ function Skits_Style_Notification:SetSpeakFrameData(speakFrame, creatureData, te
         callback = nil,
     }
 
-    if true or isVisible == true then 
-        speakFrame.portraitLoaderData = Skits_UI_Utils:LoadModel(creatureData, portraitDisplayOptions, portraitLoadOptions)
-    else
-        -- todo: instead of just clearing the model, store model to reload on show
-        speakFrame.portrait:ClearModel()
-    end   
+    speakFrame.portraitLoaderData = Skits_UI_Utils:LoadModel(creatureData, portraitDisplayOptions, portraitLoadOptions)
 
     -- Finals    
     internalPositionData.totalHeight = math.max(parameters.portraitSize + internalPositionData.portraitYoffset, internalPositionData.textAreaHeight)
@@ -397,7 +392,7 @@ function Skits_Style_Notification:msgAdd(creatureData, textData, duration)
     msgData.duration = duration    
     msgData.text = textData.text
 
-    setSpeakVisibility(msgData.speakFrame, false)    
+    --setSpeakVisibility(msgData.speakFrame, false)    
 
     self:SetSpeakFrameData(msgData.speakFrame, creatureData, textData.text, textData) 
     local newMsgHeight = msgData.speakFrame.internalPositionData.totalHeight

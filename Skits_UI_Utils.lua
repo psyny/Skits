@@ -791,7 +791,7 @@ function Skits_UI_Utils:ModelFrameSetVisible(modelframe, visible)
             end
             modelframe:SetSize(targetSize.w, targetSize.h)
         else
-            modelframe:SetSize(0.01, 0.01)
+            modelframe:SetSize(0.1, 0.1)
         end
     end
 

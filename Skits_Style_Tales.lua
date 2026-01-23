@@ -855,14 +855,9 @@ local function ModelAdd(creatureData, textData, slot, duration)
         callback = nil,
     }
     
-    if true or isVisible == true then 
-        local loaderData = Skits_UI_Utils:LoadModel(creatureData, displayOptions, loadOptions)
-        Skits_UI_Utils:ModelFrameSetVisible(slot.modelFrame, isVisible)
-        slot.loaderData = loaderData
-    else
-        -- todo: instead of just clearing the model, store model to reload on show
-        slot.modelFrame:ClearModel()      
-    end
+    local loaderData = Skits_UI_Utils:LoadModel(creatureData, displayOptions, loadOptions)
+    Skits_UI_Utils:ModelFrameSetVisible(slot.modelFrame, isVisible)
+    slot.loaderData = loaderData
 end
 
 -- Layout update functions
