@@ -65,7 +65,10 @@ local function setSpeakVisibility(speakFrame, toVisible)
             speakFrame.bg.bg:Show()
             if speakFrame.portraitLoaderData then
                 Skits_UI_Utils:LoadReAppeared(speakFrame.portraitLoaderData)
-            end          
+            end
+            if speakFrame.portraitBgLoaderData then
+                Skits_UI_Utils:LoadReAppeared(speakFrame.portraitBgLoaderData)     
+            end              
         else
             speakFrame.content:Hide()
             speakFrame.bg.bg:Hide()
@@ -97,19 +100,17 @@ local instanceStyleFallback = {
     solo = "solo",
 }
 
-function Skits_Style_Notification:ResetLayouts(force)       
-    if force == nil or force == false then 
-        if isVisible == false then
-            needsLayoutReset = true
-            return
-        end
-        if needsLayoutReset == false then
-            return
-        end
+function Skits_Style_Notification:ResetLayouts()    
+    if isVisible == false then
+        needsLayoutReset = true
+        return
+    end
+    if needsLayoutReset == false then
+        return
     end
     needsLayoutReset = false
 
-    print("RESETTING LAYOUT")
+    print("Skits_Style_Notification layout reset")
 
     local options = Skits_Options.db
 
@@ -319,16 +320,16 @@ function Skits_Style_Notification:SetSpeakFrameData(speakFrame, creatureData, te
         callback = nil,
     }
 
-    -- Finals    
-    internalPositionData.totalHeight = math.max(parameters.portraitSize + internalPositionData.portraitYoffset, internalPositionData.textAreaHeight)
-    speakFrame.height = internalPositionData.totalHeight
-
     if isVisible == true then 
         speakFrame.portraitLoaderData = Skits_UI_Utils:LoadModel(creatureData, portraitDisplayOptions, portraitLoadOptions)
     else
         -- todo: instead of just clearing the model, store model to reload on show
         speakFrame.portrait:ClearModel()
-    end    
+    end   
+
+    -- Finals    
+    internalPositionData.totalHeight = math.max(parameters.portraitSize + internalPositionData.portraitYoffset, internalPositionData.textAreaHeight)
+    speakFrame.height = internalPositionData.totalHeight
 end
 
 -- MSG add --------------------------------------------------------------------------------------------------------------
@@ -519,8 +520,6 @@ local function HideSkit()
     end
     isVisible = false
 
-    print("HIDDEN")
-
     -- Hide all messages
     for _, msgData in ipairs(Skits_Style_Notification.messages) do
         local speakFrame = msgData.speakFrame
@@ -531,15 +530,18 @@ local function HideSkit()
         setSpeakVisibility(speakFrame, toVisible)
     end    
 
+    print("Notification Hide")
+
     return
 end
-
 
 local function ShowSkit()
     if isVisible == true then
         return    
     end
     isVisible = true
+
+    Skits_Style_Notification:ResetLayouts()    
 
     -- Show all messages
     for _, msgData in ipairs(Skits_Style_Notification.messages) do
@@ -551,18 +553,21 @@ local function ShowSkit()
         setSpeakVisibility(speakFrame, toVisible)
     end    
 
+    print("Notification Show")
+
     return
 end
 
 -- EXTERNAL: Speak --------------------------------------------------------------------------------------------------------------
 function Skits_Style_Notification:NewSpeak(creatureData, textData)
+    self:ResetLayouts()
+
     local options = Skits_Options.db
 
     -- Calculate position
     local datasetchanged, _ = defineDatasetDb()
     if datasetchanged then
         needsLayoutReset = true
-        self:ResetLayouts(false)
     end
 
     -- Duration
@@ -586,8 +591,8 @@ function Skits_Style_Notification:NewSpeak(creatureData, textData)
     self:msgAdd(creatureData, textData, adjustedDuration)
 end
 
-function Skits_Style_Notification:ResetLayout(force)
-    self:ResetLayouts(force)
+function Skits_Style_Notification:ResetLayout()
+    self:ResetLayouts()
 end
 
 function Skits_Style_Notification:CloseSkit()

@@ -8,7 +8,7 @@ function Skits_Style_Hidden:NewSpeak(creatureData, textData)
     return
 end
 
-function Skits_Style_Hidden:ResetLayout(force)
+function Skits_Style_Hidden:ResetLayout()
     return
 end
 

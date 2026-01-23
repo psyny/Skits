@@ -19,8 +19,7 @@ Skits_Style_Warcraft.mainFrame:SetAllPoints(UIParent)
 Skits_Style_Warcraft.mainFrame:EnableMouse(false)
 Skits_Style_Warcraft.mainFrame:EnableMouseWheel(false)
 
-local isVisible = false
-local needsLayoutReset = true
+local isVisible = true
 
 -- AUX FUNCTIONS --------------------------------------------------------------------------------------------------------------
 local function setSpeakVisibility(msgData)
@@ -159,8 +158,17 @@ function Skits_Style_Warcraft:CreateSpeakFrame(creatureData, textData, displayOp
     local loadOptions = {
         modelFrame = modelFrame,
         callback = nil,
-    }    
-    local modelLoader = Skits_UI_Utils:LoadModel(creatureData, displayOptions, loadOptions)
+    }   
+    
+    local modelLoader
+    
+    if true or isVisible == true then 
+        -- This works.. why? Its because we created modelFrame now?
+        modelLoader = Skits_UI_Utils:LoadModel(creatureData, displayOptions, loadOptions)
+    else
+        -- todo: instead of just clearing the model, store model to reload on show
+        modelFrame:ClearModel()      
+    end
 
     Skits_UI_Utils:ModelFrameSetTargetSize(modelFrame, frameSize * 0.75, frameSize)    
     Skits_UI_Utils:ModelFrameSetVisible(modelFrame, true) 
@@ -496,7 +504,7 @@ function Skits_Style_Warcraft:NewSpeak(creatureData, textData)
     self:TrimMessages()
 end
 
-function Skits_Style_Warcraft:ResetLayout(force)
+function Skits_Style_Warcraft:ResetLayout()
     local options = Skits_Options.db
     self.mainFrame:SetAllPoints(UIParent)
     self.mainFrame:SetFrameStrata(options.style_warcraft_strata)

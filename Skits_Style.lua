@@ -53,7 +53,7 @@ function Skits_Style:Initialize()
     -- Initialize Skits Layouts
     print("Initialize")
     for _, styleObj in pairs(self.ativeStyles) do
-        styleObj:ResetLayout(true)
+        styleObj:ResetLayout()
         styleObj:ShowSkit()
         styleObj:CloseSkit()
     end

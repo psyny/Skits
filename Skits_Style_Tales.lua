@@ -138,7 +138,7 @@ Skits_Style_Tales.controls = {
     skitExpireHandler = nil,
 }
 
-function Skits_Style_Tales:ResetLayouts(force)
+function Skits_Style_Tales:ResetLayouts()
     local options = Skits_Options.db
     local font = LibStub("LibSharedMedia-3.0"):Fetch("font", options.style_tales_speech_font_name)    
     local fontSize = options.style_tales_speech_font_size
@@ -855,9 +855,14 @@ local function ModelAdd(creatureData, textData, slot, duration)
         callback = nil,
     }
     
-    local loaderData = Skits_UI_Utils:LoadModel(creatureData, displayOptions, loadOptions)
-    Skits_UI_Utils:ModelFrameSetVisible(slot.modelFrame, isVisible)
-    slot.loaderData = loaderData
+    if isVisible == true then 
+        local loaderData = Skits_UI_Utils:LoadModel(creatureData, displayOptions, loadOptions)
+        Skits_UI_Utils:ModelFrameSetVisible(slot.modelFrame, isVisible)
+        slot.loaderData = loaderData
+    else
+        -- todo: instead of just clearing the model, store model to reload on show
+        slot.modelFrame:ClearModel()      
+    end
 end
 
 -- Layout update functions
@@ -1015,8 +1020,6 @@ local function ShowSkit()
     end
     isVisible = true
 
-    Skits_Style_Tales:ResetLayouts()   
-
     local options = Skits_Options.db
     local optionsModelSize = options.style_tales_model_size
     local modelFrameSize = optionsModelSize
@@ -1135,8 +1138,8 @@ function Skits_Style_Tales:NewSpeak(creatureData, textData)
     SlotSetCurrentSpeaker(slot, creatureData)
 end
 
-function Skits_Style_Tales:ResetLayout(force)
-    self:ResetLayouts(force)
+function Skits_Style_Tales:ResetLayout()
+    self:ResetLayouts()
 end
 
 
