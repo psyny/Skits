@@ -496,7 +496,7 @@ function Skits_Style_Warcraft:NewSpeak(creatureData, textData)
     self:TrimMessages()
 end
 
-function Skits_Style_Warcraft:ResetLayout()
+function Skits_Style_Warcraft:ResetLayout(force)
     local options = Skits_Options.db
     self.mainFrame:SetAllPoints(UIParent)
     self.mainFrame:SetFrameStrata(options.style_warcraft_strata)

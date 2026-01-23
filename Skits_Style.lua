@@ -51,8 +51,9 @@ function Skits_Style:Initialize()
     initialize_aux_addActiveStyleByName(options.style_general_styleonsituation_instance_group)
 
     -- Initialize Skits Layouts
+    print("Initialize")
     for _, styleObj in pairs(self.ativeStyles) do
-        styleObj:ResetLayout()
+        styleObj:ResetLayout(true)
         styleObj:ShowSkit()
         styleObj:CloseSkit()
     end
@@ -169,10 +170,12 @@ function Skits_Style:GetInstanceInformation()
 end
 
 function Skits_Style:SituationEnterCombat(onlyIfActive)
+    print("Combat Entered A")
     local options = Skits_Options.db
 
     self.inCombat = true
     if not options.combat_easy_in then
+        print("Combat Entered B")
         self:ShowSituationSkit(onlyIfActive)
     end
 

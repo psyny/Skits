@@ -182,13 +182,15 @@ local function LayoutUpdateBackgrounds()
     end    
 end
 
-function Skits_Style_Departure:ResetLayouts()
-    if isVisible == false then
-        needsLayoutReset = true
-        return
-    end
-    if needsLayoutReset == false then
-        return
+function Skits_Style_Departure:ResetLayouts(force)
+    if force == nil or force == false then 
+        if isVisible == false then
+            needsLayoutReset = true
+            return
+        end
+        if needsLayoutReset == false then
+            return
+        end
     end
     needsLayoutReset = false
 
@@ -893,8 +895,9 @@ local function ModelAdd(creatureData, textData, slot, duration)
         callback = nil,
     }
     
-    local loaderData = Skits_UI_Utils:LoadModel(creatureData, displayOptions, loadOptions)
+    print("Load model?")
     Skits_UI_Utils:ModelFrameSetVisible(slot.modelFrame, isVisible)
+    local loaderData = Skits_UI_Utils:LoadModel(creatureData, displayOptions, loadOptions)    
     slot.loaderData = loaderData
 end
 
@@ -924,7 +927,7 @@ local function ShowSkit()
     end
     isVisible = true
 
-    Skits_Style_Departure:ResetLayouts()        
+    --Skits_Style_Departure:ResetLayouts(false)        
 
     -- Show all frames
     LayoutUpdateBackgrounds()
@@ -946,8 +949,8 @@ end
 
 -- EXTERNAL: Speak --------------------------------------------------------------------------------------------------------------
 function Skits_Style_Departure:NewSpeak(creatureData, textData)
-    self:ResetLayouts()
-
+    self:ResetLayouts(false)
+    
     -- Duration
     local duration = textData.duration
 
@@ -1035,8 +1038,8 @@ function Skits_Style_Departure:NewSpeak(creatureData, textData)
     SlotSetCurrentSpeaker(slot, creatureData)
 end
 
-function Skits_Style_Departure:ResetLayout()
-    self:ResetLayouts()
+function Skits_Style_Departure:ResetLayout(force)
+    self:ResetLayouts(force)
 end
 
 

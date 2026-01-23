@@ -374,7 +374,7 @@ local function LoadModelStartTimer(loaderData)
     local tloaderData = loaderData
     modelFrame:SetScript("OnModelLoaded", function(self)     
         LoadModelFinished(tloaderData)
-    end)        
+    end)       
 
     local tloaderData = loaderData
     loaderData.loaderHandle = C_Timer.NewTimer(0.2, function()
@@ -428,17 +428,6 @@ function Skits_UI_Utils:LoadModelAux(loaderData)
     -- Useful Variables
     local modelFrame = loaderData.loadOptions.modelFrame
 
-    if false then
-        -- Pre Set Model Frame Options
-        LoadModelApplyLoadOptions(loaderData, false)
-
-        -- Is model already loaded?
-        if LoadModelIsLoaded(loaderData) then
-            LoadModelFinished(loaderData)
-            return 
-        end
-    end
-
     -- Attempt Control
     loaderData.attemptCurrent = loaderData.attemptCurrent + 1
     loaderData.attemptTotal = loaderData.attemptTotal + 1    
@@ -449,7 +438,7 @@ function Skits_UI_Utils:LoadModelAux(loaderData)
     modelFrame:SetCamDistanceScale(1)
     modelFrame:ZeroCachedCenterXY()
     modelFrame:RefreshCamera()    
-    
+
     local maxAttempts = 50
     if creatureData.isPlayer then        
         -- Player   
@@ -594,14 +583,14 @@ function Skits_UI_Utils:LoadModelAux(loaderData)
                 modelFrame:SetDisplayInfo(displayId)
             end
         end    
-    end      
+    end   
     
     -- Is model already loaded?
     if LoadModelIsLoaded(loaderData) then
         LoadModelFinished(loaderData)
         return 
     end    
-    
+
     -- Timer to check again if the model has been loaded
     if loaderData.attemptPhase < 99 and loaderData.attemptTotal < maxAttempts then
         LoadModelStartTimer(loaderData)

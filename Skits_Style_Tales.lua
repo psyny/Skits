@@ -138,7 +138,7 @@ Skits_Style_Tales.controls = {
     skitExpireHandler = nil,
 }
 
-function Skits_Style_Tales:ResetLayouts()
+function Skits_Style_Tales:ResetLayouts(force)
     local options = Skits_Options.db
     local font = LibStub("LibSharedMedia-3.0"):Fetch("font", options.style_tales_speech_font_name)    
     local fontSize = options.style_tales_speech_font_size
@@ -1135,8 +1135,8 @@ function Skits_Style_Tales:NewSpeak(creatureData, textData)
     SlotSetCurrentSpeaker(slot, creatureData)
 end
 
-function Skits_Style_Tales:ResetLayout()
-    self:ResetLayouts()
+function Skits_Style_Tales:ResetLayout(force)
+    self:ResetLayouts(force)
 end
 
 
