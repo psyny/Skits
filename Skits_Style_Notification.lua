@@ -58,17 +58,13 @@ local function setSpeakVisibility(speakFrame, toVisible)
 
     if speakFrame then
         Skits_UI_Utils:ModelFrameSetVisible(speakFrame.portrait, toVisible)
-        Skits_UI_Utils:ModelFrameSetVisible(speakFrame.portraitBg, toVisible)
 
         if toVisible then
             speakFrame.content:Show()
             speakFrame.bg.bg:Show()
             if speakFrame.portraitLoaderData then
                 Skits_UI_Utils:LoadReAppeared(speakFrame.portraitLoaderData)
-            end
-            if speakFrame.portraitBgLoaderData then
-                Skits_UI_Utils:LoadReAppeared(speakFrame.portraitBgLoaderData)     
-            end              
+            end             
         else
             speakFrame.content:Hide()
             speakFrame.bg.bg:Hide()
@@ -192,8 +188,6 @@ function Skits_Style_Notification:CreateSpeakFrame(creatureData, text, textColor
         bg = nil,             
         portrait = nil,
         portraitLoaderData = nil,
-        portraitBg = nil,
-        portraitBgLoaderData = nil,
         textEle = nil,
         height = 0,
     }
@@ -225,18 +219,6 @@ function Skits_Style_Notification:CreateSpeakFrame(creatureData, text, textColor
     Skits_UI_Utils:ModelFrameSetTargetSize(speakFrame.portrait, parameters.portraitSize, parameters.portraitSize)
     Skits_UI_Utils:ModelFrameSetVisible(speakFrame.portrait, isVisible) 
     speakFrame.portrait:SetPoint(internalPositionData.ancorRef1, speakFrame.portraitContainer, internalPositionData.ancorRef2, 0, 0)    
-
-    -- Portrait bg frame container
-    internalPositionData.portraitBgOffsetY = internalPositionData.portraitYoffset + math.max(parameters.portraitSize * 0.05, 3)
-    speakFrame.portraitBgContainer = CreateFrame("Frame", nil, speakFrame.main)
-    speakFrame.portraitBgContainer:SetPoint(internalPositionData.ancorRef1, speakFrame.main, internalPositionData.ancorRef2, 0, internalPositionData.portraitBgOffsetY)   
-    speakFrame.portraitBgContainer:SetSize(parameters.portraitSize, parameters.portraitSize) 
-
-    -- Portrait bg frame
-    speakFrame.portraitBg = CreateFrame("PlayerModel", nil, speakFrame.portraitBgContainer)
-    Skits_UI_Utils:ModelFrameSetTargetSize(speakFrame.portraitBg, parameters.portraitSize, parameters.portraitSize)
-    Skits_UI_Utils:ModelFrameSetVisible(speakFrame.portraitBg, isVisible)
-    speakFrame.portraitBg:SetPoint(internalPositionData.ancorRef1, speakFrame.portraitBgContainer, internalPositionData.ancorRef2, 0, 0)     
 
     -- Content Frame: Frame contents
     internalPositionData.textAreaWidth = parameters.textAreaWidth 
@@ -295,7 +277,6 @@ function Skits_Style_Notification:SetSpeakFrameData(speakFrame, creatureData, te
     speakFrame.content:SetFrameLevel(100)
 
     speakFrame.portraitContainer:SetFrameLevel(51)    
-    speakFrame.portraitBgContainer:SetFrameLevel(50)
 
     speakFrame.bg.main:SetFrameLevel(2)
     speakFrame.bg.bg:SetFrameLevel(1)
@@ -401,17 +382,11 @@ function Skits_Style_Notification:msgExpire(msgData)
     msgData.speakFrame.main:SetScript("OnUpdate", nil)    
     msgData.speakFrame.portrait:SetDisplayInfo(0)
     msgData.speakFrame.portrait:ClearModel()
-    msgData.speakFrame.portraitBg:SetDisplayInfo(0)
-    msgData.speakFrame.portraitBg:ClearModel()    
 
     if msgData.portraitLoaderData then
         Skits_UI_Utils:LoadModelStopTimer(msgData.portraitLoaderData)
         msgData.portraitLoaderData = nil
-    end    
-    if msgData.portraitBgLoaderData then
-        Skits_UI_Utils:LoadModelStopTimer(msgData.portraitBgLoaderData)
-        msgData.portraitBgLoaderData = nil
-    end        
+    end       
     
     setSpeakVisibility(msgData.speakFrame, false)
 end
