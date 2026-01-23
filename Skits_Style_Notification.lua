@@ -106,8 +106,6 @@ function Skits_Style_Notification:ResetLayouts()
     end
     needsLayoutReset = false
 
-    print("Skits_Style_Notification layout reset")
-
     local options = Skits_Options.db
 
     -- Options db
@@ -301,7 +299,7 @@ function Skits_Style_Notification:SetSpeakFrameData(speakFrame, creatureData, te
         callback = nil,
     }
 
-    if isVisible == true then 
+    if true or isVisible == true then 
         speakFrame.portraitLoaderData = Skits_UI_Utils:LoadModel(creatureData, portraitDisplayOptions, portraitLoadOptions)
     else
         -- todo: instead of just clearing the model, store model to reload on show
@@ -505,8 +503,6 @@ local function HideSkit()
         setSpeakVisibility(speakFrame, toVisible)
     end    
 
-    print("Notification Hide")
-
     return
 end
 
@@ -527,16 +523,11 @@ local function ShowSkit()
         end
         setSpeakVisibility(speakFrame, toVisible)
     end    
-
-    print("Notification Show")
-
     return
 end
 
 -- EXTERNAL: Speak --------------------------------------------------------------------------------------------------------------
 function Skits_Style_Notification:NewSpeak(creatureData, textData)
-    self:ResetLayouts()
-
     local options = Skits_Options.db
 
     -- Calculate position

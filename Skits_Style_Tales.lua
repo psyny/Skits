@@ -855,7 +855,7 @@ local function ModelAdd(creatureData, textData, slot, duration)
         callback = nil,
     }
     
-    if isVisible == true then 
+    if true or isVisible == true then 
         local loaderData = Skits_UI_Utils:LoadModel(creatureData, displayOptions, loadOptions)
         Skits_UI_Utils:ModelFrameSetVisible(slot.modelFrame, isVisible)
         slot.loaderData = loaderData

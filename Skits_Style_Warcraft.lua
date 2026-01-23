@@ -160,7 +160,7 @@ function Skits_Style_Warcraft:CreateSpeakFrame(creatureData, textData, displayOp
         callback = nil,
     }   
     
-    local modelLoader
+    local modelLoader    
     
     if true or isVisible == true then 
         -- This works.. why? Its because we created modelFrame now?
@@ -456,8 +456,6 @@ function Skits_Style_Warcraft:NewSpeak(creatureData, textData)
         modelBorder = options.style_warcraft_model_border,
         modelBg = options.style_warcraft_model_bg,
     } 
-
-    print(options.style_warcraft_model_border)
 
     local textFrame, textLabel, speakerNameFrame, modelFrame, borderFrame, modelLoader = Skits_Style_Warcraft:CreateSpeakFrame(creatureData, textData, displayOptions, modelFrameSize, Skits_Style_Warcraft.mainFrame, self.speakerOrder, frameStyle)
   

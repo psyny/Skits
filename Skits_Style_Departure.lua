@@ -192,8 +192,6 @@ function Skits_Style_Departure:ResetLayouts()
     end
     needsLayoutReset = false
 
-    print("Skits_Style_Departure layout reset")
-
     local options = Skits_Options.db
     local font = LibStub("LibSharedMedia-3.0"):Fetch("font", options.style_departure_speech_font_name)    
     local fontSize = options.style_departure_speech_font_size
@@ -895,7 +893,7 @@ local function ModelAdd(creatureData, textData, slot, duration)
         callback = nil,
     }
     
-    if isVisible == true then 
+    if true or isVisible == true then 
         local loaderData = Skits_UI_Utils:LoadModel(creatureData, displayOptions, loadOptions)
         Skits_UI_Utils:ModelFrameSetVisible(slot.modelFrame, isVisible)
         slot.loaderData = loaderData
