@@ -2,7 +2,7 @@
 ## Title: Skits
 ## Notes: Immersive chats.
 ## Author: Psyny
-## Version: 4.1.0
+## Version: 4.1.1
 ## DefaultState: enabled
 
 ## SavedVariables: SkitsDB
@@ -22,6 +22,7 @@ Libs\AceLocale-3.0\AceLocale-3.0.xml
 Libs\AceGUI-3.0\AceGUI-3.0.xml
 Libs\AceConsole-3.0\AceConsole-3.0.xml
 Libs\AceConfig-3.0\AceConfig-3.0.xml
+Libs\LibSharedMedia-3.0\lib.xml
 #@end-no-lib-strip@
 
 # Locale files
