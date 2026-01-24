@@ -82,12 +82,20 @@ function Skits_ID_Store:Locals_GetCreatureDataByIdx(database, idxQueue, dataIdx)
 end
 
 function Skits_ID_Store:Locals_GetCreatureDataByName(database, idxQueue, creatureName)
-    local dataIdx = nil
+    if issecretvalue(creatureName) then
+        return
+    end
+    
+    local dataIdx = nil    
     dataIdx = database.mapNpcNameToIdx[creatureName]
     return self:Locals_GetCreatureDataByIdx(database, idxQueue, dataIdx)
 end
 
 function Skits_ID_Store:Locals_SetCreatureData(database, idxQueue, idxLimit, creatureData, updateNewer)
+    if issecretvalue(creatureData.name) then
+        return
+    end
+    
     if creatureData == nil then
         return
     end

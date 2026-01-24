@@ -331,6 +331,10 @@ end)
 
 -- Function to select color for the speaker dynamically
 function Skits:GetColorForSpeaker(name)
+    if issecretvalue(name) then
+        return unpack(self.colorPalette[1])
+    end
+
     -- Check if the speaker already has an assigned color
     local speakerColorIdx = self.speakerColorMap[name]
     if speakerColorIdx then
@@ -340,7 +344,6 @@ function Skits:GetColorForSpeaker(name)
         end        
     end
 
-   
     -- Speaker is not assigned or has the same color idx as the last message: assign new color    
     speakerColorIdx = Skits.nextColor
 
@@ -481,6 +484,10 @@ function Skits:HandlePlayerChatEvent(event, msg, sender, languageName, channelNa
 end
 
 function Skits:ChatEvent(creatureData, textData, priority)
+    if issecretvalue(creatureData.name) then
+        return
+    end
+
     local options = Skits_Options.db
     local r, g, b = self:GetColorForSpeaker(creatureData.name)	
 	
@@ -524,16 +531,13 @@ function Skits:BuildCreatureDataOfToken(unittoken)
             end
         
             -- Get GUID and creatureID
-            local guid = UnitGUID(unittoken)
-            if guid then
-                local creatureId = tonumber(guid:match("[Creature|Vehicle|Pet|Vignette|Instance]%-.-%-.-%-.-%-.-%-(%d+)"))
-                if creatureId then
-                    creatureData = {
-                        name = creatureName,
-                        creatureId = creatureId,
-                        isPlayer = false,
-                    }
-                end
+            local creatureId = UnitCreatureID(unittoken)
+            if creatureId then
+                creatureData = {
+                    name = creatureName,
+                    creatureId = creatureId,
+                    isPlayer = false,
+                }
             end
         else
             -- Is Player
