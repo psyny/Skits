@@ -27,7 +27,7 @@ function Skits_SpeakQueue:ShowNext()
 
     -- Show speak
     if nextSpeakData.isPause == false then
-        Skits:ChatEvent(nextSpeakData.creatureData, nextSpeakData.textData, false)
+        Skits:ChatEvent(nextSpeakData.creatureData, nextSpeakData.textData, false, true, true)
     end    
 
     return true

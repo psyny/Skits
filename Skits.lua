@@ -63,7 +63,7 @@ function Skits:OnInitialize()
     local options = Skits_Options.options
     local defaults = Skits_Options.defaults
 
-	self.db = LibStub("AceDB-3.0"):New("SkitsDB", defaults)
+	self.db = LibStub("AceDB-3.0"):New("SkitsDB", defaults, true)
 	self.db.RegisterCallback(self, "OnProfileChanged", "OnProfileChanged")
 	self.db.RegisterCallback(self, "OnProfileCopied", "OnProfileChanged")
 	self.db.RegisterCallback(self, "OnProfileReset", "OnProfileChanged")   
@@ -435,7 +435,7 @@ function Skits:HandleNpcChatEvent(event, msg, sender, languageName, channelName,
         speed= 1.0,
     }
 
-    self:ChatEvent(creatureData, textData, true)
+    self:ChatEvent(creatureData, textData, true, true, true)
 end
 
 function Skits:HandlePlayerChatEvent(event, msg, sender, languageName, channelName, target, flags, unknown, channelNumber, channelName2, unknown2, counter, guid)
@@ -480,10 +480,10 @@ function Skits:HandlePlayerChatEvent(event, msg, sender, languageName, channelNa
         speed = 1.0,
     }
 
-    self:ChatEvent(creatureData, textData, true)
+    self:ChatEvent(creatureData, textData, true, true, true)
 end
 
-function Skits:ChatEvent(creatureData, textData, priority)
+function Skits:ChatEvent(creatureData, textData, priority, storeInMemory, displaySkit)
     if issecretvalue(creatureData.name) then
         return
     end
@@ -502,15 +502,19 @@ function Skits:ChatEvent(creatureData, textData, priority)
     end
 
 	-- Store speak information in memory
-    self:StoreInMemory(creatureData, textData.text, {r=r, g=g, b=b})
+    if storeInMemory then
+        self:StoreInMemory(creatureData, textData.text, {r=r, g=g, b=b})
+    end
 
     -- Display text and 3D model
-    if self.skitsActive then
+    if displaySkit and self.skitsActive then
         Skits_UI:DisplaySkits(creatureData, textData, r, g, b)
     end
 
     -- Refresh log page
-    Skits_Log_UI:RefreshPage()
+    if storeInMemory then
+        Skits_Log_UI:RefreshPage()
+    end
     self.lastSpeaker = creatureData.name
 end
 
