@@ -157,8 +157,11 @@ L["Skits.options.style_departure_previous_speaker_lingertime.title"] = "Previous
 L["Skits.options.style_departure_previous_speaker_lingertime.desc"] = "How long a previous speaker stays lingering on the background (in seconds)."
 
 -- Quest Frame Model
-L["Skits.options.event_npc_interact.title"] = "Show Quest text as conversations"
-L["Skits.options.event_npc_interact.desc"] = "Toggle to display NPC and player messages when interacting via quest frame."
+L["Skits.options.event_npc_interact.title"] = "Quest Text Handling"
+L["Skits.options.event_npc_interact.desc"] = "How to handle NPC and player messages when interacting via quest frame."
+L["Skits.options.event_npc_interact.option.ignore"] = "Ignore"
+L["Skits.options.event_npc_interact.option.log"] = "Log Only"
+L["Skits.options.event_npc_interact.option.skit"] = "Show as Skit"
 L["Skits.options.quest_frame_model_enabled.title"] = "Enable Quest Model Frame"
 L["Skits.options.quest_frame_model_enabled.desc"] = "Toggle to display a 3D model frame when interacting with quest NPCs."
 L["Skits.options.quest_frame_model_size.title"] = "Quest Model Size"

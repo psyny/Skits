@@ -27,7 +27,7 @@ function Skits_SpeakQueue:ShowNext()
 
     -- Show speak
     if nextSpeakData.isPause == false then
-        Skits:ChatEvent(nextSpeakData.creatureData, nextSpeakData.textData, false, true, true)
+        Skits:ChatEvent(nextSpeakData.creatureData, nextSpeakData.textData, false, nextSpeakData.storeInMemory, true)
     end    
 
     return true
@@ -49,7 +49,7 @@ function Skits_SpeakQueue:CurrentTimesUp()
     self:ShowNext()
 end
 
-function Skits_SpeakQueue:AddSpeaker(creatureData, textData, duration, priority)
+function Skits_SpeakQueue:AddSpeaker(creatureData, textData, duration, priority, storeInMemory)
     -- Build speaker data
     local speakData = {
         isPause = false,        
@@ -57,6 +57,7 @@ function Skits_SpeakQueue:AddSpeaker(creatureData, textData, duration, priority)
         textData = textData,
         duration = duration,
         priority = priority,
+        storeInMemory = storeInMemory,
     }
 
     table.insert(self.queuedSpeaks, speakData)

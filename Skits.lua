@@ -70,6 +70,14 @@ function Skits:OnInitialize()
 	addonOptions = self.db.profile
     Skits_Options.db = addonOptions    
 
+    -- Backwards compatibility
+        --migrate event_npc_interact from boolean to string
+        if addonOptions.event_npc_interact == nil or addonOptions.event_npc_interact == false then
+            addonOptions.event_npc_interact = "ignore"
+        elseif addonOptions.event_npc_interact == true then
+            addonOptions.event_npc_interact = "skit"
+        end
+
 	-- Register options table and slash command
 	LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("Skits", options)
 	self:RegisterChatCommand("handynotes", function() LibStub("AceConfigDialog-3.0"):Open("Skits") end)

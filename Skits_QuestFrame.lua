@@ -177,7 +177,7 @@ end
 
 hooksecurefunc('SelectGossipOption', function(index, text, confirm)
     local options = Skits_Options.db
-    if not options.event_npc_interact then
+    if options.event_npc_interact == "ignore" then
         return 
     end    
 
@@ -192,7 +192,7 @@ end)
 
 hooksecurefunc(C_GossipInfo, "SelectOption", function(optionID)
     local options = Skits_Options.db
-    if not options.event_npc_interact then
+    if options.event_npc_interact == "ignore" then
         return 
     end    
 
@@ -206,7 +206,7 @@ end)
 
 hooksecurefunc(C_GossipInfo, "SelectOptionByIndex", function(index, optionText)
     local options = Skits_Options.db
-    if not options.event_npc_interact then
+    if options.event_npc_interact == "ignore" then
         return 
     end    
 
@@ -220,7 +220,7 @@ end)
 
 hooksecurefunc(C_GossipInfo, "SelectAvailableQuest", function(questID)
     local options = Skits_Options.db
-    if not options.event_npc_interact then
+    if options.event_npc_interact == "ignore" then
         return 
     end    
 
@@ -234,7 +234,7 @@ end)
 
 hooksecurefunc(C_GossipInfo, "SelectActiveQuest", function(questID)
     local options = Skits_Options.db
-    if not options.event_npc_interact then
+    if options.event_npc_interact == "ignore" then
         return 
     end    
 
@@ -252,7 +252,7 @@ end)
 QuestFrameAcceptButton:HookScript("OnClick", function()    
     --print("Quest Accepted")    
     local options = Skits_Options.db
-    if not options.event_npc_interact then
+    if options.event_npc_interact == "ignore" then
         return 
     end    
 
@@ -263,7 +263,7 @@ end)
 QuestFrameDeclineButton:HookScript("OnClick", function()
     --print("Quest Declined")
     local options = Skits_Options.db
-    if not options.event_npc_interact then
+    if options.event_npc_interact == "ignore" then
         return 
     end    
 
@@ -274,7 +274,7 @@ end)
 QuestFrameGoodbyeButton:HookScript("OnClick", function()
     --print("Goodbye clicked")
     local options = Skits_Options.db
-    if not options.event_npc_interact then
+    if options.event_npc_interact == "ignore" then
         return 
     end    
 
@@ -285,7 +285,7 @@ end)
 QuestFrameCloseButton:HookScript("OnClick", function()
     --print("Quest Frame closed via (X) button")
     local options = Skits_Options.db
-    if not options.event_npc_interact then
+    if options.event_npc_interact == "ignore" then
         return 
     end    
 
@@ -296,7 +296,7 @@ end)
 GossipFrame.GreetingPanel.GoodbyeButton:HookScript("OnClick", function()
     --print("Gossip Frame closed via GoodBye button")
     local options = Skits_Options.db
-    if not options.event_npc_interact then
+    if options.event_npc_interact == "ignore" then
         return 
     end    
 
@@ -307,7 +307,7 @@ end)
 GossipFrameCloseButton:HookScript("OnClick", function()
     --print("Gossip Frame closed via (X) button")
     local options = Skits_Options.db
-    if not options.event_npc_interact then
+    if options.event_npc_interact == "ignore" then
         return 
     end    
         
@@ -359,6 +359,8 @@ end
 
 -- Quest Frames
 function Skits_QuestFrame:HandleQuestFrame(creatureData, mainText, extraText, priority, clearQueue)
+    local options = Skits_Options.db 
+
     -- Check if speak was seen recently
     local npcName = Skits_Utils:GetUnitTokenFullName("npc") or "<no npc>"
     local speakId = npcName .. creatureData.name .. #mainText .. mainText:sub(1, 30)
@@ -444,7 +446,10 @@ function Skits_QuestFrame:HandleQuestFrame(creatureData, mainText, extraText, pr
                 duration = math.max((Skits_Utils:MessageDuration(currSpeakText) / frameTextSpeed) - 0.1, 1),
             }
 
-            Skits_SpeakQueue:AddSpeaker(creatureData, textData, textData.duration - 0.05, priority)
+            Skits:ChatEvent(creatureData, textData, false, true, false)
+            if options.event_npc_interact == "skit" then
+                Skits_SpeakQueue:AddSpeaker(creatureData, textData, textData.duration - 0.05, priority, false) 
+            end   
            
             currSpeakText = ""
         end
@@ -461,7 +466,10 @@ function Skits_QuestFrame:HandleQuestFrame(creatureData, mainText, extraText, pr
             duration = math.max((Skits_Utils:MessageDuration(currSpeakText) / frameTextSpeed) - 0.1, 1),
         }
 
-        Skits_SpeakQueue:AddSpeaker(creatureData, textData, textData.duration - 0.05, priority)
+        Skits:ChatEvent(creatureData, textData, false, true, false)
+        if options.event_npc_interact == "skit" then
+            Skits_SpeakQueue:AddSpeaker(creatureData, textData, textData.duration - 0.05, priority, false)
+        end
     end
 end
 
@@ -511,7 +519,7 @@ function Skits_QuestFrame:HandleQuestGreeting(event)
     self:AttachFrameToQuestFrame("QuestFrame", questText)
     
     local options = Skits_Options.db
-    if not options.event_npc_interact then
+    if options.event_npc_interact == "ignore" then
         return 
     end    
 
@@ -532,7 +540,7 @@ function Skits_QuestFrame:HandleQuestDetail(event)
     self:AttachFrameToQuestFrame("QuestFrame", questText)
 
     local options = Skits_Options.db
-    if not options.event_npc_interact then
+    if options.event_npc_interact == "ignore" then
         return 
     end    
 
@@ -565,7 +573,6 @@ function Skits_QuestFrame:HandleQuestDetail(event)
 
     -- NPC Talk (quest text)   
     self:HandleQuestFrame(creatureData, questText, "", 0, true)
-
     -- Player Talk (quest objective)
     if #questObjective > 0 then
         Skits_QuestFrame:PlayerQuestTalk(questObjective, false) 
@@ -580,7 +587,7 @@ function Skits_QuestFrame:HandleQuestProgress(event)
     self:AttachFrameToQuestFrame("QuestFrame", questText)
 
     local options = Skits_Options.db
-    if not options.event_npc_interact then
+    if options.event_npc_interact == "ignore" then
         return 
     end    
 
@@ -600,7 +607,7 @@ function Skits_QuestFrame:HandleQuestComplete(event)
     self:AttachFrameToQuestFrame("QuestFrame", questText)
 
     local options = Skits_Options.db
-    if not options.event_npc_interact then
+    if options.event_npc_interact == "ignore" then
         return 
     end    
 
@@ -625,7 +632,7 @@ function Skits_QuestFrame:HandleGossipShow(event)
     Skits.gossip.options.byOptionId = {}
 
     local options = Skits_Options.db
-    if not options.event_npc_interact then
+    if options.event_npc_interact == "ignore" then
         return
     end
 

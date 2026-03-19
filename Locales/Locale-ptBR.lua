@@ -157,8 +157,11 @@ L["Skits.options.style_departure_previous_speaker_lingertime.title"] = "Tempo de
 L["Skits.options.style_departure_previous_speaker_lingertime.desc"] = "Por quanto tempo o orador anterior permanece no fundo (em segundos)."
 
 -- Quest Frame Model
-L["Skits.options.event_npc_interact.title"] = "Exibir Texto de Quests como conversas"
-L["Skits.options.event_npc_interact.desc"] = "Ative para exibir mensagens de NPC ao interagir através de um quadro de missão." 
+L["Skits.options.event_npc_interact.title"] = "Modo de Exibição de Texto de Quest"
+L["Skits.options.event_npc_interact.desc"] = "Como lidar com mensagens de NPC e jogador ao interagir através de um quadro de missão."
+L["Skits.options.event_npc_interact.option.ignore"] = "Ignorar"
+L["Skits.options.event_npc_interact.option.log"] = "Apenas Registrar"
+L["Skits.options.event_npc_interact.option.skit"] = "Mostrar como Skit" 
 L["Skits.options.quest_frame_model_enabled.title"] = "Ativar Quadro de Modelo de Missão"
 L["Skits.options.quest_frame_model_enabled.desc"] = "Alternar para exibir um quadro de modelo 3D ao interagir com NPCs de missão."
 L["Skits.options.quest_frame_model_size.title"] = "Tamanho do Modelo de Missão"

@@ -146,7 +146,7 @@ Skits_Options.defaults = {
         style_departure_previous_speaker_lingertime      = 30,       
 
         -- Quests
-        event_npc_interact                               = false,  
+        event_npc_interact                               = "ignore",  
         quest_frame_model_enabled                        = false,
         quest_frame_model_size                           = 80,
         quest_frame_model_offsetx                        = 5,
@@ -393,9 +393,14 @@ Skits_Options.options = {
             disabled = false,         
             args = {
                 event_npc_interact = {
-                    type = "toggle",
+                    type = "select",
                     name = L["Skits.options.event_npc_interact.title"],
                     desc = L["Skits.options.event_npc_interact.desc"],
+                    values = {
+                        ["ignore"] = L["Skits.options.event_npc_interact.option.ignore"],
+                        ["log"] = L["Skits.options.event_npc_interact.option.log"],
+                        ["skit"] = L["Skits.options.event_npc_interact.option.skit"],
+                    },
                     arg = "event_npc_interact",
                     order = 1,
                     width = optionWidth,
