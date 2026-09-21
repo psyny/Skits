@@ -714,7 +714,7 @@ local function PositionSwap(slot1, slot2, instant)
     -- Reasons to be instant (besides given parameter)
     if not isVisible then
         instant = true
-    elseif not slot.position then
+    elseif not slot1.position then
         instant = true
     end
 
@@ -803,6 +803,7 @@ local function MsgAdd(creatureData, textData, slot, duration)
     local messageTextHeight = 0
     local textWidth = GetScreenWidth() * 0.25
     local fadedFrameParameters = nil
+    local eleTextHeight = 0
     if slot.position.onLeft then
         Skits_Style_Departure.textLeftSpeakerText:SetText(creatureData.name)
         Skits_Style_Departure.textLeftSpeakerText:SetTextColor(1, 1, 1)

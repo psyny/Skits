@@ -494,11 +494,7 @@ function Skits_QuestFrame:GetQuestGiverCreatureData()
     -- Get Creature Data
     local creatureData = nil
 
-    local playerName = Skits_Utils:GetUnitTokenFullName("player")
-    local creatureServer = GetRealmName()
-    local fullGiverName = giverName .. "-" .. creatureServer
-
-    if fullGiverName == playerName then
+    if UnitExists("npc") and UnitIsUnit("npc", "player") then
         creatureData = Skits:GetPlayerCreatureData()
     else
         creatureData = Skits:BuildCreatureDataOfToken("npc")

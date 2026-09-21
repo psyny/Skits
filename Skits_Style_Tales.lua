@@ -714,7 +714,7 @@ local function PositionSwap(slot1, slot2, instant)
     -- Reasons to be instant (besides given parameter)
     if not isVisible then
         instant = true
-    elseif not slot.position then
+    elseif not slot1.position then
         instant = true
     end
 
