@@ -237,21 +237,27 @@ function Skits_Style_Departure:ResetLayouts()
 
     -- Left Frame
     self.textLeftFrame:SetSize(textWidth, textAreaHeight)
-    self.textLeftFrame:SetPoint("BOTTOMLEFT", 0, 0)   
-    fadedFrameParameters = {
-        parent = Skits_Style_Departure.textLeftFrame,
-        alpha = 0.1,
-        contentHeight = textAreaHeight,
-        contentWidth = textWidth,
-        leftSize = textWidth,
-        rightSize = textWidth,
-        topSize = 2,
-        bottomSize = 2,
-    }  
+    self.textLeftFrame:SetPoint("BOTTOMLEFT", 0, 0)
 
-    Skits_UI_Utils:ResizeFadedFrame(self.textLeftFrameBgBorder, fadedFrameParameters)
-    self.textLeftFrameBgBorder.main:SetPoint("BOTTOMLEFT", Skits_Style_Departure.textLeftFrame, "BOTTOMLEFT", 0, 0)   
-    
+    -- Skip the generic placeholder box if this side is already showing a fitted message background
+    local mainSlotLeft = self.speakerPositions.left[1].slot
+    local hasActiveLeft = mainSlotLeft and mainSlotLeft.creatureData
+    if not hasActiveLeft then
+        fadedFrameParameters = {
+            parent = Skits_Style_Departure.textLeftFrame,
+            alpha = 0.1,
+            contentHeight = textAreaHeight,
+            contentWidth = textWidth,
+            leftSize = textWidth,
+            rightSize = textWidth,
+            topSize = 2,
+            bottomSize = 2,
+        }
+
+        Skits_UI_Utils:ResizeFadedFrame(self.textLeftFrameBgBorder, fadedFrameParameters)
+        self.textLeftFrameBgBorder.main:SetPoint("BOTTOMLEFT", Skits_Style_Departure.textLeftFrame, "BOTTOMLEFT", 0, 0)
+    end
+
     self.textLeftSpeakerText:SetPoint("LEFT", self.textLeftFrame, "BOTTOMLEFT", 0, 0)
     self.textLeftSpeakerText:SetFont(font, fontSize)
     self.textLeftSpeakerText:SetJustifyH("LEFT")
@@ -270,19 +276,25 @@ function Skits_Style_Departure:ResetLayouts()
     -- Right Frame
     self.textRightFrame:SetSize(textWidth, textAreaHeight)
     self.textRightFrame:SetPoint("BOTTOMRIGHT", 0, 0)
-    fadedFrameParameters = {
-        parent = Skits_Style_Departure.textRightFrame,
-        alpha = 0.1,
-        contentHeight = textAreaHeight,
-        contentWidth = textWidth,
-        leftSize = textWidth,
-        rightSize = textWidth,
-        topSize = 2,
-        bottomSize = 2,
-    }  
-    Skits_UI_Utils:ResizeFadedFrame(self.textRightFrameBgBorder, fadedFrameParameters)
-    self.textRightFrameBgBorder.main:SetPoint("BOTTOMRIGHT", Skits_Style_Departure.textRightFrame, "BOTTOMRIGHT", 0, 0)   
-    
+
+    -- Skip the generic placeholder box if this side is already showing a fitted message background
+    local mainSlotRight = self.speakerPositions.right[1].slot
+    local hasActiveRight = mainSlotRight and mainSlotRight.creatureData
+    if not hasActiveRight then
+        fadedFrameParameters = {
+            parent = Skits_Style_Departure.textRightFrame,
+            alpha = 0.1,
+            contentHeight = textAreaHeight,
+            contentWidth = textWidth,
+            leftSize = textWidth,
+            rightSize = textWidth,
+            topSize = 2,
+            bottomSize = 2,
+        }
+        Skits_UI_Utils:ResizeFadedFrame(self.textRightFrameBgBorder, fadedFrameParameters)
+        self.textRightFrameBgBorder.main:SetPoint("BOTTOMRIGHT", Skits_Style_Departure.textRightFrame, "BOTTOMRIGHT", 0, 0)
+    end
+
     self.textRightSpeakerText:SetPoint("RIGHT", self.textRightFrame, "BOTTOMRIGHT", 0, 0)
     self.textRightSpeakerText:SetFont(font, fontSize)
     self.textRightSpeakerText:SetJustifyH("RIGHT")
