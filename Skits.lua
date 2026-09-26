@@ -452,6 +452,10 @@ function Skits:HandlePlayerChatEvent(event, msg, sender, languageName, channelNa
         return
     end
 
+    -- Some servers (eg. WoW Forever surnames) send chat senders as "Name Surname" while
+    -- UnitName-based lookups build "Name-Surname". Normalize so both paths share one key.
+    sender = sender:gsub(" ", "-", 1)
+
     -- Update if player is the current
     local unittoken = Skits_Utils:FindUnitToken(sender)
     local tempCreatureData = {}

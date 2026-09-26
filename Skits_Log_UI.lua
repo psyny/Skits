@@ -38,6 +38,12 @@ logFrame:Hide()
 local closeButton = CreateFrame("Button", nil, logFrame, "UIPanelCloseButton")
 closeButton:SetPoint("TOPRIGHT", logFrame, "TOPRIGHT", -5, -5)
 
+-- Toggle to show all characters' messages instead of just the current character's
+local filterCheckbox = CreateFrame("CheckButton", nil, logFrame, "UICheckButtonTemplate")
+filterCheckbox:SetPoint("TOPLEFT", logFrame, "TOPLEFT", 5, -5)
+filterCheckbox.Text:SetText("All Characters")
+filterCheckbox.Text:SetFontObject("GameFontNormalSmall")
+
 -- Navigation buttons
 local prevButton = CreateFrame("Button", nil, logFrame, "UIPanelButtonTemplate")
 prevButton:SetSize(80, 20)
@@ -48,6 +54,19 @@ local nextButton = CreateFrame("Button", nil, logFrame, "UIPanelButtonTemplate")
 nextButton:SetSize(80, 20)
 nextButton:SetText("Next")
 nextButton:SetPoint("BOTTOMRIGHT", logFrame, "BOTTOMRIGHT", -10, 10)
+
+-- Find the nearest deque neighbor (in the "next" direction) whose entry passes the current character filter, if enabled
+local function FindAdjacentEntry(fromEle, filterCurrentCharacter, currentPlayerName)
+    local ele = fromEle and fromEle.next
+    while ele do
+        local candidate = SkitsDB.conversationLog.messages[ele.value]
+        if candidate and (not filterCurrentCharacter or candidate.playerName == currentPlayerName) then
+            return candidate
+        end
+        ele = ele.next
+    end
+    return nil
+end
 
 -- Separator
 function Skits_Log_UI:CreateSeparator(msgEntry, parentFrame, width)
@@ -134,19 +153,28 @@ function Skits_Log_UI:PopulateLogFrame()
     -- Specs
     local altSpeakerSide = true
     local font = LibStub("LibSharedMedia-3.0"):Fetch("font", options.style_warcraft_speech_font_name)
-    local fontSize = options.style_warcraft_speech_font_size 
+    local fontSize = options.style_warcraft_speech_font_size
 
     -- Offset based on dir
     spaceFilled = topBotPadding
 
+    -- Character filter (checkbox shows "All Characters"; filter to current character when it's unchecked)
+    local filterCurrentCharacter = not options.style_log_show_all_characters
+    local currentPlayerName = Skits_Utils:GetUnitTokenFullName("player")
+
     -- Loop through `SkitsDB.conversationLog.messages` for the entries on the current page
-    for i = 1, 100 do -- 100 is the max msgs in a page, usually waaay less than this (4)
+    -- Bounded by the memory limit (not a small constant) since filtering can skip many entries before finding a match
+    for i = 1, Skits.msgMemoryLimit do
         if msgEleCurr == nil then
             break
         end
 
         local entry = SkitsDB.conversationLog.messages[msgEleCurr.value]
-        if entry ~= nil then    
+        if entry ~= nil and filterCurrentCharacter and entry.playerName ~= currentPlayerName then
+            entry = nil
+        end
+
+        if entry ~= nil then
             if lastSpeaker ~= entry.creatureData.name then
                 altSpeakerSide = not altSpeakerSide
             end 
@@ -158,17 +186,9 @@ function Skits_Log_UI:PopulateLogFrame()
                 msgEleTop = msgEleCurr
             end
 
-            -- Check if need a separator
-            local lastMsgEle = nil
-            if msgEleDir > 0 then
-                lastMsgEle = msgEleCurr.next
-            else
-                lastMsgEle = msgEleCurr.next
-            end
-            local lastEntry = nil
-            if lastMsgEle then
-                lastEntry = SkitsDB.conversationLog.messages[lastMsgEle.value]
-            end
+            -- Check if need a separator (skip over any filtered-out neighbors so the comparison
+            -- is against the entry that would actually be displayed right before/after this one)
+            local lastEntry = FindAdjacentEntry(msgEleCurr, filterCurrentCharacter, currentPlayerName)
             local shouldHaveSeparator = false
             if lastEntry then                
                 if lastEntry.zoneName ~= entry.zoneName then
@@ -339,18 +359,15 @@ function Skits_Log_UI:PopulateLogFrame()
 
                 -- Update Space Filled qty
                 spaceFilled = spaceFilled + fillIncrement                
-            end            
-
-            -- Update current indexes
-            if msgEleDir > 0 then
-                msgEleCurr = msgEleCurr.prev
-            else
-                msgEleCurr = msgEleCurr.next
             end
-            if not msgEleCurr then
-                break
-            end              
-        end 
+        end
+
+        -- Update current indexes (always advance, even past entries hidden by the character filter)
+        if msgEleDir > 0 then
+            msgEleCurr = msgEleCurr.prev
+        else
+            msgEleCurr = msgEleCurr.next
+        end
     end
 
     if not msgEleTop or not msgEleTop.next then
@@ -415,10 +432,19 @@ nextButton:SetScript("OnClick", function()
     local nextMsgEleTop = msgEleBottom.prev
     if nextMsgEleTop then
         msgEleBottom = nextMsgEleTop
-        msgEleTop = nextMsgEleTop       
-        msgEleCurr =  nextMsgEleTop 
-        Skits_Log_UI:PopulateLogFrame()   
+        msgEleTop = nextMsgEleTop
+        msgEleCurr =  nextMsgEleTop
+        Skits_Log_UI:PopulateLogFrame()
     end
+end)
+
+-- Character filter checkbox click handler
+filterCheckbox:SetScript("OnClick", function(self)
+    Skits_Options.db.style_log_show_all_characters = self:GetChecked() and true or false
+
+    -- Jump back to the most recent page so the filtered view starts somewhere sensible
+    Skits_Log_UI:SetMostRecentPage()
+    Skits_Log_UI:PopulateLogFrame()
 end)
 
 -- Command to toggle the log frame
@@ -427,6 +453,7 @@ SlashCmdList["SkitsLog"] = function()
     if logFrame:IsShown() then
         logFrame:Hide()
     else
+        filterCheckbox:SetChecked(Skits_Options.db.style_log_show_all_characters)
         isMostRecent = true
         logFrame:Show()
         Skits_Log_UI:RefreshPage()

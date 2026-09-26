@@ -362,11 +362,10 @@ function Skits_QuestFrame:HandleQuestFrame(creatureData, mainText, extraText, pr
     local options = Skits_Options.db 
 
     -- Check if speak was seen recently
-    local npcName = Skits_Utils:GetUnitTokenFullName("npc") or "<no npc>"
-    local speakId = npcName .. creatureData.name .. #mainText .. mainText:sub(1, 30)
+    local speakId = creatureData.name .. #mainText .. mainText:sub(1, 30)
 
     if clearQueue == true then
-        Skits_SpeakQueue:RemoveByName(npcName)
+        Skits_SpeakQueue:RemoveByName(creatureData.name)
     end
 
     -- Repeat Status

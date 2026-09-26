@@ -45,6 +45,9 @@ Skits_Options.defaults = {
         event_msg_guild                   = false,
         event_msg_officer                 = false,
 
+        -- Conversation Log
+        style_log_show_all_characters       = false,
+
         -- Style General
         style_general_styleonsituation_immersive         = "tales",
         style_general_styleonsituation_explore           = "departure",
