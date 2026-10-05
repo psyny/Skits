@@ -7,7 +7,7 @@ Skits_ID_Store.localCache = nil
 Skits_ID_Store.localPlayerCacheIdxQueue = nil
 Skits_ID_Store.localPlayerCache = nil
 
-local LOCAL_DB_MAX_SIZE = 100000
+local LOCAL_DB_MAX_SIZE = 20000
 local LOCAL_CACHE_MAX_SIZE = 10000
 local LOCAL_PLAYER_CACHE_MAX_SIZE = 1000
 
