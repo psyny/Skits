@@ -1,6 +1,11 @@
 -- Skits_Utils.lua
 Skits_Utils = {}
 
+-- issecretvalue only exists on clients with secret values (retail 12.0+)
+function Skits_Utils:IsSecretValue(value)
+    return issecretvalue ~= nil and issecretvalue(value)
+end
+
 function Skits_Utils:IsInCombat()
     return UnitAffectingCombat("player")
 end

@@ -13,13 +13,15 @@ local LOCAL_PLAYER_CACHE_MAX_SIZE = 1000
 
 -- NPC stores (local DB and local cache) are zoned. Each record is:
 --     { name = <npc name>, byKey = { [<zone key>] = { <ids> } } }
--- Zone keys come from Skits_ZoneGroup:GetZoneKeyChain (a group name, "map:<uiMapID>" or "global").
+-- Zone keys are uiMapIDs, or Skits_MapChain.GLOBAL_KEY (0) for ids seen anywhere (see Skits_MapChain).
 -- <ids> is a flat list: npcIds as positive numbers first, then displayIds as negative numbers.
 -- Each kind holds at most MAX_IDS_PER_KIND ids.
 --     Local DB: each kind sorted by id, descending (higher id = newer, our best guess).
 --     Local cache: each kind ordered by most recently seen.
--- A sighting is written to the most specific key of the current map and to "global".
-local ZONED_STORE_VERSION = 2
+-- A sighting is written to the exact map, its continent and global (Skits_MapChain:GetWriteKeys).
+-- Versions: 1 = not zoned, 2 = keyed by zone group / "map:<uiMapID>" / "global", 3 = keyed by uiMapID / 0
+local ZONED_STORE_VERSION = 3
+local ZONE_GROUP_STORE_VERSION = 2
 local MAX_IDS_PER_KIND = 3
 local MAX_KEYS_PER_RECORD = 8
 
@@ -171,7 +173,7 @@ local function GetOrCreateKeyList(byKey, key)
     end
     if keyQty >= MAX_KEYS_PER_RECORD then
         for k, _ in pairs(byKey) do
-            if k ~= Skits_ZoneGroup.GLOBAL_KEY then
+            if k ~= Skits_MapChain.GLOBAL_KEY then
                 byKey[k] = nil
                 break
             end
@@ -206,7 +208,7 @@ function Skits_ID_Store:Locals_GetCreatureDataByIdx(database, idxQueue, dataIdx)
 end
 
 function Skits_ID_Store:Locals_GetCreatureDataByName(database, idxQueue, creatureName)
-    if issecretvalue(creatureName) then
+    if Skits_Utils:IsSecretValue(creatureName) then
         return
     end
 
@@ -221,7 +223,7 @@ function Skits_ID_Store:Locals_SetCreatureData(database, idxQueue, idxLimit, cre
         return
     end
 
-    if issecretvalue(creatureData.name) then
+    if Skits_Utils:IsSecretValue(creatureData.name) then
         return
     end
 
@@ -277,7 +279,7 @@ function Skits_ID_Store:Locals_SetZonedCreatureData(database, idxQueue, idxLimit
         return
     end
 
-    if issecretvalue(creatureData.name) then
+    if Skits_Utils:IsSecretValue(creatureData.name) then
         return
     end
 
@@ -347,13 +349,9 @@ function Skits_ID_Store:Locals_Trim(database, idxQueue, dataLimit)
     end
 end
 
--- Keys a sighting on uiMapId is written to: the most specific key and global.
+-- Keys a sighting on uiMapId is written to: the exact map, its continent and global.
 local function GetWriteKeys(uiMapId)
-    local chain = Skits_ZoneGroup:GetZoneKeyChain(uiMapId)
-    if #chain > 1 then
-        return { chain[1], Skits_ZoneGroup.GLOBAL_KEY }
-    end
-    return chain
+    return Skits_MapChain:GetWriteKeys(uiMapId)
 end
 
 -- ------------------------------------
@@ -377,7 +375,7 @@ end
 -- Local DB Functions
 
 -- v1 records: { name, creatureId, displayId, isDisplayIdNewer, creatureIds?, displayIds? }
--- v2 records: { name, byKey = { global = { <ids> } } }
+-- v3 records: { name, byKey = { [0] = { <ids> } } }
 local function MigrateLocalDbToZoned(store)
     local migratedQty = 0
     for dataIdx, oldRecord in pairs(store.creatureDataByIdx) do
@@ -399,13 +397,37 @@ local function MigrateLocalDbToZoned(store)
 
         local byKey = {}
         if #list > 0 then
-            byKey[Skits_ZoneGroup.GLOBAL_KEY] = list
+            byKey[Skits_MapChain.GLOBAL_KEY] = list
         end
 
         store.creatureDataByIdx[dataIdx] = {
             name = oldRecord.name,
             byKey = byKey,
         }
+        migratedQty = migratedQty + 1
+    end
+
+    store.version = ZONED_STORE_VERSION
+    return migratedQty
+end
+
+-- v2 keys -> v3 keys: "global" -> 0, "map:<uiMapID>" -> <uiMapID>. Zone group keys are dropped:
+-- a group can cover several continents, so there's no single map to move them to (their ids are also in "global").
+local function MigrateLocalDbFromZoneGroups(store)
+    local migratedQty = 0
+    for _, record in pairs(store.creatureDataByIdx) do
+        local byKey = {}
+        for key, list in pairs(record.byKey or {}) do
+            if key == "global" then
+                byKey[Skits_MapChain.GLOBAL_KEY] = list
+            elseif type(key) == "string" then
+                local uiMapId = tonumber(key:match("^map:(%d+)$"))
+                if uiMapId then
+                    byKey[uiMapId] = list
+                end
+            end
+        end
+        record.byKey = byKey
         migratedQty = migratedQty + 1
     end
 
@@ -425,6 +447,11 @@ function Skits_ID_Store:LocalDB_Start()
 
     if not SkitsDB.creatureIdStore then
         SkitsDB.creatureIdStore = NewStore(ZONED_STORE_VERSION)
+    elseif SkitsDB.creatureIdStore.version == ZONE_GROUP_STORE_VERSION then
+        local migratedQty = MigrateLocalDbFromZoneGroups(SkitsDB.creatureIdStore)
+        if SkitsDB.debugMode then
+            print("[Skits] Local NPC DB migrated from zone groups to map keys: " .. migratedQty .. " entries")
+        end
     elseif SkitsDB.creatureIdStore.version ~= ZONED_STORE_VERSION then
         local migratedQty = MigrateLocalDbToZoned(SkitsDB.creatureIdStore)
         if SkitsDB.debugMode then
@@ -485,13 +512,20 @@ function Skits_ID_Store:ExternalDB_GetCreatureDataByName(creatureName)
     return creatureData, {"external: CreatureDisplayDB"}
 end
 
-function Skits_ID_Store:ExternalDB_GetFixedCreatureDataByName(creatureName)
+-- uiMapId is optional, defaults to the player's current map.
+function Skits_ID_Store:ExternalDB_GetFixedCreatureDataByName(creatureName, uiMapId)
     -- Try CreatureDisplayDB
     if not CreatureDisplayDB then
         return nil
     end
 
-    local creatureId = CreatureDisplayDB:GetFixedNpcIdForCurrentZone(creatureName)
+    -- Map and its parent maps. Older CreatureDisplayDB versions only have the current zone lookup.
+    local creatureId = nil
+    if CreatureDisplayDB.GetFixedNpcIdForZoneAndParents then
+        creatureId = CreatureDisplayDB:GetFixedNpcIdForZoneAndParents(uiMapId or C_Map.GetBestMapForUnit("player"), creatureName)
+    else
+        creatureId = CreatureDisplayDB:GetFixedNpcIdForCurrentZone(creatureName)
+    end
 
     if creatureId then
         local creatureData = {
@@ -503,6 +537,29 @@ function Skits_ID_Store:ExternalDB_GetFixedCreatureDataByName(creatureName)
     end
 
     return nil, {"external: CreatureDisplayDB fixed data"}
+end
+
+-- Only the ids CreatureDisplayDB has for uiMapId and its parent maps (no general ids).
+-- uiMapId is optional, defaults to the player's current map.
+function Skits_ID_Store:ExternalDB_GetZoneCreatureDataByName(creatureName, uiMapId)
+    -- Try CreatureDisplayDB. Older versions don't have zone specific data.
+    if not CreatureDisplayDB or not CreatureDisplayDB.GetZoneSpecificDataByName then
+        return nil
+    end
+
+    local displayData = CreatureDisplayDB:GetZoneSpecificDataByName(creatureName, uiMapId)
+    if not displayData then
+        return nil, {"external: CreatureDisplayDB zone data"}
+    end
+
+    local creatureData = {
+        name = creatureName,
+        creatureId = nil,
+        creatureIds = displayData.npc_ids,
+        displayIds = displayData.display_ids,
+    }
+
+    return creatureData, {"external: CreatureDisplayDB zone data"}
 end
 
 
@@ -550,6 +607,22 @@ local function AddZonedListToResult(result, seen, list)
     return added
 end
 
+-- Appends the creatureIds and displayIds of an external creature data to the result. Returns true if anything was added.
+local function AddExternalDataToResult(result, seen, creatureData)
+    local added = false
+    if creatureData.creatureIds then
+        for _, id in ipairs(creatureData.creatureIds) do
+            added = AddIdToResult(result, seen, id, false) or added
+        end
+    end
+    if creatureData.displayIds then
+        for _, id in ipairs(creatureData.displayIds) do
+            added = AddIdToResult(result, seen, id, true) or added
+        end
+    end
+    return added
+end
+
 -- uiMapId is optional, defaults to the player's current map.
 function Skits_ID_Store:GetCreatureDataByName(creatureName, isPlayer, uiMapId)
     -- Player data is only retrieved from the local cache
@@ -558,13 +631,14 @@ function Skits_ID_Store:GetCreatureDataByName(creatureName, isPlayer, uiMapId)
         return creatureData, {"player local cache"}
     end
 
-    if issecretvalue(creatureName) then
+    if Skits_Utils:IsSecretValue(creatureName) then
         return nil, {}
     end
 
     -- We will try to retrieve the NPC data from many sources, most specific first.
     -- Source 1: External Addons Fixed ID log
-    -- Source 2: Local Cache and Local DB, for each zone key from the most specific to global
+    -- Source 2: Local Cache and Local DB, for each zone key from the most specific to global.
+    --           Other Addons DB data for this location goes right before global, so it beats ids seen anywhere else.
     -- Source 3: Other Addons DB
 
     local result = {
@@ -575,7 +649,7 @@ function Skits_ID_Store:GetCreatureDataByName(creatureName, isPlayer, uiMapId)
     local allSources = {}
 
     -- Source 1: Other Addons DB - Fixed Creature data
-    local creatureData, sources = self:ExternalDB_GetFixedCreatureDataByName(creatureName)
+    local creatureData, sources = self:ExternalDB_GetFixedCreatureDataByName(creatureName, uiMapId)
     if creatureData then
         if AddIdToResult(result, seen, creatureData.creatureId, false) then
             Skits_Utils:AddListToList(sources, allSources, false)
@@ -585,8 +659,16 @@ function Skits_ID_Store:GetCreatureDataByName(creatureName, isPlayer, uiMapId)
     -- Source 2: Local Cache and Local DB, by zone key
     local cacheRecord = self:LocalCache_GetCreatureDataByName(creatureName)
     local dbRecord = self:LocalDB_GetCreatureDataByName(creatureName)
-    if cacheRecord or dbRecord then
-        for _, key in ipairs(Skits_ZoneGroup:GetZoneKeyChain(uiMapId)) do
+    for _, key in ipairs(Skits_MapChain:GetReadKeys(uiMapId)) do
+        -- Other Addons DB data for this location, before the ids seen anywhere (global)
+        if key == Skits_MapChain.GLOBAL_KEY then
+            creatureData, sources = self:ExternalDB_GetZoneCreatureDataByName(creatureName, uiMapId)
+            if creatureData and AddExternalDataToResult(result, seen, creatureData) then
+                Skits_Utils:AddListToList(sources, allSources, false)
+            end
+        end
+
+        if cacheRecord or dbRecord then
             if cacheRecord and cacheRecord.byKey[key] then
                 if AddZonedListToResult(result, seen, cacheRecord.byKey[key]) then
                     table.insert(allSources, "local cache [" .. key .. "]")
@@ -602,21 +684,8 @@ function Skits_ID_Store:GetCreatureDataByName(creatureName, isPlayer, uiMapId)
 
     -- Source 3: Other Addons DB
     creatureData, sources = self:ExternalDB_GetCreatureDataByName(creatureName)
-    if creatureData then
-        local added = false
-        if creatureData.creatureIds then
-            for _, id in ipairs(creatureData.creatureIds) do
-                added = AddIdToResult(result, seen, id, false) or added
-            end
-        end
-        if creatureData.displayIds then
-            for _, id in ipairs(creatureData.displayIds) do
-                added = AddIdToResult(result, seen, id, true) or added
-            end
-        end
-        if added then
-            Skits_Utils:AddListToList(sources, allSources, false)
-        end
+    if creatureData and AddExternalDataToResult(result, seen, creatureData) then
+        Skits_Utils:AddListToList(sources, allSources, false)
     end
 
     -- Nothing was found
@@ -690,7 +759,7 @@ local function PrintNpcData(creatureName)
     local creatureData, sources = Skits_ID_Store:GetCreatureDataByName(creatureName, false)
 
     print("[NPC Data]")
-    print("KEY CHAIN: " .. table.concat(Skits_ZoneGroup:GetZoneKeyChain(), " > "))
+    print("KEY CHAIN: " .. table.concat(Skits_MapChain:GetReadKeys(), " > "))
 
     if not creatureData then
         print(creatureName .. " not found in our DBs")
@@ -766,43 +835,4 @@ SlashCmdList["SkitsClearLocalDB"] = function()
 
     SkitsDB.creatureIdStore = NewStore(ZONED_STORE_VERSION)
     Skits_ID_Store:GetLocalDbIdxQueueController():Reset()
-end
-
--- Command to print the uiMapID chain (current map up to the root)
-local UI_MAP_TYPE_NAMES = {
-    [0] = "Cosmic",
-    [1] = "World",
-    [2] = "Continent",
-    [3] = "Zone",
-    [4] = "Dungeon",
-    [5] = "Micro",
-    [6] = "Orphan",
-}
-
-SLASH_SkitsMapChain1 = "/skitsMapChain"
-SlashCmdList["SkitsMapChain"] = function()
-    local uiMapId = C_Map.GetBestMapForUnit("player")
-
-    print("[Map Chain]")
-    if not uiMapId then
-        print("No uiMapID for player")
-        return
-    end
-
-    local guard = 0
-    while uiMapId and uiMapId ~= 0 and guard < 20 do
-        local mapInfo = C_Map.GetMapInfo(uiMapId)
-        if not mapInfo then
-            print("mapID: " .. uiMapId .. " (no map info)")
-            break
-        end
-
-        local typeName = UI_MAP_TYPE_NAMES[mapInfo.mapType] or "Unknown"
-        print("mapID: " .. mapInfo.mapID)
-        print("name: " .. (mapInfo.name or ""))
-        print("type: " .. typeName .. " (" .. (mapInfo.mapType or "nil") .. ")")
-
-        uiMapId = mapInfo.parentMapID
-        guard = guard + 1
-    end
 end

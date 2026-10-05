@@ -339,7 +339,7 @@ end)
 
 -- Function to select color for the speaker dynamically
 function Skits:GetColorForSpeaker(name)
-    if issecretvalue(name) then
+    if Skits_Utils:IsSecretValue(name) then
         return unpack(self.colorPalette[1])
     end
 
@@ -496,7 +496,7 @@ function Skits:HandlePlayerChatEvent(event, msg, sender, languageName, channelNa
 end
 
 function Skits:ChatEvent(creatureData, textData, priority, storeInMemory, displaySkit)
-    if issecretvalue(creatureData.name) then
+    if Skits_Utils:IsSecretValue(creatureData.name) then
         return
     end
 

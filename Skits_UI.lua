@@ -75,7 +75,7 @@ function Skits_UI:SpeakerMarker_NameplateAdded(nameplateToken)
     end
 
     local unitName = Skits_Utils:GetUnitTokenFullName(nameplateToken)
-    if issecretvalue(unitName) then
+    if Skits_Utils:IsSecretValue(unitName) then
         return
     end
     
@@ -114,7 +114,7 @@ function Skits_UI:SpeakerMarker_FindUnitAndAdd(unitName)
         if nameplate.UnitFrame then
             local unittoken = nameplate.UnitFrame.unit
             local unittokenname = Skits_Utils:GetUnitTokenFullName(unittoken)
-            if issecretvalue(unittokenname) then
+            if Skits_Utils:IsSecretValue(unittokenname) then
                 return
             end            
             if unittokenname == unitName then    
@@ -166,7 +166,7 @@ function Skits_UI:SpeakerMarker_AddToNameplate(nameplateToken)
 end
 
 function Skits_UI:SpeakerMarker_RemoveFromUnit(unitName)
-    if issecretvalue(unitName) then
+    if Skits_Utils:IsSecretValue(unitName) then
         return
     end
     
