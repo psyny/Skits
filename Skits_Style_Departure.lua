@@ -256,9 +256,11 @@ function Skits_Style_Departure:ResetLayouts()
 
         Skits_UI_Utils:ResizeFadedFrame(self.textLeftFrameBgBorder, fadedFrameParameters)
         self.textLeftFrameBgBorder.main:SetPoint("BOTTOMLEFT", Skits_Style_Departure.textLeftFrame, "BOTTOMLEFT", 0, 0)
+
+        self.textLeftSpeakerText:SetPoint("LEFT", self.textLeftFrame, "BOTTOMLEFT", 0, 0)
+        self.textLeftMessageText:SetPoint("BOTTOMLEFT", self.textLeftFrame, "BOTTOMLEFT", 0, 0) -- Centered horizontally and vertically
     end
 
-    self.textLeftSpeakerText:SetPoint("LEFT", self.textLeftFrame, "BOTTOMLEFT", 0, 0)
     self.textLeftSpeakerText:SetFont(font, fontSize)
     self.textLeftSpeakerText:SetJustifyH("LEFT")
     self.textLeftSpeakerText:SetJustifyV("MIDDLE")
@@ -266,7 +268,6 @@ function Skits_Style_Departure:ResetLayouts()
     self.textLeftSpeakerText:SetText(" ")
     speakerNameHeight = self.textLeftSpeakerText:GetStringHeight() + 5
 
-    self.textLeftMessageText:SetPoint("BOTTOMLEFT", self.textLeftFrame, "BOTTOMLEFT", 0, 0) -- Centered horizontally and vertically
     self.textLeftMessageText:SetSize(textWidth, textAreaHeight)
     self.textLeftMessageText:SetFont(font, fontSize)
     self.textLeftMessageText:SetJustifyH("LEFT")
@@ -295,7 +296,6 @@ function Skits_Style_Departure:ResetLayouts()
         self.textRightFrameBgBorder.main:SetPoint("BOTTOMRIGHT", Skits_Style_Departure.textRightFrame, "BOTTOMRIGHT", 0, 0)
     end
 
-    self.textRightSpeakerText:SetPoint("RIGHT", self.textRightFrame, "BOTTOMRIGHT", 0, 0)
     self.textRightSpeakerText:SetFont(font, fontSize)
     self.textRightSpeakerText:SetJustifyH("RIGHT")
     self.textRightSpeakerText:SetJustifyV("MIDDLE")
@@ -303,7 +303,10 @@ function Skits_Style_Departure:ResetLayouts()
     self.textRightSpeakerText:SetText(" ")
     speakerNameHeight = self.textRightSpeakerText:GetStringHeight() + 5
 
-    self.textRightMessageText:SetPoint("BOTTOMRIGHT", self.textRightFrame, "BOTTOMRIGHT", 0, -speakerNameHeight) -- Centered horizontally and vertically
+    if not hasActiveRight then
+        self.textRightSpeakerText:SetPoint("RIGHT", self.textRightFrame, "BOTTOMRIGHT", 0, 0)
+        self.textRightMessageText:SetPoint("BOTTOMRIGHT", self.textRightFrame, "BOTTOMRIGHT", 0, -speakerNameHeight) -- Centered horizontally and vertically
+    end
     self.textRightMessageText:SetSize(textWidth, textAreaHeight)
     self.textRightMessageText:SetFont(font, fontSize)
     self.textRightMessageText:SetJustifyH("RIGHT")
