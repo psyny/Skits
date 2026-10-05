@@ -410,7 +410,7 @@ function Skits_Style_Warcraft:NewSpeak(creatureData, textData)
             hasModel = true
         end
     else
-        if creatureData.creatureId or creatureData.creatureIds or creatureData.displayIds then
+        if creatureData.creatureId or creatureData.displayId or (creatureData.ids and #creatureData.ids > 0) then
             hasModel = true
         end
     end

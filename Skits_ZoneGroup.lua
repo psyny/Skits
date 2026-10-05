@@ -17,8 +17,19 @@ Skits_ZoneGroup.zoneIdQty = 0
 -- tree doesn't change during a session, so this never needs to be invalidated.
 local resolvedCache = {}
 
+-- uiMapID -> ordered list of storage keys (see GetZoneKeyChain)
+local keyChainCache = {}
+
 local MAX_RANGE_SIZE = 10000
 local MAX_CHAIN_DEPTH = 20
+
+-- Enum.UIMapType values
+local UI_MAP_TYPE_COSMIC = 0
+local UI_MAP_TYPE_WORLD = 1
+local UI_MAP_TYPE_MICRO = 5
+
+Skits_ZoneGroup.GLOBAL_KEY = "global"
+local GLOBAL_ONLY_CHAIN = { Skits_ZoneGroup.GLOBAL_KEY }
 
 -- ------------------------------------
 -- Build
@@ -29,6 +40,7 @@ function Skits_ZoneGroup:Initialize()
     self.groupIdxByZoneId = {}
     self.zoneIdQty = 0
     resolvedCache = {}
+    keyChainCache = {}
 
     local defs = Skits_ZoneGroup_Defs or {}
 
@@ -149,6 +161,57 @@ function Skits_ZoneGroup:GetZoneGroup(uiMapId)
     return self.groupsByIdx[resolved.idx], resolved.idx, resolved.matchedId
 end
 
+-- Storage keys for a map, most specific first, always ending with GLOBAL_KEY.
+-- Walks the parent chain: a map with a group gives its group name, a map without one gives "map:<uiMapID>".
+-- Micro, World and Cosmic maps without a group are skipped (too narrow / too broad to be useful).
+-- Example: Dornogal -> { "TheWarWithin", "global" }, Elwynn Forest -> { "map:37", "map:13", "global" }
+function Skits_ZoneGroup:GetZoneKeyChain(uiMapId)
+    uiMapId = uiMapId or C_Map.GetBestMapForUnit("player")
+    if not uiMapId then
+        return GLOBAL_ONLY_CHAIN
+    end
+
+    local chain = keyChainCache[uiMapId]
+    if chain then
+        return chain
+    end
+
+    chain = {}
+    local seen = {}
+    local currId = uiMapId
+    local depth = 0
+    while currId and currId ~= 0 and depth < MAX_CHAIN_DEPTH do
+        local mapInfo = C_Map.GetMapInfo(currId)
+
+        local key = nil
+        local groupIdx = self.groupIdxByZoneId[currId]
+        if groupIdx then
+            key = self.groupsByIdx[groupIdx]
+        elseif mapInfo then
+            local mapType = mapInfo.mapType
+            if mapType ~= UI_MAP_TYPE_MICRO and mapType ~= UI_MAP_TYPE_WORLD and mapType ~= UI_MAP_TYPE_COSMIC then
+                key = "map:" .. currId
+            end
+        end
+
+        if key and not seen[key] then
+            seen[key] = true
+            table.insert(chain, key)
+        end
+
+        if not mapInfo then
+            break
+        end
+        currId = mapInfo.parentMapID
+        depth = depth + 1
+    end
+
+    table.insert(chain, self.GLOBAL_KEY)
+
+    keyChainCache[uiMapId] = chain
+    return chain
+end
+
 -- ------------------------------------
 -- Init
 
@@ -179,6 +242,8 @@ SlashCmdList["SkitsZoneGroup"] = function()
         print("group: " .. groupName .. " (idx " .. groupIdx .. ")")
         print("matched at: " .. matchedId .. " - " .. ((matchedInfo and matchedInfo.name) or "?"))
     end
+
+    print("key chain: " .. table.concat(Skits_ZoneGroup:GetZoneKeyChain(uiMapId), " > "))
 
     print("loaded: " .. #Skits_ZoneGroup.groupsByIdx .. " groups, " .. Skits_ZoneGroup.zoneIdQty .. " uiMapIDs")
 end
