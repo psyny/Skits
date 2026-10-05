@@ -576,3 +576,42 @@ SlashCmdList["SkitsClearLocalDB"] = function()
         dataQty = 0,
     }
 end
+
+-- Command to print the uiMapID chain (current map up to the root)
+local UI_MAP_TYPE_NAMES = {
+    [0] = "Cosmic",
+    [1] = "World",
+    [2] = "Continent",
+    [3] = "Zone",
+    [4] = "Dungeon",
+    [5] = "Micro",
+    [6] = "Orphan",
+}
+
+SLASH_SkitsMapChain1 = "/skitsMapChain"
+SlashCmdList["SkitsMapChain"] = function()
+    local uiMapId = C_Map.GetBestMapForUnit("player")
+
+    print("[Map Chain]")
+    if not uiMapId then
+        print("No uiMapID for player")
+        return
+    end
+
+    local guard = 0
+    while uiMapId and uiMapId ~= 0 and guard < 20 do
+        local mapInfo = C_Map.GetMapInfo(uiMapId)
+        if not mapInfo then
+            print("mapID: " .. uiMapId .. " (no map info)")
+            break
+        end
+
+        local typeName = UI_MAP_TYPE_NAMES[mapInfo.mapType] or "Unknown"
+        print("mapID: " .. mapInfo.mapID)
+        print("name: " .. (mapInfo.name or ""))
+        print("type: " .. typeName .. " (" .. (mapInfo.mapType or "nil") .. ")")
+
+        uiMapId = mapInfo.parentMapID
+        guard = guard + 1
+    end
+end

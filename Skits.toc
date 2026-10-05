@@ -34,6 +34,9 @@ Locales\Locale-ptBR.lua
 Skits_Options.lua
 Skits_Deque.lua
 
+Skits_ZoneGroup_Defs.lua
+Skits_ZoneGroup.lua
+
 Skits_ID_Store.lua
 Skits_Utils.lua
 Skits_UI_Utils.lua
