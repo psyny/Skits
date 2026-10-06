@@ -731,9 +731,16 @@ SlashCmdList["SkitsLocalDBStats"] = function()
     print("Number of Data Entries: " .. SkitsDB.creatureIdStore.dataQty )
 end
 
+-- Max ids printed per list by the npc data commands
+local PRINT_MAX_IDS = 5
+
 local function ZonedListToString(list)
     local parts = {}
-    for _, stored in ipairs(list) do
+    for i, stored in ipairs(list) do
+        if i > PRINT_MAX_IDS then
+            table.insert(parts, "(+" .. (#list - PRINT_MAX_IDS) .. " more)")
+            break
+        end
         if stored > 0 then
             table.insert(parts, "npc " .. stored)
         else
@@ -769,7 +776,11 @@ local function PrintNpcData(creatureName)
         print("DISPLAY ID: " .. (creatureData.displayId or "nil"))
 
         print("ORDERED IDS:")
-        for _, id in ipairs(creatureData.ids) do
+        for i, id in ipairs(creatureData.ids) do
+            if i > PRINT_MAX_IDS then
+                print("(+" .. (#creatureData.ids - PRINT_MAX_IDS) .. " more)")
+                break
+            end
             if id[2] then
                 print("DisId: " .. id[1])
             else
