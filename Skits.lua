@@ -78,9 +78,8 @@ function Skits:OnInitialize()
             addonOptions.event_npc_interact = "skit"
         end
 
-	-- Register options table and slash command
+	-- Register options table
 	LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("Skits", options)
-	self:RegisterChatCommand("handynotes", function() LibStub("AceConfigDialog-3.0"):Open("Skits") end)
 	LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Skits", "Skits")
 
 	-- Get the option table for profiles

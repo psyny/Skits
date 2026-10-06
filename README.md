@@ -1,146 +1,130 @@
 # Skits
+
 Skits: A World of Warcraft Addon for Immersive Conversation
 
-Step into a more immersive World of Warcraft experience with Skits, an addon designed to bring a fresh, cinematic flair to in-game conversations. Inspired by skit-like dialogues in JRPGs, this addon transforms chat messages into an engaging sequence, adding depth and storytelling to every interaction.
+Inspired by the skit-like dialogues of JRPGs, Skits turns in-game chat into an on-screen conversation: the speaker's 3D model, their name and their line of dialogue, one after another. NPC lines work out of the box, and player chat can be turned on for roleplay.
 
-**Key Features:**
+## Features
 
-- **Immersive Skit Format:** Chat messages are displayed as dynamic, skit-style dialogues, complete with character portraits and a smooth sequence of talking heads.
-- **Storybook Log:** Revisit past conversations with a storybook-like interface. Use /skitslog to relive your favorite skits anytime!
-- **Roleplayer-Friendly:** Works with player messages, making it perfect for roleplaying scenarios. Add an extra layer of immersion to your stories and interactions.
-- **Customizable:** Tailor the experience to your liking. Decide which chat messages become skits, toggle talking heads or speaker portraits, and configure when skits appear—whether during combat, in dungeons, or other specific situations.
+- **Skit styles:** five ways to show a conversation (see [Skit Styles](#skit-styles)), from full-screen character scenes to small notifications in a corner.
+- **Situation-aware:** pick a different style for exploring, combat, solo instances, group instances and immersive mode. Skits switches between them as your situation changes.
+- **NPC and player chat:** NPC say, yell, whisper and party lines are shown by default. Player say, yell, whisper, party, raid, instance, channel, guild and officer chat can each be turned on.
+- **Quest and gossip dialogue:** quest and gossip text can be logged, or played as a skit with the NPC talking and your character answering. An optional 3D model of the quest giver can be attached to the quest frame.
+- **Conversation log:** `/skitslog` opens a storybook-style log of the last 1000 lines, with portraits, zone and date. It can show all your characters or only the current one.
+- **Speaker marker:** a marker appears over the speaking unit in the game world.
+- **Talking heads:** the standard WoW talking head can be blocked. Skits still reads the model from it, so the speaker gets the right portrait.
+- **Profiles:** all options are stored in AceDB profiles, so different characters can use different setups.
+- **Localization:** English and Brazilian Portuguese.
+
+## Supported Clients
+
+| TOC file | Client |
+|---|---|
+| `Skits.toc` | Retail (Interface 120000 / 120001) |
+| `Skits_Camelot.toc` | WoW Forever (Interface 16000 / 16001) |
 
 ## Recommendations
 
-Have the "Creature Display DB" addon installed. This will vastly improve the experience with this addon by increase the variety of unit models displayed.
+Install the **Creature Display DB** addon. Skits works without it, but then it can only find models for NPCs you have seen around you (nameplates, target, mouseover, boss frames, talking heads). With it, Skits can look up models for NPCs you have never seen, and it picks the right model for the zone you are in (for example, Thrall in Shadowlands versus Thrall in Orgrimmar).
 
-## Important Commands
+## Commands
 
-- **/SkitsLog:** Shows the conversation log.
-- **/SkitsImmersive:** Toggles immersive mode on and off.
-- **/SkitsToggle:** Toggle skits on and off.
+| Command | Description |
+|---|---|
+| `/skitslog` | Open the conversation log. |
+| `/skitsimmersive` | Toggle immersive mode (uses the Immersion skit style). |
+| `/skitstoggle` | Turn skits on or off for this session. |
+| `/skitslayout` | Reset the skit style layouts. |
 
-## Debug Commands
+Options: **Options → AddOns → Skits**.
 
-- **/SkitsLocalDBStats:** shows the stats of the local database for NPC/Display ids.
-- **/SkitsNPCData "npcname":** shows the current data for the given NPC name.
-- **/SkitsTargetData:** show the current data for the current target.
-- **/SkitsClearLocalDB:** erases the local database for NPC/Display ids. Not recommended to use without understands what this means.
+### Debug Commands
+
+| Command | Description |
+|---|---|
+| `/skitsdebug` | Toggle debug output. |
+| `/skitsnpcdata <name>` | Print the model ids Skits knows for an NPC name, and where they came from. |
+| `/skitstargetdata` | Same as above, for your current target. |
+| `/skitsmapchain` | Print the current map chain (map → parent maps) and the keys used to store NPC model ids. |
+| `/skitslocaldbstats` | Print how many entries the local NPC model database has. |
+| `/skitsclearlocaldb` | Erase the local NPC model database. Skits will have to learn models again from what you see. Only use it if you know you need to. |
+
+## Skit Styles
+
+| Style | Description |
+|---|---|
+| **Departure** | Two speakers face each other from the left and right sides of the screen, each with a large posing model and a text box. Default for exploring. |
+| **Tales** | Large posing character with the speech below. Previous speakers linger in the background. Can always be full screen. Default for immersive mode. |
+| **Warcraft** | A stack of talking-head-like speech boxes with a small portrait. |
+| **Notification** | Small portrait and text in a corner of the screen. Layout can be set per instance size (solo, small, medium, large). Default for combat. |
+| **Hidden** | Shows nothing. Lines are still logged. |
+
+### Which style is shown
+
+Each situation has its own style setting. Skits checks them in this order and uses the first one that is not set to **Undefined**:
+
+1. Immersive mode (`/skitsimmersive`)
+2. Solo instance
+3. Group instance
+4. Combat
+5. Exploring (always used if nothing above applies)
+
+Solo and group instance are **Undefined** by default, so instances use the combat or exploring style.
+
+### Mouse clicks
+
+Each style has its own left and right click action on the text area:
+
+- **Show Next Speech**: skip to the next queued line (default left click).
+- **Switch to Combat Style Skit**: switch to the combat style for 30 seconds.
+- **Close Skit** / **Hide Skit**
+- **Block Clicks** / **Pass Click to UI Below**
+
+## Options
+
+All options are in **Options → AddOns → Skits**, and each one has a tooltip in game.
+
+- **General:** enable Skits, block talking heads, and when to switch between the combat and exploring styles (easy in, easy out, combat over delay, and switching out of the exploring style while moving).
+- **Quests:** how quest and gossip text is handled (Ignore, Log Only or Show as Skit), and the quest model frame (size, position, animation, poser, background and border).
+- **Events:** which NPC and player chat types become skits.
+- **Style:**
+  - *General:* the style for each situation, and the speaker marker size.
+  - *Per style:* frame strata, click actions, font and font size, plus that style's own settings (model size, poser, linger time, portrait, number of speeches on screen, position, frame background and border).
+  - *Notification:* settings per instance size. A size can inherit the settings of the size below it.
+- **Duration:** minimum and maximum time a line stays on screen, and how much the length of the text adds to it.
+- **Profiles:** standard AceDB profile management.
 
 ## Limitations
 
 ### NPC Portraits
 
-Getting the potratis for the speakers is no easy task and most of the time guess work.
-Sometimes the addon will not be able to find the portrait or find the wrong one (mainly for NPCs with many different appearances).
-This is something I will always be improving over time.
-
-Having the "Creature Display DB" addon installed vastly improves the user experience, as the portrait can be retrieve from a database and not only from the player surrondings.
+WoW chat events only give the speaker's name, not their model, so Skits has to work out which model to show. It learns models from NPCs around you and from Creature Display DB, and stores them per zone so the same name can have different models in different places. It can still show no model, or the wrong one, mostly for NPCs that have many appearances.
 
 ### Player Portraits
 
-Same limitations as NPC Portraits, plus we can't have a database for player portraits.
-So on Skits the player portrait can be shown as the current player model. But on the skits log (`/skitslog`) it will be an aproximation of that player (race/bodytype).
+Live skits can show the real model of a player who is near you. Skits can't store player appearances, so the conversation log and players who are not nearby show an approximation based on race and body type.
 
 ## Known Issues
 
-- Limitations listed above.
-- Portraits of NPCs in some areas sometimes displays a different model. This needs to be solved in a case by case basis.
-- In rare ocasions, this addon causes a stuttering. It manifestas as a 1 to 3 seconds freeze when an NPC talks. As far as I know, this happens when having multipe skit styles selected to different situations in options. If this is happening to you, please report the skit styles you are using. The workaround is having only one skit style in use, it can be defined for different situations, but should be only one.
+- The limitations listed above.
+- Some NPCs show a different model in some areas. These have to be fixed one by one; reports with the NPC name and zone help.
+
+## Development Notes
+
+| File | Purpose |
+|---|---|
+| `Skits.lua` | Addon setup, event handling, chat → skit flow, conversation log storage, speaker colors. |
+| `Skits_Options.lua` | Option defaults and the AceConfig options table. |
+| `Skits_ID_Store.lua` | NPC/player model id storage and lookup (session cache, local DB, Creature Display DB). |
+| `Skits_MapChain.lua` | uiMapID chains and the storage keys used by the ID store. |
+| `Skits_QuestFrame.lua` | Quest and gossip dialogue, quest model frame. |
+| `Skits_SpeakQueue.lua` | Queue of lines and pauses for quest dialogue. |
+| `Skits_UI.lua`, `Skits_UI_Utils.lua` | Shared display code: model loading, speaker marker, faded frames. |
+| `Skits_Log_UI.lua` | Conversation log window. |
+| `Skits_Style.lua` | Picks and switches the active style based on the situation. |
+| `Skits_Style_*.lua` | One file per skit style. |
+| `Locales/` | Translations. |
 
 ## Roadmap
 
-No fixed roadmap yet, but I plan to keep improving this addon as much as I can.
-If you wanna help me develop this addon let me know.
-I will always be adding new Skit Styles as I find the time to do it.
-
-## Options
-
-Can be changed in the WoW options menu: Options -> Addons -> Skits
-
-# Skits Addon Options Documentation
-
-## Overview
-This documentation lists all available configuration options for the Skits addon. Each option is categorized and described for clarity. 
-
----
-
-## General Settings
-- **Enable Skits**: Enable or disable Skits.
-- **Block Talking Heads**: Block standard WoW talking heads from appearing.
-
----
-
-## Combat Behavior
-- **Combat Mode Easy In**: If enabled, will not instantly change Skits style to combat style when entering combat mode. Instead, the addon will wait for the next chat message to change Skits style.
-- **Combat Mode Easy Out**: If enabled, will not instantly change Skits style to exploring style when exiting combat mode. Instead, the addon will wait for the next chat message to change Skits style.
-- **Combat Over Delay**: How many seconds to wait before considering that combat is over to change Skits styles.
-
----
-
-## Duration and Speed
-- **Speech Duration: Minimum [sec]**: Adjust the minimum duration of a speech on screen before fading.
-- **Speech Duration: Maximum [sec]**: Adjust the maximum duration of a speech on screen before fading.
-- **Speech Duration: Fade Speed**: Adjust the speed at which speech text fades from the screen. Based on this factor and the number of letters in the speech.
-
----
-
-## NPC Events
-- **NPC Yell**: Toggle to display NPC yells on screen.
-- **NPC Whisper**: Toggle to display NPC whispers on screen.
-- **NPC Say**: Toggle to display NPC say messages on screen.
-- **NPC Party**: Toggle to display NPC party messages on screen.
-
----
-
-## Player Events
-- **Player Say**: Toggle to display player say messages on screen.
-- **Player Yell**: Toggle to display player yells on screen.
-- **Player Whisper**: Toggle to display player whispers on screen.
-- **Party Chat**: Toggle to display party chat messages on screen.
-- **Party Leader Chat**: Toggle to display messages from the party leader on screen.
-- **Raid Chat**: Toggle to display raid chat messages on screen.
-- **Raid Leader Chat**: Toggle to display messages from the raid leader on screen.
-- **Instance Chat**: Toggle to display instance chat messages on screen.
-- **Instance Leader Chat**: Toggle to display messages from the instance leader on screen.
-- **Channel Chat**: Toggle to display general channel messages on screen.
-- **Guild Chat**: Toggle to display guild chat messages on screen.
-- **Officer Chat**: Toggle to display officer chat messages on screen.
-
----
-
-## Style Settings
-
-### General Style Settings
-- **Speaker Marker Size**: Size of the marker that appears over the speaker's unit in the game world.
-- **Immersion Skit Style**: Skit style to display when in immersion mode.
-- **Exploring Skit Style**: Skit style to display when exploring.
-- **Combat Skit Style**: Skit style to display when in combat.
-- **Solo Instance Skit Style**: Skit style to display when in a solo instance.
-- **Group Instance Skit Style**: Skit style to display when in a group instance.
-
-### Warcraft Style
-- **Max Number of Speeches**: Max number of speeches on screen.
-- **Max Number of Speeches: Combat**: Max number of speeches on screen while in combat. Limited by the general max number of speeches value.
-- **Max Number of Speeches: Group Instances**: Max number of speeches on screen while in a group instance. Limited by the general max number of speeches value.
-- **Max Number of Speeches: Solo Instances**: Max number of speeches on screen while in a solo instance. Limited by the general max number of speeches value.
-- **Enable Speaker Portrait**: Toggle to display the speaker's portrait during conversations.
-- **Speaker Portrait Size**: Set the size of the speaker's portrait during conversations.
-- **Enable Speaker Name**: Toggle to display the speaker's name during conversations.
-- **Bottom Distance**: Distance to the bottom of the screen.
-- **Speech Frame Width**: Set the width of the text area for speech display.
-
-### Tales Style
-- **Character Size**: On-screen size of the speaking character.
-- **Character Poser**: Show the speaking character posing during a skit.
-- **Speaker Name Enabled**: Show speaker name on screen.
-- **Previous Speaker Linger Time**: How long a previous speaker stays lingering in the background (in seconds).
-- **Always Fullscreen**: Always show the skit fullscreen, ignoring the side of the speaking character on the screen.
-
-### Notification Style
-- **Portrait Size**: Set the size of the portrait displayed in notifications.
-- **Message on Right**: Toggle to display notifications on the right side of the screen.
-- **Max Messages**: Set the maximum number of notification messages displayed on screen.
-- **Text Area Size**: Set the width of the text area for notification speech display.
-- **Side Distance**: Set the distance from the side of the screen for notifications.
-- **Top Distance**: Set the distance from the top of the screen for notifications.
+No fixed roadmap, but I keep improving the addon and adding new skit styles when I find the time. If you want to help develop it, let me know.
