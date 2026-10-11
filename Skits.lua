@@ -529,6 +529,26 @@ function Skits:ChatEvent(creatureData, textData, priority, storeInMemory, displa
     self.lastSpeaker = creatureData.name
 end
 
+-- True if a non player unit is owned or controlled by a player. Checks missing in a game flavor are skipped,
+-- and secret values count as unknown (not owned), so they never block an npc id.
+function Skits:IsUnitPlayerOwned(unittoken)
+    local function check(func, ...)
+        if not func then
+            return false
+        end
+        local result = func(...)
+        if Skits_Utils:IsSecretValue(result) then
+            return false
+        end
+        -- Some clients return 1/nil instead of true/false
+        return result and true or false
+    end
+
+    return check(UnitIsOwnerOrControllerOfUnit, "player", unittoken)
+        or check(UnitPlayerControlled, unittoken)
+        or check(UnitIsOtherPlayersPet, unittoken)
+end
+
 function Skits:BuildCreatureDataOfToken(unittoken)
     local creatureData = nil
 
@@ -544,7 +564,12 @@ function Skits:BuildCreatureDataOfToken(unittoken)
                     return nil
                 end
             end
-        
+
+            -- Same issue for followers owned or controlled by a player (summoned escorts, guardians, pets)
+            if self:IsUnitPlayerOwned(unittoken) then
+                return nil
+            end
+
             -- Get GUID and creatureID
             local creatureId = UnitCreatureID(unittoken)
             if creatureId then
